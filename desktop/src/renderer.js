@@ -7,7 +7,9 @@ const state = {
   projectPath: null,
   scan: null,
   plan: null,
-  toolsLoaded: false
+  toolsLoaded: false,
+  proxyActive: false,
+  stats: { requests: 0, tokens: 0, saved: 0 }
 };
 
 const $ = (sel) => document.querySelector(sel);
@@ -31,6 +33,7 @@ function updateNextButton() {
   if (state.step === 0) { next.disabled = !state.projectPath; next.textContent = 'بعدی'; }
   else if (state.step === 1) { next.disabled = false; next.textContent = 'ذخیره و ادامه'; }
   else if (state.step === 2) { next.disabled = false; next.textContent = 'برو به کانفیگ'; }
+  else if (state.step === 3) { next.disabled = false; next.textContent = 'برو به مانیتور'; }
   else { next.disabled = true; next.textContent = 'پایان'; }
 }
 
@@ -48,7 +51,11 @@ $('#next-btn').addEventListener('click', async () => {
     setStep(3);
     return;
   }
-  if (state.step < 3) setStep(state.step + 1);
+  if (state.step === 3) {
+    setStep(4);
+    return;
+  }
+  if (state.step < 4) setStep(state.step + 1);
 });
 
 /* ---------- Step 0: pick + scan ---------- */
@@ -60,6 +67,11 @@ $('#pick-btn').addEventListener('click', async () => {
   if (!res.ok) { alert(res.error); return; }
   state.scan = res.info;
   renderScan(res.info);
+  
+  // Check if team config exists
+  if (res.info.tokensaverConfig) {
+    applyTeamConfig(res.info.tokensaverConfig);
+  }
   
   // Add project to history list
   addOrUpdateProjectInHistory(dir);
@@ -142,6 +154,7 @@ async function applyAgentDetection() {
 
 /* ---------- Step 2: tools ---------- */
 async function loadTools() {
+  runDiagnostics(); // Run dependencies checker
   const { tools, platform } = await api.listTools();
   state.platform = platform;
   const list = $('#tools-list');
@@ -325,6 +338,9 @@ $('#apply-btn').addEventListener('click', async () => {
       res.written.map((f) => '<div class="f">+ ' + escapeHtml(f) + '</div>').join('') +
       merged.map((f) => '<div class="f" style="color:#c084fc">~ ' + escapeHtml(f) + ' (ادغام شد)</div>').join('');
 
+    // Enable team config export
+    $('#export-team-btn').disabled = false;
+
     // Update project history with config savings
     let savedTokens = 0;
     let savedPercent = 0;
@@ -468,12 +484,162 @@ function renderProjectHistory() {
       }
       state.scan = res.info;
       renderScan(res.info);
+      
+      // Auto-load team config if present in scanned project
+      if (res.info.tokensaverConfig) {
+        applyTeamConfig(res.info.tokensaverConfig);
+      }
+      
       updateNextButton();
     });
 
     list.appendChild(item);
   });
 }
+
+/* ---------- Team Configuration Loader ---------- */
+function applyTeamConfig(config) {
+  if (!config) return;
+  
+  const applyOpts = (groupName, list) => {
+    const group = document.querySelector(`.opts[data-name="${groupName}"]`);
+    if (!group) return;
+    const multi = group.dataset.multi === '1';
+    
+    group.querySelectorAll('.opt').forEach((o) => {
+      const val = o.dataset.val;
+      if (multi) {
+        o.classList.toggle('selected', list.includes(val));
+      } else {
+        o.classList.toggle('selected', val === list);
+      }
+    });
+  };
+  
+  if (config.agents) applyOpts('agents', config.agents);
+  if (config.noisy) applyOpts('noisy', config.noisy);
+  if (config.repoSize) applyOpts('repoSize', config.repoSize);
+  if (config.priority) applyOpts('priority', config.priority);
+  if (config.provider) applyOpts('provider', config.provider);
+  
+  // Show temporary info notice
+  const noteEl = document.createElement('div');
+  noteEl.className = 'card-note';
+  noteEl.style.color = '#c084fc';
+  noteEl.style.fontWeight = 'bold';
+  noteEl.style.marginTop = '1rem';
+  noteEl.textContent = 'تنظیمات تیمی (.tokensaver.json) با موفقیت اعمال شد! ✓';
+  $('#scan-card').after(noteEl);
+  setTimeout(() => noteEl.remove(), 4000);
+}
+
+/* ---------- Dependencies Diagnostics (Checker) ---------- */
+async function runDiagnostics() {
+  const panel = $('#diag-card');
+  if (!panel) return;
+  
+  panel.querySelectorAll('.status').forEach((el) => {
+    el.textContent = '…';
+    el.className = 'status';
+  });
+  
+  const res = await api.checkDependencies();
+  if (!res || !res.ok) return;
+  
+  const r = res.results;
+  const update = (dep, obj) => {
+    const el = panel.querySelector(`.diag-item[data-dep="${dep}"] .status`);
+    if (!el) return;
+    if (obj.installed) {
+      el.textContent = obj.version.split(' ')[1] || obj.version || 'OK';
+      el.className = 'status ok';
+    } else {
+      el.textContent = 'نصب نیست';
+      el.className = 'status missing';
+    }
+  };
+  
+  update('git', r.git);
+  update('node', r.node);
+  update('python', r.python);
+  update('bash', r.bash);
+}
+
+$('#diag-refresh-btn').addEventListener('click', runDiagnostics);
+
+/* ---------- Team Config Export Event ---------- */
+$('#export-team-btn').addEventListener('click', async () => {
+  if (!state.projectPath) return;
+  const config = collectAnswers();
+  const res = await api.exportConfig(state.projectPath, config);
+  if (res && res.ok) {
+    alert('فایل .tokensaver.json و راهنمای README-tokensaver.md با موفقیت در پوشه ریشه پروژه ذخیره شدند! ✓');
+  } else {
+    alert('خطا در اکسپورت تنظیمات تیمی: ' + (res.error || 'نامشخص'));
+  }
+});
+
+/* ---------- Live Token Proxy Monitor Controller ---------- */
+$('#proxy-toggle-btn').addEventListener('click', async () => {
+  const btn = $('#proxy-toggle-btn');
+  const badge = $('#proxy-status-badge');
+  const info = $('#proxy-address-info');
+  
+  if (state.proxyActive) {
+    await api.stopProxy();
+    state.proxyActive = false;
+    btn.textContent = 'شروع پروکسی مانیتورینگ';
+    btn.className = 'btn btn-primary';
+    badge.textContent = 'پروکسی خاموش است';
+    badge.className = 'proxy-badge off';
+    info.classList.add('hidden');
+  } else {
+    // Get saved tokens percentage
+    const proj = getProjectFromHistory(state.projectPath);
+    const pct = proj ? (proj.savedPercent || 80) : 80;
+    
+    const res = await api.startProxy(pct);
+    if (res && res.ok) {
+      state.proxyActive = true;
+      btn.textContent = 'توقف پروکسی';
+      btn.className = 'btn btn-ghost';
+      badge.textContent = 'پروکسی فعال است';
+      badge.className = 'proxy-badge on';
+      info.classList.remove('hidden');
+    } else {
+      alert('خطا در راه‌اندازی پروکسی: ' + (res.error || 'پورت ۹۹۹۹ ممکن است اشغال باشد.'));
+    }
+  }
+});
+
+api.onProxyOutput((data) => {
+  state.stats.requests += 1;
+  state.stats.tokens += (data.inputTokens + data.outputTokens);
+  state.stats.saved += data.savedTokens;
+  
+  $('#stat-requests').textContent = state.stats.requests.toLocaleString('en-US');
+  $('#stat-tokens').textContent = state.stats.tokens.toLocaleString('en-US');
+  $('#stat-saved').textContent = state.stats.saved.toLocaleString('en-US');
+  
+  const tbody = $('#proxy-log-body');
+  const empty = tbody.querySelector('.empty-row');
+  if (empty) empty.remove();
+  
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td>${escapeHtml(data.time)}</td>
+    <td style="font-weight: 700; color: #60a5fa;">${escapeHtml(data.model)}</td>
+    <td style="direction: ltr; font-family: monospace; font-size: 0.8rem; text-align: left;">${escapeHtml(data.endpoint)}</td>
+    <td>${data.inputTokens.toLocaleString('en-US')}</td>
+    <td>${data.outputTokens.toLocaleString('en-US')}</td>
+    <td class="proxy-table-saved">~${data.savedTokens.toLocaleString('en-US')}</td>
+  `;
+  tbody.prepend(row);
+  
+  if (tbody.children.length > 30) {
+    tbody.lastElementChild.remove();
+  }
+});
 
 // Fetch available tools and render project history on startup
 api.listTools().then(({ tools }) => {

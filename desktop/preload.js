@@ -29,5 +29,12 @@ contextBridge.exposeInMainWorld('tokensaver', {
   submitInfo: (data) => ipcRenderer.invoke('submit-info', data),
 
   // App version
-  appVersion: () => ipcRenderer.invoke('app-version')
+  appVersion: () => ipcRenderer.invoke('app-version'),
+
+  // Proxy monitoring, system diagnostics, and config sharing
+  checkDependencies: () => ipcRenderer.invoke('check-dependencies'),
+  startProxy: (savedPercent) => ipcRenderer.invoke('start-proxy', savedPercent),
+  stopProxy: () => ipcRenderer.invoke('stop-proxy'),
+  onProxyOutput: (cb) => ipcRenderer.on('proxy-output', (_e, data) => cb(data)),
+  exportConfig: (projectPath, config) => ipcRenderer.invoke('export-config', { projectPath, config })
 });

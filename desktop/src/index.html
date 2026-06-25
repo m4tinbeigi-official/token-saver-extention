@@ -19,6 +19,7 @@
         <li data-step="1"><span>۲</span> سؤال‌ها</li>
         <li data-step="2"><span>۳</span> ابزارها</li>
         <li data-step="3"><span>۴</span> کانفیگ</li>
+        <li data-step="4"><span>۵</span> مانیتور زنده</li>
       </ol>
       <div class="sidebar-foot" id="app-version">برای ویندوز و مک</div>
     </aside>
@@ -114,6 +115,21 @@
       <section class="screen" data-screen="2">
         <h1>ابزارهای صرفه‌جویی توکن</h1>
         <p class="muted">این ابزارهای متن‌باز را می‌توانی مستقیم از همین‌جا روی پروژه‌ات نصب کنی. نصب فقط با کلیک خودت و با نمایش خروجی زنده انجام می‌شود.</p>
+        
+        <!-- سیستم عیب‌یابی پیش‌نیازها -->
+        <div class="diag-card" id="diag-card">
+          <div class="diag-head">
+            <span class="diag-title">سیستم عیب‌یابی پیش‌نیازها</span>
+            <button class="btn btn-ghost btn-sm" id="diag-refresh-btn">بررسی مجدد</button>
+          </div>
+          <div class="diag-grid">
+            <div class="diag-item" data-dep="git"><span>Git</span><b class="status">—</b></div>
+            <div class="diag-item" data-dep="node"><span>Node.js</span><b class="status">—</b></div>
+            <div class="diag-item" data-dep="python"><span>Python</span><b class="status">—</b></div>
+            <div class="diag-item" data-dep="bash"><span>Bash/WSL</span><b class="status">—</b></div>
+          </div>
+        </div>
+
         <div class="tools-list" id="tools-list"></div>
       </section>
 
@@ -127,8 +143,72 @@
           <pre class="file-view" id="file-view">یک فایل را از لیست انتخاب کن…</pre>
         </div>
         <div class="reco" id="reco"></div>
-        <button class="btn btn-primary btn-lg" id="apply-btn">اعمال کانفیگ روی پروژه</button>
+        <div class="action-row-wrap" style="display:flex; gap:1rem; align-items:center; margin-bottom:1.5rem;">
+          <button class="btn btn-primary btn-lg" id="apply-btn">اعمال کانفیگ روی پروژه</button>
+          <button class="btn btn-ghost btn-lg" id="export-team-btn" disabled>خروجی کانفیگ تیمی (.json)</button>
+        </div>
         <div class="result hidden" id="result"></div>
+      </section>
+
+      <!-- STEP 4: Live Token Monitor -->
+      <section class="screen" data-screen="4">
+        <h1>مانیتور زنده مصرف توکن</h1>
+        <p class="muted">با فعال‌سازی پروکسی سرور داخلی، مصرف توکن و مقدار هزینه‌ای که با فیلتر نویز صرفه‌جویی می‌شود را به صورت زنده مشاهده کنید.</p>
+        
+        <div class="proxy-control-card">
+          <div class="proxy-status-row">
+            <div class="proxy-badge off" id="proxy-status-badge">پروکسی خاموش است</div>
+            <button class="btn btn-primary" id="proxy-toggle-btn">شروع پروکسی مانیتورینگ</button>
+          </div>
+          <div class="proxy-address-info hidden" id="proxy-address-info">
+            پروکسی محلی فعال است روی: <code>http://127.0.0.1:9999</code>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-box">
+            <span class="stat-label">کل درخواست‌ها</span>
+            <b class="stat-val" id="stat-requests">۰</b>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">توکن‌های پردازش‌شده</span>
+            <b class="stat-val" id="stat-tokens">۰</b>
+          </div>
+          <div class="stat-box saving">
+            <span class="stat-label">توکن‌های صرفه‌جویی‌شده</span>
+            <b class="stat-val" id="stat-saved">۰</b>
+          </div>
+        </div>
+
+        <div class="proxy-guide">
+          <h3>راهنمای تنظیم آدرس پایه در ادیتورها:</h3>
+          <ul>
+            <li><b>Cursor:</b> به بخش Settings -> Models -> Override OpenAI Base URL رفته و آدرس <code>http://127.0.0.1:9999/v1</code> را قرار دهید.</li>
+            <li><b>Claude Code:</b> قبل از اجرای کلود کد، متغیر محیطی را تنظیم کنید: <code>export ANTHROPIC_BASE_URL=http://127.0.0.1:9999</code></li>
+            <li><b>Codex / Gemini CLI:</b> متغیر محیطی آدرس پایه را تنظیم کنید: <code>export OPENAI_BASE_URL=http://127.0.0.1:9999/v1</code></li>
+          </ul>
+        </div>
+
+        <div class="proxy-log-container">
+          <h3>لاگ زنده درخواست‌ها</h3>
+          <div class="proxy-table-wrap">
+            <table class="proxy-table">
+              <thead>
+                <tr>
+                  <th>زمان</th>
+                  <th>مدل</th>
+                  <th>متد / آدرس</th>
+                  <th>توکن ورودی</th>
+                  <th>توکن خروجی</th>
+                  <th>صرفه‌جویی</th>
+                </tr>
+              </thead>
+              <tbody id="proxy-log-body">
+                <tr class="empty-row"><td colspan="6" style="text-align: center; color: var(--muted); padding: 1.5rem 0;">درخواستی ثبت نشده است. پروکسی را روشن کنید و درخواست بفرستید.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </section>
 
       <!-- nav -->

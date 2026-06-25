@@ -61,6 +61,13 @@ function scanProject(projectPath, fs, path) {
   let topLevelEntries = 0;
   try { topLevelEntries = fs.readdirSync(projectPath).length; } catch (_e) {}
 
+  let tokensaverConfig = null;
+  if (has('.tokensaver.json')) {
+    try {
+      tokensaverConfig = JSON.parse(safeRead(fs, path.join(projectPath, '.tokensaver.json')));
+    } catch (_e) {}
+  }
+
   return {
     projectPath,
     name: projectPath.split(/[\\/]/).filter(Boolean).pop() || 'project',
@@ -69,7 +76,8 @@ function scanProject(projectPath, fs, path) {
     testCommands: Array.from(new Set(testCommands)),
     existingAgentConfigs,
     isMonorepo,
-    topLevelEntries
+    topLevelEntries,
+    tokensaverConfig
   };
 }
 

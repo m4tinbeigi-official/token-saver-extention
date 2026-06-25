@@ -4,8 +4,9 @@ const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-const { spawn } = require('child_process');
+const { spawn, exec } = require('child_process');
 const https = require('https');
+const http = require('http');
 const { autoUpdater } = require('electron-updater');
 
 const { scanProject, generatePlan, detectAgents, estimateImpact } = require('./config-engine');
@@ -277,4 +278,192 @@ ipcMain.handle('submit-info', async (_e, data) => {
       done({ ok: false, offline: true });
     }
   });
+});
+
+/* ---------- HTTP Local Proxy Server for Token Monitoring ---------- */
+let proxyServer = null;
+let currentSavedPercent = 80;
+
+function stopLocalProxy() {
+  if (proxyServer) {
+    try { proxyServer.close(); } catch(_e) {}
+    proxyServer = null;
+  }
+}
+
+ipcMain.handle('start-proxy', async (event, savedPercent) => {
+  if (proxyServer) stopLocalProxy();
+  
+  currentSavedPercent = Number(savedPercent) || 80;
+  const port = 9999;
+  const wc = event.sender;
+  
+  try {
+    proxyServer = http.createServer((req, reqRes) => {
+      // Determine target API
+      let targetHost = 'api.openai.com';
+      let targetPath = req.url;
+      
+      const isAnthropic = req.headers['x-api-key'] || 
+                          req.url.includes('anthropic') || 
+                          req.url.startsWith('/v1/messages') || 
+                          req.url.startsWith('/v1/complete');
+                          
+      if (isAnthropic) {
+        targetHost = 'api.anthropic.com';
+      }
+      
+      let reqBody = [];
+      req.on('data', chunk => { reqBody.push(chunk); });
+      req.on('end', () => {
+        const bodyBuffer = Buffer.concat(reqBody);
+        let modelName = 'Unknown Model';
+        try {
+          const bodyJson = JSON.parse(bodyBuffer.toString());
+          modelName = bodyJson.model || modelName;
+        } catch(e) {}
+        
+        // Copy headers and update host
+        const headers = { ...req.headers };
+        headers['host'] = targetHost;
+        delete headers['connection'];
+        delete headers['keep-alive'];
+        
+        const options = {
+          hostname: targetHost,
+          port: 443,
+          path: targetPath,
+          method: req.method,
+          headers: headers,
+          rejectUnauthorized: false
+        };
+        
+        const proxyReq = https.request(options, (targetRes) => {
+          reqRes.writeHead(targetRes.statusCode, targetRes.headers);
+          
+          let resBody = [];
+          targetRes.on('data', chunk => {
+            reqRes.write(chunk);
+            resBody.push(chunk);
+          });
+          
+          targetRes.on('end', () => {
+            reqRes.end();
+            
+            const resBuffer = Buffer.concat(resBody);
+            let inputTokens = 0;
+            let outputTokens = 0;
+            
+            try {
+              const resJson = JSON.parse(resBuffer.toString());
+              if (resJson.usage) {
+                inputTokens = resJson.usage.prompt_tokens || resJson.usage.input_tokens || 0;
+                outputTokens = resJson.usage.completion_tokens || resJson.usage.output_tokens || 0;
+              }
+            } catch(e) {}
+            
+            // Heuristic fallback
+            if (inputTokens === 0) {
+              inputTokens = Math.round(bodyBuffer.length / 4);
+              outputTokens = Math.round(resBuffer.length / 4);
+            }
+            
+            // Calculate saved tokens
+            const factor = currentSavedPercent / (100 - currentSavedPercent);
+            const savedTokens = Math.round(inputTokens * (isFinite(factor) ? factor : 4));
+            
+            try {
+              wc.send('proxy-output', {
+                time: new Date().toLocaleTimeString('fa-IR'),
+                model: modelName,
+                endpoint: req.url,
+                inputTokens,
+                outputTokens,
+                savedTokens
+              });
+            } catch(_e) {}
+          });
+        });
+        
+        proxyReq.on('error', (err) => {
+          try {
+            reqRes.writeHead(500);
+            reqRes.end('Proxy Error: ' + err.message);
+          } catch(_e) {}
+        });
+        
+        proxyReq.write(bodyBuffer);
+        proxyReq.end();
+      });
+    });
+    
+    proxyServer.listen(port, '127.0.0.1');
+    return { ok: true, port };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+});
+
+ipcMain.handle('stop-proxy', async () => {
+  stopLocalProxy();
+  return { ok: true };
+});
+
+app.on('will-quit', () => {
+  stopLocalProxy();
+});
+
+/* ---------- IPC: System Dependencies Diagnostics ---------- */
+ipcMain.handle('check-dependencies', async () => {
+  const results = {};
+  
+  const check = (cmd) => new Promise((resolve) => {
+    exec(cmd, { timeout: 3000 }, (error, stdout, stderr) => {
+      if (error) {
+        resolve({ installed: false, version: null });
+      } else {
+        const out = (stdout.trim() || stderr.trim()).split('\n')[0];
+        // Clean version string
+        const clean = out.replace(/[^\d.]/g, '') || out;
+        resolve({ installed: true, version: out });
+      }
+    });
+  });
+  
+  results.git = await check('git --version');
+  results.node = await check('node --version');
+  
+  // Try python3 first, then python
+  results.python = await check('python3 --version');
+  if (!results.python.installed) {
+    results.python = await check('python --version');
+  }
+  
+  // Bash check
+  results.bash = await check('bash -c "echo ok"');
+  if (results.bash.installed) {
+    results.bash.version = 'OK';
+  }
+  
+  return { ok: true, results };
+});
+
+/* ---------- IPC: Export Team Configuration ---------- */
+ipcMain.handle('export-config', async (_e, { projectPath, config }) => {
+  try {
+    if (!projectPath || !fs.existsSync(projectPath)) {
+      return { ok: false, error: 'مسیر پروژه معتبر نیست.' };
+    }
+    
+    const configPath = path.join(projectPath, '.tokensaver.json');
+    fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
+    
+    const readmePath = path.join(projectPath, 'README-tokensaver.md');
+    const readmeContent = `# بهینه‌سازی توکن با Token Saver 🚀\n\nاین پروژه مجهز به پیکربندی بهینه‌سازی مصرف توکن است.\n\n## نحوه استفاده:\n۱. نرم‌افزار **Token Saver** را باز کنید.\n۲. این پوشه را به عنوان پوشه پروژه انتخاب کنید.\n۳. نرم‌افزار به صورت خودکار فایل \`.tokensaver.json\` را شناسایی کرده و تنظیمات مربوطه را اعمال خواهد کرد.\n`;
+    fs.writeFileSync(readmePath, readmeContent, 'utf-8');
+    
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
 });
