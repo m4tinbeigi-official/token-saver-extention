@@ -132,17 +132,24 @@
                 </div>
 
                 <div class="download-buttons fade-in-up">
-                    <a href="https://github.com/m4tinbeigi-official/tokensaver/releases/latest" target="_blank" rel="noopener" class="btn btn-primary btn-large glow-btn download-btn">
+                    <a id="dl-win" href="https://github.com/m4tinbeigi-official/tokensaver/releases/latest" target="_blank" rel="noopener" class="btn btn-secondary btn-large download-btn">
                         <span class="dl-icon"></span>
                         دانلود برای ویندوز
                         <span class="dl-sub">فایل نصبی .exe</span>
                     </a>
-                    <a href="https://github.com/m4tinbeigi-official/tokensaver/releases/latest" target="_blank" rel="noopener" class="btn btn-secondary btn-large download-btn">
+                    <a id="dl-mac" href="https://github.com/m4tinbeigi-official/tokensaver/releases/latest" target="_blank" rel="noopener" class="btn btn-secondary btn-large download-btn">
                         <span class="dl-icon"></span>
                         دانلود برای مک
                         <span class="dl-sub">فایل .dmg — Intel و Apple Silicon</span>
                     </a>
                 </div>
+
+                <details class="mac-help fade-in-up">
+                    <summary>روی مک باز نمی‌شود؟ («is damaged» یا «unidentified developer»)</summary>
+                    <p>چون نرم‌افزار رایگان و بدون امضای پولی اپل منتشر می‌شود، مک بار اول جلوی اجرا را می‌گیرد. کافی است روی اپ <b>راست‌کلیک → Open</b> بزنی، یا این دستور را در Terminal اجرا کنی:</p>
+                    <code class="copy-cmd" id="mac-fix-cmd">xattr -cr "/Applications/Token Saver.app"</code>
+                    <span class="copy-hint" id="copy-hint">برای کپی کلیک کن</span>
+                </details>
 
                 <div class="download-steps grid grid-3">
                     <div class="impact-item fade-in-up">

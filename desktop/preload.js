@@ -20,5 +20,8 @@ contextBridge.exposeInMainWorld('tokensaver', {
     ipcRenderer.on('install-output', (_e, data) => cb(data.toolId, data.chunk)),
 
   // Best-effort lead submission
-  submitInfo: (data) => ipcRenderer.invoke('submit-info', data)
+  submitInfo: (data) => ipcRenderer.invoke('submit-info', data),
+
+  // App version
+  appVersion: () => ipcRenderer.invoke('app-version')
 });

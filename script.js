@@ -9,6 +9,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // 1a. Download: detect OS and highlight the matching button + copy mac fix
+    (function () {
+        const ua = navigator.userAgent || '';
+        const platform = navigator.platform || '';
+        const isMac = /Mac/i.test(platform) || /Mac OS X/i.test(ua);
+        const isWin = /Win/i.test(platform) || /Windows/i.test(ua);
+        const winBtn = document.getElementById('dl-win');
+        const macBtn = document.getElementById('dl-mac');
+        const primary = (el) => { if (el) { el.classList.add('btn-primary', 'glow-btn'); el.classList.remove('btn-secondary'); } };
+        if (isMac) primary(macBtn);
+        else if (isWin) primary(winBtn);
+        else { primary(winBtn); } // default emphasis
+
+        const cmd = document.getElementById('mac-fix-cmd');
+        const hint = document.getElementById('copy-hint');
+        if (cmd) {
+            cmd.addEventListener('click', () => {
+                navigator.clipboard.writeText(cmd.textContent.trim()).then(() => {
+                    if (hint) { hint.textContent = 'کپی شد ✓'; setTimeout(() => { hint.textContent = 'برای کپی کلیک کن'; }, 2000); }
+                });
+            });
+        }
+    })();
+
     // 1b. Scroll progress bar
     const progressBar = document.getElementById('scroll-progress');
     const updateProgress = () => {

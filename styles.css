@@ -1079,6 +1079,61 @@ h1, h2, h3, h4 {
     margin-bottom: 0;
 }
 
+/* Mac troubleshooting note */
+.mac-help {
+    max-width: 640px;
+    margin: 0 auto 3rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 0.5rem 1.25rem;
+    text-align: right;
+}
+
+.mac-help summary {
+    cursor: pointer;
+    padding: 0.75rem 0;
+    font-weight: 600;
+    color: var(--text-secondary);
+    list-style: none;
+}
+
+.mac-help summary::-webkit-details-marker { display: none; }
+.mac-help summary::before { content: '؟ '; color: var(--accent-purple); font-weight: 800; }
+.mac-help[open] summary { color: var(--text-primary); }
+
+.mac-help p {
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+    line-height: 1.8;
+    margin-bottom: 0.75rem;
+}
+
+.copy-cmd {
+    display: block;
+    direction: ltr;
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    background: #0b0d12;
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: #c084fc;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.copy-cmd:hover { border-color: var(--accent-purple); }
+
+.copy-hint {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    opacity: 0.6;
+    margin-top: 0.4rem;
+}
+
 .pricing-features {
     text-align: right;
     margin-bottom: 2rem;

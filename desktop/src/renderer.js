@@ -244,4 +244,10 @@ function escapeHtml(s) {
 }
 function cssEscape(s) { return String(s).replace(/"/g, '\\"'); }
 
+// Show the real app version in the sidebar
+api.appVersion().then((v) => {
+  const el = $('#app-version');
+  if (el && v) el.textContent = 'نسخه ' + v + ' • برای ویندوز و مک';
+}).catch(() => {});
+
 setStep(0);

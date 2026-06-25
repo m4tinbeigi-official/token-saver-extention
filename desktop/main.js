@@ -118,6 +118,9 @@ ipcMain.handle('open-external', async (_e, target) => {
   return true;
 });
 
+/* ---------- IPC: app version ---------- */
+ipcMain.handle('app-version', async () => app.getVersion());
+
 /* ---------- IPC: list available tools ---------- */
 ipcMain.handle('list-tools', async () => {
   return { tools: TOOLS, platform: platformKey(process.platform) };
