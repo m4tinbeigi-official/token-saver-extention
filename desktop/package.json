@@ -1,0 +1,51 @@
+{
+  "name": "tokensaver-desktop",
+  "productName": "Token Saver",
+  "version": "1.0.0",
+  "description": "بهینه‌سازی مصرف توکن AI Coding Agents با یک کلیک — برای ویندوز و مک",
+  "main": "main.js",
+  "author": "Token Saver",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "test": "node test-engine.js",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "ir.tokensaver.desktop",
+    "productName": "Token Saver",
+    "files": [
+      "main.js",
+      "preload.js",
+      "config-engine.js",
+      "src/**/*"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] }
+      ],
+      "artifactName": "TokenSaver-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false
+    },
+    "mac": {
+      "target": [
+        { "target": "dmg", "arch": ["x64", "arm64"] }
+      ],
+      "category": "public.app-category.developer-tools",
+      "artifactName": "TokenSaver-${version}-${arch}.${ext}"
+    }
+  }
+}

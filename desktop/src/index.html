@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Token Saver</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar / steps -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">T</div>
+        <div class="brand-name">Token Saver</div>
+      </div>
+      <ol class="steps" id="steps">
+        <li data-step="0" class="active"><span>۱</span> پروژه</li>
+        <li data-step="1"><span>۲</span> سؤال‌ها</li>
+        <li data-step="2"><span>۳</span> پیش‌نمایش</li>
+        <li data-step="3"><span>۴</span> اعمال</li>
+      </ol>
+      <div class="sidebar-foot">نسخه ۱.۰ • برای ویندوز و مک</div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <!-- STEP 0: pick project -->
+      <section class="screen active" data-screen="0">
+        <h1>پروژه‌ات را انتخاب کن</h1>
+        <p class="muted">پوشه‌ی ریشه‌ی پروژه را انتخاب کن تا Stack و دستورهایش را تشخیص دهیم. هیچ فایلی بدون تأیید تو تغییر نمی‌کند.</p>
+        <button class="btn btn-primary btn-lg" id="pick-btn">انتخاب پوشه پروژه</button>
+        <div class="scan-card hidden" id="scan-card">
+          <div class="scan-row"><span>مسیر</span><b id="scan-path">—</b></div>
+          <div class="scan-row"><span>Stack</span><b id="scan-stacks">—</b></div>
+          <div class="scan-row"><span>تست</span><b id="scan-tests">—</b></div>
+          <div class="scan-row"><span>build</span><b id="scan-build">—</b></div>
+          <div class="scan-row"><span>کانفیگ موجود</span><b id="scan-existing">—</b></div>
+        </div>
+      </section>
+
+      <!-- STEP 1: questions -->
+      <section class="screen" data-screen="1">
+        <h1>چند سؤال کوتاه</h1>
+        <p class="muted">بر اساس پاسخ‌ها تصمیم می‌گیریم چه کانفیگی بسازیم.</p>
+
+        <div class="q">
+          <h3>کدام agentها را استفاده می‌کنی؟</h3>
+          <div class="opts" data-name="agents" data-multi="1">
+            <button class="opt selected" data-val="claude-code">Claude Code</button>
+            <button class="opt" data-val="cursor">Cursor</button>
+            <button class="opt" data-val="codex">Codex CLI</button>
+            <button class="opt" data-val="gemini">Gemini CLI</button>
+          </div>
+        </div>
+
+        <div class="q">
+          <h3>چه خروجی‌هایی پرنویز هستند؟</h3>
+          <div class="opts" data-name="noisy" data-multi="1">
+            <button class="opt selected" data-val="tests">خروجی تست‌ها</button>
+            <button class="opt selected" data-val="build">لاگ build</button>
+            <button class="opt selected" data-val="logs">لاگ‌های اجرا</button>
+            <button class="opt" data-val="lockfiles">lockfileها</button>
+            <button class="opt" data-val="generated">فایل‌های تولیدی/minified</button>
+          </div>
+        </div>
+
+        <div class="q">
+          <h3>اندازه‌ی ریپو؟</h3>
+          <div class="opts" data-name="repoSize" data-multi="0">
+            <button class="opt selected" data-val="small">کوچک</button>
+            <button class="opt" data-val="medium">متوسط</button>
+            <button class="opt" data-val="large">بزرگ / مونوریپو</button>
+          </div>
+        </div>
+
+        <div class="q">
+          <h3>اولویت اصلی؟</h3>
+          <div class="opts" data-name="priority" data-multi="0">
+            <button class="opt" data-val="cost">کاهش هزینه</button>
+            <button class="opt" data-val="quality">کیفیت context</button>
+            <button class="opt selected" data-val="both">هر دو</button>
+          </div>
+        </div>
+
+        <div class="q">
+          <h3>provider اصلی؟</h3>
+          <div class="opts" data-name="provider" data-multi="0">
+            <button class="opt selected" data-val="anthropic">Anthropic / Claude</button>
+            <button class="opt" data-val="openai">OpenAI</button>
+            <button class="opt" data-val="gemini">Gemini</button>
+            <button class="opt" data-val="mixed">ترکیبی</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- STEP 2: preview -->
+      <section class="screen" data-screen="2">
+        <h1>پیش‌نمایش کانفیگ</h1>
+        <p class="muted">این فایل‌ها ساخته می‌شوند. قبل از نوشتن می‌توانی محتوا را ببینی.</p>
+        <div class="preview-wrap">
+          <div class="file-list" id="file-list"></div>
+          <pre class="file-view" id="file-view">یک فایل را از لیست انتخاب کن…</pre>
+        </div>
+        <div class="reco" id="reco"></div>
+        <div class="install" id="install"></div>
+      </section>
+
+      <!-- STEP 3: apply / done -->
+      <section class="screen" data-screen="3">
+        <h1 id="done-title">آماده‌ی اعمال</h1>
+        <p class="muted" id="done-sub">با زدن دکمه، فایل‌های کانفیگ داخل پروژه نوشته می‌شوند. از فایل‌های موجود نسخه‌ی پشتیبان <code>.tokensaver.bak</code> ساخته می‌شود.</p>
+        <button class="btn btn-primary btn-lg" id="apply-btn">اعمال کانفیگ روی پروژه</button>
+        <div class="result hidden" id="result"></div>
+      </section>
+
+      <!-- nav -->
+      <div class="nav">
+        <button class="btn btn-ghost" id="back-btn" disabled>قبلی</button>
+        <button class="btn btn-primary" id="next-btn" disabled>بعدی</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
