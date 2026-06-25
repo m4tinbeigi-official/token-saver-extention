@@ -1,4 +1,5 @@
 # Token Saver ignore — الگوهایی که نباید وارد context ابزار AI شوند
+server/
 node_modules/
 dist/
 build/

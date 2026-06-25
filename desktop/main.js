@@ -283,6 +283,10 @@ ipcMain.handle('submit-info', async (_e, data) => {
 /* ---------- HTTP Local Proxy Server for Token Monitoring ---------- */
 let proxyServer = null;
 let currentSavedPercent = 80;
+let budgetGuardActive = false;
+let maxTokensLimit = 100000;
+let maxCostLimit = 1.0;
+const pendingConfirmations = new Map();
 
 function stopLocalProxy() {
   if (proxyServer) {
@@ -291,16 +295,19 @@ function stopLocalProxy() {
   }
 }
 
-ipcMain.handle('start-proxy', async (event, savedPercent) => {
+ipcMain.handle('start-proxy', async (event, { savedPercent, budgetGuard, limitTokens, limitCost }) => {
   if (proxyServer) stopLocalProxy();
   
   currentSavedPercent = Number(savedPercent) || 80;
+  budgetGuardActive = !!budgetGuard;
+  maxTokensLimit = Number(limitTokens) || 100000;
+  maxCostLimit = Number(limitCost) || 1.0;
+  
   const port = 9999;
   const wc = event.sender;
   
   try {
     proxyServer = http.createServer((req, reqRes) => {
-      // Determine target API
       let targetHost = 'api.openai.com';
       let targetPath = req.url;
       
@@ -315,13 +322,35 @@ ipcMain.handle('start-proxy', async (event, savedPercent) => {
       
       let reqBody = [];
       req.on('data', chunk => { reqBody.push(chunk); });
-      req.on('end', () => {
+      req.on('end', async () => {
         const bodyBuffer = Buffer.concat(reqBody);
         let modelName = 'Unknown Model';
         try {
           const bodyJson = JSON.parse(bodyBuffer.toString());
           modelName = bodyJson.model || modelName;
         } catch(e) {}
+        
+        // --- Budget Guard Check ---
+        const estimatedInputTokens = Math.round(bodyBuffer.length / 4);
+        const estimatedCost = (estimatedInputTokens / 1000000) * 15.0; // ~$15 per 1M tokens
+        
+        if (budgetGuardActive && (estimatedInputTokens > maxTokensLimit || estimatedCost > maxCostLimit)) {
+          const reqId = Math.random().toString(36).substring(2);
+          const approvedPromise = new Promise((resolve) => {
+            pendingConfirmations.set(reqId, resolve);
+          });
+          
+          try {
+            wc.send('budget-warning', { id: reqId, model: modelName, tokens: estimatedInputTokens, cost: estimatedCost });
+          } catch(_e) {}
+          
+          const approved = await approvedPromise;
+          if (!approved) {
+            reqRes.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
+            reqRes.end('Blocked by TokenSaver Budget Guard: حد مجاز بودجه فراتر رفته است.');
+            return;
+          }
+        }
         
         // Copy headers and update host
         const headers = { ...req.headers };
@@ -364,7 +393,7 @@ ipcMain.handle('start-proxy', async (event, savedPercent) => {
             
             // Heuristic fallback
             if (inputTokens === 0) {
-              inputTokens = Math.round(bodyBuffer.length / 4);
+              inputTokens = estimatedInputTokens;
               outputTokens = Math.round(resBuffer.length / 4);
             }
             
@@ -406,6 +435,14 @@ ipcMain.handle('start-proxy', async (event, savedPercent) => {
 
 ipcMain.handle('stop-proxy', async () => {
   stopLocalProxy();
+  return { ok: true };
+});
+
+ipcMain.handle('respond-budget-warning', (event, { id, approved }) => {
+  if (pendingConfirmations.has(id)) {
+    pendingConfirmations.get(id)(approved);
+    pendingConfirmations.delete(id);
+  }
   return { ok: true };
 });
 
@@ -467,3 +504,80 @@ ipcMain.handle('export-config', async (_e, { projectPath, config }) => {
     return { ok: false, error: err.message };
   }
 });
+
+/* ---------- IPC: Server-side Payment & Licensing Integrations ---------- */
+const SERVER_BASE = 'http://localhost:8080';
+
+function serverRequest(path, method, payload, token) {
+  return new Promise((resolve) => {
+    const data = payload ? JSON.stringify(payload) : '';
+    const url = new URL(`${SERVER_BASE}${path}`);
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    if (data) {
+      headers['Content-Length'] = Buffer.byteLength(data);
+    }
+    
+    const req = http.request({
+      hostname: url.hostname,
+      port: url.port,
+      path: url.pathname,
+      method: method,
+      headers: headers
+    }, (res) => {
+      let body = '';
+      res.on('data', chunk => { body += chunk; });
+      res.on('end', () => {
+        try { resolve(JSON.parse(body)); }
+        catch (e) { resolve({ ok: false, error: 'پاسخ نامعتبر از سرور' }); }
+      });
+    });
+    
+    req.on('error', (e) => resolve({ ok: false, error: 'سرور در دسترس نیست: ' + e.message }));
+    
+    if (data) {
+      req.write(data);
+    }
+    req.end();
+  });
+}
+
+ipcMain.handle('send-otp', async (_e, { phoneNumber }) => {
+  return serverRequest('/api/auth/send-otp', 'POST', { phoneNumber });
+});
+
+ipcMain.handle('verify-otp', async (_e, { phoneNumber, code, name, email }) => {
+  return serverRequest('/api/auth/verify-otp', 'POST', { phoneNumber, code, name, email });
+});
+
+ipcMain.handle('check-auth-status', async (_e, token) => {
+  return serverRequest('/api/auth/status', 'GET', null, token);
+});
+
+ipcMain.handle('sync-project', async (_e, { token, projectPath, name, savedTokens, savedPercent }) => {
+  return serverRequest('/api/projects/sync', 'POST', { path: projectPath, name, savedTokens, savedPercent }, token);
+});
+
+ipcMain.handle('request-payment', async (_e, { token }) => {
+  return serverRequest('/api/payment/request', 'POST', {}, token);
+});
+
+ipcMain.handle('verify-license', async (_e, licenseKey) => {
+  return serverRequest('/api/license/verify', 'POST', { licenseKey });
+});
+
+ipcMain.handle('fetch-server-config', async () => {
+  return serverRequest('/api/app-config', 'GET');
+});
+
+ipcMain.handle('update-budget-config', async (_e, { budgetGuard, limitTokens, limitCost }) => {
+  budgetGuardActive = !!budgetGuard;
+  maxTokensLimit = Number(limitTokens) || 100000;
+  maxCostLimit = Number(limitCost) || 1.0;
+  return { ok: true };
+});
+

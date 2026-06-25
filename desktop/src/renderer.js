@@ -68,6 +68,9 @@ $('#pick-btn').addEventListener('click', async () => {
   state.scan = res.info;
   renderScan(res.info);
   
+  // Auto-detect and display large assets warning
+  checkLargeAssets(res.info);
+
   // Check if team config exists
   if (res.info.tokensaverConfig) {
     applyTeamConfig(res.info.tokensaverConfig);
@@ -75,6 +78,9 @@ $('#pick-btn').addEventListener('click', async () => {
   
   // Add project to history list
   addOrUpdateProjectInHistory(dir);
+  
+  // Sync project stats to server
+  syncProjectWithServer();
   
   updateNextButton();
 });
@@ -155,11 +161,51 @@ async function applyAgentDetection() {
 /* ---------- Step 2: tools ---------- */
 async function loadTools() {
   runDiagnostics(); // Run dependencies checker
-  const { tools, platform } = await api.listTools();
+  
+  // Try loading tools from server first, fallback to local registry
+  let tools = [];
+  let platform = 'mac';
+  try {
+    const srv = await api.fetchServerConfig();
+    if (srv && srv.ok && srv.tools) {
+      tools = srv.tools;
+      const local = await api.listTools();
+      platform = local.platform;
+    } else {
+      const local = await api.listTools();
+      tools = local.tools;
+      platform = local.platform;
+    }
+  } catch (e) {
+    const local = await api.listTools();
+    tools = local.tools;
+    platform = local.platform;
+  }
+  
+  state.availableTools = tools;
   state.platform = platform;
   const list = $('#tools-list');
   list.innerHTML = '';
   const tpl = $('#tool-card-tpl');
+
+  // Verify license key saved in localStorage
+  const savedKey = localStorage.getItem('tokensaver_license');
+  if (savedKey && !state.licenseVerified) {
+    try {
+      const res = await api.verifyLicense(savedKey);
+      if (res && res.ok && res.active) {
+        state.license = res;
+        state.licenseVerified = true;
+        
+        $('#license-status-msg').style.color = '#10b981';
+        $('#license-status-msg').textContent = `نسخه پرو فعال است (مالک: ${res.owner})`;
+        $('#license-key-input').value = savedKey;
+        $('#license-key-input').disabled = true;
+        $('#license-verify-btn').disabled = true;
+        $('#license-buy-btn').style.display = 'none';
+      }
+    } catch(e) {}
+  }
 
   tools.forEach((tool) => {
     const node = tpl.content.cloneNode(true);
@@ -190,8 +236,10 @@ async function loadTools() {
       note(card, 'دستور کپی شد.');
     });
 
+    const isLocked = tool.locked && !(state.license && state.license.active);
+
     // Handle locked pro tools
-    if (tool.locked) {
+    if (isLocked) {
       card.classList.add('locked');
       const badge = node.querySelector('.tool-badge');
       badge.textContent = 'پرو (قفل شده)';
@@ -205,7 +253,9 @@ async function loadTools() {
       installBtn.classList.add('btn-pro');
       
       installBtn.addEventListener('click', () => {
-        alert('این ویژگی در نسخه‌های بعدی با پرداخت هزینه فعال می‌شود.');
+        $('#license-card').scrollIntoView({ behavior: 'smooth' });
+        $('#license-status-msg').style.color = '#f59e0b';
+        $('#license-status-msg').textContent = 'لطفاً لایسنس پرو تهیه کنید یا کد لایسنس خود را وارد نمایید.';
       });
 
       copyBtn.disabled = true;
@@ -353,6 +403,9 @@ $('#apply-btn').addEventListener('click', async () => {
       savedTokens,
       savedPercent
     });
+    
+    // Sync project stats to server
+    syncProjectWithServer();
   } else {
     box.innerHTML = '<h3>خطا</h3><p class="muted">' + escapeHtml(res.error || 'نامشخص') + '</p>';
   }
@@ -485,6 +538,9 @@ function renderProjectHistory() {
       state.scan = res.info;
       renderScan(res.info);
       
+      // Auto-detect and display large assets warning
+      checkLargeAssets(res.info);
+
       // Auto-load team config if present in scanned project
       if (res.info.tokensaverConfig) {
         applyTeamConfig(res.info.tokensaverConfig);
@@ -598,7 +654,16 @@ $('#proxy-toggle-btn').addEventListener('click', async () => {
     const proj = getProjectFromHistory(state.projectPath);
     const pct = proj ? (proj.savedPercent || 80) : 80;
     
-    const res = await api.startProxy(pct);
+    const budgetGuard = $('#budget-guard-active').checked;
+    const limitTokens = $('#budget-tokens-limit').value || 100000;
+    const limitCost = $('#budget-cost-limit').value || 1.0;
+    
+    const res = await api.startProxy({
+      savedPercent: pct,
+      budgetGuard,
+      limitTokens,
+      limitCost
+    });
     if (res && res.ok) {
       state.proxyActive = true;
       btn.textContent = 'توقف پروکسی';
@@ -639,7 +704,383 @@ api.onProxyOutput((data) => {
   if (tbody.children.length > 30) {
     tbody.lastElementChild.remove();
   }
+  
+  // Sync project stats to server
+  syncProjectWithServer();
 });
+
+/* ---------- Smart Asset Scanner Warning ---------- */
+function checkLargeAssets(info) {
+  const prev = document.querySelector('.large-assets-warning');
+  if (prev) prev.remove();
+
+  if (!info.largeAssets || info.largeAssets.length === 0) return;
+  
+  // Group assets by folder (or root file) and accumulate sizes
+  const groups = {};
+  info.largeAssets.forEach(a => {
+    let rel = a.path;
+    if (rel.startsWith(info.projectPath)) {
+      rel = rel.substring(info.projectPath.length);
+    }
+    rel = rel.replace(/^[/\\]/, '');
+    
+    const parts = rel.split(/[/\\]/).filter(Boolean);
+    if (parts.length === 0) return;
+    
+    let groupKey = '';
+    if (parts.length === 1) {
+      groupKey = `فایل ${parts[0]}`;
+    } else {
+      groupKey = `پوشه /${parts[0]}`;
+    }
+    
+    if (!groups[groupKey]) {
+      groups[groupKey] = 0;
+    }
+    groups[groupKey] += a.size || 0;
+  });
+  
+  const items = Object.entries(groups).map(([name, sizeBytes]) => {
+    const sizeMb = (sizeBytes / (1024 * 1024)).toFixed(1);
+    return `${name} (${sizeMb} مگابایت)`;
+  });
+  
+  if (items.length === 0) return;
+  
+  const foldersList = items.map(item => `<code>${item}</code>`).join('، ');
+  
+  const noteEl = document.createElement('div');
+  noteEl.className = 'reco large-assets-warning';
+  noteEl.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+  noteEl.style.background = 'rgba(245, 158, 11, 0.05)';
+  noteEl.style.color = '#f59e0b';
+  noteEl.style.marginTop = '1rem';
+  noteEl.innerHTML = `⚠️ <b>فایل‌های غیرکد حجیم پیدا شدند!</b><br>پوشه‌ها یا فایل‌های حجیم زیر شناسایی شدند: ${foldersList}<br>توصیه می‌کنیم برای کاهش هزینه هوش مصنوعی، این مسیرها را در مرحله بعدی به لیست فیلتر نویز اضافه کنید.`;
+  $('#scan-card').after(noteEl);
+}
+
+/* ---------- License Manager Controller ---------- */
+$('#license-verify-btn').addEventListener('click', async () => {
+  const input = $('#license-key-input');
+  const msg = $('#license-status-msg');
+  const key = input.value.trim();
+  
+  if (!key) {
+    msg.style.color = '#ef4444';
+    msg.textContent = 'کد لایسنس نمی‌تواند خالی باشد.';
+    return;
+  }
+  
+  msg.style.color = '#f59e0b';
+  msg.textContent = 'در حال تأیید لایسنس…';
+  
+  const res = await api.verifyLicense(key);
+  if (res && res.ok && res.active) {
+    state.license = res;
+    state.licenseVerified = true;
+    localStorage.setItem('tokensaver_license', key);
+    
+    msg.style.color = '#10b981';
+    msg.textContent = `لایسنس نسخه پرو با موفقیت فعال شد ✓ (مالک: ${res.owner})`;
+    input.disabled = true;
+    $('#license-verify-btn').disabled = true;
+    $('#license-buy-btn').style.display = 'none';
+    
+    // Reload tools to unlock
+    await loadTools();
+  } else {
+    msg.style.color = '#ef4444';
+    msg.textContent = 'خطا در تایید لایسنس: ' + ((res && res.error) || 'سرور لایسنس پاسخگو نیست.');
+  }
+});
+
+$('#license-buy-btn').addEventListener('click', async () => {
+  const token = localStorage.getItem('tokensaver_user_token');
+  if (!token) {
+    alert('ابتدا باید وارد حساب خود شوید.');
+    return;
+  }
+  
+  const res = await api.requestPayment(token);
+  if (res && res.ok && res.paymentUrl) {
+    api.openExternal(res.paymentUrl);
+    const msg = $('#license-status-msg');
+    msg.style.color = '#c084fc';
+    msg.textContent = 'درگاه پرداخت زرین‌پال در مرورگر باز شد. پس از پرداخت موفق، حساب شما به صورت خودکار ارتقا خواهد یافت.';
+  } else {
+    alert('خطا در اتصال به درگاه پرداخت: ' + ((res && res.error) || 'نامشخص. لطفاً از روشن بودن سرور لایسنس مطمئن شوید.'));
+  }
+});
+
+/* ---------- Budget Guard Confirmation Modal ---------- */
+let activeBudgetId = null;
+
+api.onBudgetWarning((data) => {
+  activeBudgetId = data.id;
+  
+  const modal = $('#budget-modal');
+  const text = $('#budget-modal-text');
+  
+  const fmt = (n) => n.toLocaleString('en-US');
+  text.innerHTML = `یک درخواست ارسالی برای مدل <code>${escapeHtml(data.model)}</code> دارای تخمین <b>${fmt(data.tokens)}</b> توکن (~<b>${data.cost.toFixed(2)}$</b> هزینه) است که از حد مجاز بودجه فراتر رفته است. آیا اجازه می‌دهید؟`;
+  
+  modal.classList.remove('hidden');
+});
+
+$('#budget-block-btn').addEventListener('click', async () => {
+  if (activeBudgetId) {
+    await api.respondBudgetWarning(activeBudgetId, false);
+    activeBudgetId = null;
+  }
+  $('#budget-modal').classList.add('hidden');
+});
+
+$('#budget-allow-btn').addEventListener('click', async () => {
+  if (activeBudgetId) {
+    await api.respondBudgetWarning(activeBudgetId, true);
+    activeBudgetId = null;
+  }
+  $('#budget-modal').classList.add('hidden');
+});
+
+/* ---------- SMS OTP Authentication Controller ---------- */
+const loginOverlay = $('#login-overlay');
+const authStatusMsg = $('#auth-status-msg');
+const authPhoneInput = $('#auth-phone');
+const authNameInput = $('#auth-name');
+const authEmailInput = $('#auth-email');
+const authSendBtn = $('#auth-send-btn');
+const authVerifyBtn = $('#auth-verify-btn');
+const authCodeInput = $('#auth-code');
+const authChangePhoneBtn = $('#auth-change-phone-btn');
+const authStepPhone = $('#auth-step-phone');
+const authStepCode = $('#auth-step-code');
+const authTargetPhone = $('#auth-target-phone');
+
+const userProfileCard = $('#user-sidebar-profile');
+const userProfileName = $('#user-profile-name');
+const userProfilePhone = $('#user-profile-phone');
+const sidebarLogoutBtn = $('#sidebar-logout-btn');
+
+let currentAuthPhone = '';
+
+// Check Auth Status on Launch
+async function checkStartupAuth() {
+  const token = localStorage.getItem('tokensaver_user_token');
+  if (!token) {
+    loginOverlay.classList.remove('hidden');
+    return;
+  }
+  
+  authStatusMsg.style.color = '#f59e0b';
+  authStatusMsg.textContent = 'در حال بررسی احراز هویت…';
+  
+  const res = await api.checkAuthStatus(token);
+  if (res && res.ok && res.user) {
+    state.user = res.user;
+    loginOverlay.classList.add('hidden');
+    
+    // Fill sidebar profile
+    userProfileName.textContent = res.user.name || 'کاربر TokenSaver';
+    userProfilePhone.textContent = res.user.phoneNumber;
+    userProfileCard.classList.remove('hidden');
+    
+    // Set user email and name fields to remember them
+    $('#user-name').value = res.user.name || '';
+    $('#user-email').value = res.user.email || '';
+    
+    // If user is Pro, save status
+    if (res.user.isPro) {
+      state.license = { active: true, owner: res.user.name };
+      state.licenseVerified = true;
+    }
+    
+    // Reload tools to unlock Pro tools
+    await loadTools();
+  } else {
+    localStorage.removeItem('tokensaver_user_token');
+    loginOverlay.classList.remove('hidden');
+    authStatusMsg.style.color = '#ef4444';
+    authStatusMsg.textContent = 'نشست شما منقضی شده است. لطفا دوباره وارد شوید.';
+  }
+}
+
+// Send OTP Clicked
+authSendBtn.addEventListener('click', async () => {
+  const phone = authPhoneInput.value.trim();
+  if (!phone || !/^09\d{9}$/.test(phone)) {
+    authStatusMsg.style.color = '#ef4444';
+    authStatusMsg.textContent = 'لطفاً شماره موبایل معتبری وارد کنید (مثال: 09123456789)';
+    return;
+  }
+  
+  authStatusMsg.style.color = '#f59e0b';
+  authStatusMsg.textContent = 'در حال ارسال کد تایید…';
+  authSendBtn.disabled = true;
+  
+  const res = await api.sendOtp(phone);
+  authSendBtn.disabled = false;
+  
+  if (res && res.ok) {
+    currentAuthPhone = phone;
+    authTargetPhone.textContent = phone;
+    authStepPhone.classList.add('hidden');
+    authStepCode.classList.remove('hidden');
+    authStatusMsg.style.color = '#10b981';
+    authStatusMsg.textContent = res.sandbox 
+      ? 'کد تایید شبیه‌ساز در کنسول سرور چاپ شد.' 
+      : 'کد تایید ارسال شد.';
+  } else {
+    authStatusMsg.style.color = '#ef4444';
+    authStatusMsg.textContent = 'خطا در ارسال کد: ' + (res.error || 'نامشخص');
+  }
+});
+
+// Verify OTP Clicked
+authVerifyBtn.addEventListener('click', async () => {
+  const code = authCodeInput.value.trim();
+  if (!code || code.length !== 6) {
+    authStatusMsg.style.color = '#ef4444';
+    authStatusMsg.textContent = 'کد تایید باید ۶ رقمی باشد.';
+    return;
+  }
+  
+  const name = authNameInput.value.trim();
+  const email = authEmailInput.value.trim();
+  
+  authStatusMsg.style.color = '#f59e0b';
+  authStatusMsg.textContent = 'در حال تایید کد…';
+  authVerifyBtn.disabled = true;
+  
+  const res = await api.verifyOtp(currentAuthPhone, code, name, email);
+  authVerifyBtn.disabled = false;
+  
+  if (res && res.ok && res.token) {
+    localStorage.setItem('tokensaver_user_token', res.token);
+    state.user = res.user;
+    loginOverlay.classList.add('hidden');
+    
+    // Fill profile
+    userProfileName.textContent = res.user.name || 'کاربر TokenSaver';
+    userProfilePhone.textContent = res.user.phoneNumber;
+    userProfileCard.classList.remove('hidden');
+    
+    authStatusMsg.textContent = '';
+    authCodeInput.value = '';
+    
+    // Reload tools to check Pro status
+    if (res.user.isPro) {
+      state.license = { active: true, owner: res.user.name };
+      state.licenseVerified = true;
+    }
+    await loadTools();
+  } else {
+    authStatusMsg.style.color = '#ef4444';
+    authStatusMsg.textContent = 'خطا در تایید کد: ' + (res.error || 'کد وارد شده نامعتبر است.');
+  }
+});
+
+// Change phone click
+authChangePhoneBtn.addEventListener('click', () => {
+  authStepCode.classList.add('hidden');
+  authStepPhone.classList.remove('hidden');
+  authStatusMsg.textContent = '';
+});
+
+// Logout click
+sidebarLogoutBtn.addEventListener('click', () => {
+  localStorage.removeItem('tokensaver_user_token');
+  state.user = null;
+  state.license = null;
+  state.licenseVerified = false;
+  
+  userProfileCard.classList.add('hidden');
+  loginOverlay.classList.remove('hidden');
+  
+  authStepCode.classList.add('hidden');
+  authStepPhone.classList.remove('hidden');
+  
+  authPhoneInput.value = '';
+  authCodeInput.value = '';
+  authStatusMsg.textContent = 'با موفقیت خارج شدید.';
+  authStatusMsg.style.color = '#10b981';
+});
+
+// Sync project savings metadata with server (No source code files are ever sent!)
+async function syncProjectWithServer() {
+  if (!state.projectPath) return;
+  const token = localStorage.getItem('tokensaver_user_token');
+  if (!token) return;
+  
+  const folderName = state.projectPath.split(/[/\\]/).pop() || state.projectPath;
+  
+  let savedTokens = 0;
+  let savedPercent = 80;
+  
+  const proj = getProjectFromHistory(state.projectPath);
+  if (proj) {
+    savedTokens = proj.savedTokens || 0;
+    savedPercent = proj.savedPercent || 80;
+  } else if (state.lastEstimate) {
+    savedTokens = state.lastEstimate.noiseTokens || 0;
+    savedPercent = state.lastEstimate.pct || 80;
+  }
+  
+  if (state.stats && state.stats.saved > 0) {
+    savedTokens = state.stats.saved;
+  }
+  
+  try {
+    await api.syncProject(token, state.projectPath, folderName, savedTokens, savedPercent);
+  } catch (e) {
+    console.error('Failed to sync project stats to server:', e);
+  }
+}
+
+// Load budget settings from localStorage
+function loadBudgetSettings() {
+  const active = localStorage.getItem('tokensaver_budget_active');
+  const tokens = localStorage.getItem('tokensaver_budget_tokens');
+  const cost = localStorage.getItem('tokensaver_budget_cost');
+  
+  if (active !== null) {
+    $('#budget-guard-active').checked = active === 'true';
+  }
+  if (tokens !== null) {
+    $('#budget-tokens-limit').value = tokens;
+  }
+  if (cost !== null) {
+    $('#budget-cost-limit').value = cost;
+  }
+}
+
+// Sync budget inputs to running backend proxy
+function updateRunningBudgetConfig() {
+  const active = $('#budget-guard-active').checked;
+  const tokens = $('#budget-tokens-limit').value || 100000;
+  const cost = $('#budget-cost-limit').value || 1.0;
+  
+  localStorage.setItem('tokensaver_budget_active', active);
+  localStorage.setItem('tokensaver_budget_tokens', tokens);
+  localStorage.setItem('tokensaver_budget_cost', cost);
+  
+  api.updateBudgetConfig({
+    budgetGuard: active,
+    limitTokens: tokens,
+    limitCost: cost
+  }).catch(() => {});
+}
+
+// Add change listeners to budget inputs
+$('#budget-guard-active').addEventListener('change', updateRunningBudgetConfig);
+$('#budget-tokens-limit').addEventListener('input', updateRunningBudgetConfig);
+$('#budget-cost-limit').addEventListener('input', updateRunningBudgetConfig);
+
+// Startup Init
+loadBudgetSettings();
+updateRunningBudgetConfig();
+checkStartupAuth();
 
 // Fetch available tools and render project history on startup
 api.listTools().then(({ tools }) => {

@@ -17,6 +17,45 @@ function safeRead(fs, p) {
   try { return fs.readFileSync(p, 'utf-8'); } catch (_e) { return null; }
 }
 
+function scanLargeAssets(dir, fs, path, maxDepth = 3, currentDepth = 0) {
+  if (currentDepth > maxDepth) return [];
+  
+  let assets = [];
+  let entries = [];
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch (e) {
+    return [];
+  }
+  
+  const ignoredFolders = ['node_modules', '.git', 'dist', 'build', 'out', '.next', 'coverage', '.cache', 'vendor', 'server'];
+  const assetExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.mp4', '.mov', '.zip', '.pdf', '.tar', '.gz', '.mp3', '.wav', '.log', '.sql', '.csv', '.json', '.xlsx', '.sqlite', '.db'];
+  
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      if (ignoredFolders.includes(entry.name)) continue;
+      assets = assets.concat(scanLargeAssets(fullPath, fs, path, maxDepth, currentDepth + 1));
+    } else if (entry.isFile()) {
+      const ext = path.extname(entry.name).toLowerCase();
+      if (assetExtensions.includes(ext)) {
+        try {
+          const stat = fs.statSync(fullPath);
+          if (stat.size > 1 * 1024 * 1024) { // > 1MB
+            assets.push({
+              path: fullPath,
+              name: entry.name,
+              size: stat.size
+            });
+          }
+        } catch (e) {}
+      }
+    }
+  }
+  
+  return assets;
+}
+
 function scanProject(projectPath, fs, path) {
   const has = (f) => fs.existsSync(path.join(projectPath, f));
 
@@ -49,7 +88,7 @@ function scanProject(projectPath, fs, path) {
 
   // Existing agent configs
   const existingAgentConfigs = [];
-  ['CLAUDE.md', '.claude/settings.json', '.cursorrules', '.cursor', 'AGENTS.md', 'GEMINI.md']
+  ['CLAUDE.md', '.claude/settings.json', '.cursorrules', '.cursor', 'AGENTS.md', 'GEMINI.md', '.windsurfrules', '.clinerules', '.aider.conf.yml', '.github/copilot-instructions.md']
     .forEach((f) => { if (has(f)) existingAgentConfigs.push(f); });
 
   // Monorepo signals
@@ -68,6 +107,8 @@ function scanProject(projectPath, fs, path) {
     } catch (_e) {}
   }
 
+  const largeAssets = scanLargeAssets(projectPath, fs, path);
+
   return {
     projectPath,
     name: projectPath.split(/[\\/]/).filter(Boolean).pop() || 'project',
@@ -77,7 +118,8 @@ function scanProject(projectPath, fs, path) {
     existingAgentConfigs,
     isMonorepo,
     topLevelEntries,
-    tokensaverConfig
+    tokensaverConfig,
+    largeAssets
   };
 }
 
@@ -278,6 +320,54 @@ function geminiMd(info, noisy) {
 `;
 }
 
+function windsurfRules(info, noisy) {
+  return `# Token Saver — قواعد Windsurf
+
+- context را تمیز نگه دار: فایل‌های زیر را برای درک پروژه نخوان مگر صریحاً لازم باشد:
+  ${ignorePatterns(noisy, info.stacks).join('، ')}
+- به‌جای خواندن فایل‌به‌فایل، از جستجوی نمادمحور و semantic استفاده کن.
+- خروجی تست/بیلد موفق را خلاصه کن؛ لاگ کامل را در context نگذار.
+- Stack پروژه: ${info.stacks.join('، ')}.
+- دستور تست: ${info.testCommands[0] || 'نامشخص'} | دستور build: ${info.buildCommands[0] || 'نامشخص'}.
+`;
+}
+
+function rooClineRules(info, noisy) {
+  return `# Token Saver — قواعد Roo Cline (Roo Code)
+
+- نویز context را کاهش بده. پوشه‌ها و فایل‌های سنگین زیر را نخوان مگر صریحاً درخواست شده باشد:
+  ${ignorePatterns(noisy, info.stacks).join('، ')}
+- از ابزارهای جستجو و پیدا کردن فایل‌ها به‌صورت هدفمند استفاده کن.
+- خروجی شل/تست/بیلد را فقط در صورت بروز خطا کامل نشان بده، در حالت موفقیت خلاصه کن.
+- Stack پروژه: ${info.stacks.join('، ')}.
+- دستور تست: ${info.testCommands[0] || 'نامشخص'} | دستور build: ${info.buildCommands[0] || 'نامشخص'}.
+`;
+}
+
+function aiderConfig(info, noisy) {
+  const ignores = ignorePatterns(noisy, info.stacks).map(p => `  - ${p}`).join('\n');
+  return `# Aider Config — بهینه‌سازی توکن
+# تولیدشده توسط Token Saver
+
+ignore:
+${ignores}
+
+# جلوگیری از کامیت خودکار نویز
+auto-commit: false
+`;
+}
+
+function copilotInstructions(info, noisy) {
+  return `# Copilot Instructions — ${info.name}
+
+Please follow these guidelines to reduce token consumption and keep context clean:
+1. Avoid scanning or reading large non-code files, lockfiles, or build outputs:
+   ${ignorePatterns(noisy, info.stacks).join('\n   ')}
+2. Do not output verbose logs when commands or tests run successfully. Summarize outputs instead.
+3. Use symbol-based search and target files directly rather than performing recursive directories traversal.
+`;
+}
+
 /* ------------------------------------------------------------------ */
 /* Install commands per feature (cross-platform)                       */
 /* ------------------------------------------------------------------ */
@@ -372,6 +462,18 @@ function generatePlan(answers, info) {
   }
   if (agents.includes('gemini')) {
     files.push({ path: 'GEMINI.md', content: geminiMd(info, noisy), merge: 'markdown' });
+  }
+  if (agents.includes('windsurf')) {
+    files.push({ path: '.windsurfrules', content: windsurfRules(info, noisy), merge: 'markdown' });
+  }
+  if (agents.includes('roo-cline')) {
+    files.push({ path: '.clinerules', content: rooClineRules(info, noisy), merge: 'markdown' });
+  }
+  if (agents.includes('aider')) {
+    files.push({ path: '.aider.conf.yml', content: aiderConfig(info, noisy), merge: 'overwrite' });
+  }
+  if (agents.includes('copilot')) {
+    files.push({ path: '.github/copilot-instructions.md', content: copilotInstructions(info, noisy), merge: 'markdown' });
   }
 
   const installCommands = installCommandsFor(features, answers.provider);

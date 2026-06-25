@@ -14,6 +14,14 @@
         <div class="brand-mark">T</div>
         <div class="brand-name">Token Saver</div>
       </div>
+      
+      <!-- User profile in sidebar -->
+      <div class="user-sidebar-profile hidden" id="user-sidebar-profile" style="margin: 1.5rem 1rem; padding: 0.8rem; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; text-align: center;">
+        <div id="user-profile-name" style="font-weight: bold; font-size: 0.82rem; color: #e2e8f0; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">کاربر TokenSaver</div>
+        <div id="user-profile-phone" style="font-size: 0.72rem; color: var(--muted); margin-top: 0.2rem; font-family: monospace;">09120000000</div>
+        <button class="btn btn-ghost" id="sidebar-logout-btn" style="margin-top: 0.6rem; padding: 0.3rem 0.8rem; font-size: 0.72rem; width: 100%; border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; border-radius: 4px; height: auto; cursor: pointer;">خروج از حساب</button>
+      </div>
+
       <ol class="steps" id="steps">
         <li data-step="0" class="active"><span>۱</span> پروژه</li>
         <li data-step="1"><span>۲</span> سؤال‌ها</li>
@@ -58,6 +66,10 @@
             <button class="opt" data-val="cursor">Cursor</button>
             <button class="opt" data-val="codex">Codex CLI</button>
             <button class="opt" data-val="gemini">Gemini CLI</button>
+            <button class="opt" data-val="windsurf">Windsurf</button>
+            <button class="opt" data-val="roo-cline">Roo Cline (Roo Code)</button>
+            <button class="opt" data-val="aider">Aider</button>
+            <button class="opt" data-val="copilot">VS Code Copilot</button>
           </div>
         </div>
 
@@ -130,6 +142,22 @@
           </div>
         </div>
 
+        <!-- فعال‌سازی نسخه پرو -->
+        <div class="license-card" id="license-card" style="margin-bottom: 1.5rem;">
+          <div class="license-row" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <div class="license-desc">
+              <h3 style="font-size: 0.95rem; font-weight: 700; color: #f59e0b;">فعال‌سازی نسخه پرو TokenSaver</h3>
+              <p style="color: var(--muted); font-size: 0.8rem; margin-top: 0.2rem;">با خرید لایسنس، تمام ابزارهای فشرده‌سازی پرو باز و فعال می‌شوند.</p>
+            </div>
+            <div class="license-actions" style="display: flex; gap: 0.6rem; align-items: center;">
+              <input type="text" id="license-key-input" class="field" placeholder="کد لایسنس (TS-PRO-...)" style="padding: 0.5rem 0.8rem; font-size: 0.85rem; width: 200px; font-family: monospace;">
+              <button class="btn btn-primary" id="license-verify-btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;">تأیید لایسنس</button>
+              <button class="btn btn-pro" id="license-buy-btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;">خرید آنلاین (۵۰,۰۰۰ تومان)</button>
+            </div>
+          </div>
+          <div class="license-status-msg" id="license-status-msg" style="margin-top: 0.5rem; font-size: 0.82rem; min-height: 1.1em; color: var(--muted);"></div>
+        </div>
+
         <div class="tools-list" id="tools-list"></div>
       </section>
 
@@ -162,6 +190,26 @@
           </div>
           <div class="proxy-address-info hidden" id="proxy-address-info">
             پروکسی محلی فعال است روی: <code>http://127.0.0.1:9999</code>
+          </div>
+          
+          <hr class="card-hr" style="border: none; border-top: 1px solid var(--border); margin: 1.2rem 0;">
+          
+          <div class="budget-guard-panel">
+            <div class="budget-header">
+              <label class="consent" style="margin-top: 0; font-weight: 700;">
+                <input type="checkbox" id="budget-guard-active" checked> فعال‌سازی بودجه محافظ توکن (Budget Guard)
+              </label>
+            </div>
+            <div class="budget-inputs-row" style="display: flex; gap: 1rem; margin-top: 0.8rem;">
+              <div class="budget-field" style="flex: 1;">
+                <span class="label-small" style="display: block; margin-bottom: 0.35rem;">حداکثر توکن ورودی در هر درخواست:</span>
+                <input type="number" id="budget-tokens-limit" class="field" style="width: 100%; padding: 0.5rem 0.8rem; font-size: 0.85rem;" value="100000" step="10000">
+              </div>
+              <div class="budget-field" style="flex: 1;">
+                <span class="label-small" style="display: block; margin-bottom: 0.35rem;">حداکثر هزینه تخمینی هر درخواست ($):</span>
+                <input type="number" id="budget-cost-limit" class="field" style="width: 100%; padding: 0.5rem 0.8rem; font-size: 0.85rem;" value="1.0" step="0.1">
+              </div>
+            </div>
           </div>
         </div>
 
@@ -244,6 +292,49 @@
       <pre class="tool-log hidden"></pre>
     </div>
   </template>
+
+  <!-- Budget Warning Alert Modal -->
+  <div class="modal-overlay hidden" id="budget-modal">
+    <div class="modal-card">
+      <div class="modal-icon">⚠️</div>
+      <h2 class="modal-title">هشدار حد مجاز بودجه توکن</h2>
+      <p class="modal-text" id="budget-modal-text">یک درخواست ارسالی برای مدل cluade-3-5-sonnet دارای تخمین ۱۲۰,۰۰۰ توکن (~۱.۸ دلار) است که از حد مجاز تعیین‌شده فراتر رفته است.</p>
+      <div class="modal-buttons">
+        <button class="btn btn-ghost" id="budget-block-btn">مسدود کردن درخواست</button>
+        <button class="btn btn-primary" id="budget-allow-btn">اجازه دادن به درخواست</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auth OTP Login Overlay -->
+  <div class="modal-overlay" id="login-overlay">
+    <div class="modal-card auth-card">
+      <div class="brand-auth" style="display: flex; align-items: center; justify-content: center; gap: 0.8rem; margin-bottom: 1.5rem;">
+        <div class="brand-mark" style="width: 40px; height: 40px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.5rem; border-radius: 8px; box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);">T</div>
+        <div class="brand-name" style="font-weight: 800; font-size: 1.5rem; background: linear-gradient(to left, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Token Saver</div>
+      </div>
+      <h2 class="modal-title" style="margin-bottom: 0.5rem;">ورود / ثبت‌نام در نرم‌افزار</h2>
+      <p class="modal-text" style="font-size: 0.82rem; color: var(--muted); margin-bottom: 2rem;">برای استفاده از Token Saver، شماره موبایل خود را وارد کرده و کد تأیید یکبار مصرف (OTP) دریافت کنید.</p>
+      
+      <!-- Step 1: Request OTP -->
+      <div class="auth-step-panel" id="auth-step-phone" style="display: flex; flex-direction: column; gap: 1rem;">
+        <input type="text" id="auth-phone" class="field" placeholder="شماره موبایل (مثال: 09123456789)" maxlength="11" style="text-align: center; font-size: 1rem; padding: 0.7rem 1rem;">
+        <input type="text" id="auth-name" class="field" placeholder="نام و نام‌خانوادگی (برای اولین ورود)" style="padding: 0.7rem 1rem;">
+        <input type="email" id="auth-email" class="field" placeholder="ایمیل (اختیاری)" style="padding: 0.7rem 1rem;">
+        <button class="btn btn-primary" id="auth-send-btn" style="padding: 0.75rem; font-weight: bold;">دریافت کد تایید</button>
+      </div>
+      
+      <!-- Step 2: Verify OTP -->
+      <div class="auth-step-panel hidden" id="auth-step-code" style="display: flex; flex-direction: column; gap: 1rem;">
+        <p class="modal-text" style="font-size: 0.85rem; color: #e2e8f0; margin-bottom: 0.5rem;">کد تایید ۶ رقمی به شماره <span id="auth-target-phone" style="font-weight: bold; color: #60a5fa;"></span> ارسال شد.</p>
+        <input type="text" id="auth-code" class="field" placeholder="کد تایید ۶ رقمی" maxlength="6" style="text-align: center; letter-spacing: 4px; font-weight: bold; font-size: 1.25rem; padding: 0.7rem 1rem;">
+        <button class="btn btn-primary" id="auth-verify-btn" style="padding: 0.75rem; font-weight: bold;">تأیید و ورود</button>
+        <button class="btn btn-ghost" id="auth-change-phone-btn" style="font-size: 0.82rem; padding: 0.5rem;">تغییر شماره موبایل</button>
+      </div>
+      
+      <div class="auth-status-msg" id="auth-status-msg" style="margin-top: 1rem; font-size: 0.85rem; min-height: 1.2em; color: #ef4444;"></div>
+    </div>
+  </div>
 
   <script src="renderer.js"></script>
 </body>
