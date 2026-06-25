@@ -12,6 +12,43 @@ const state = {
   stats: { requests: 0, tokens: 0, saved: 0 }
 };
 
+let currentLang = localStorage.getItem('lang') || 'en';
+
+function applyTranslations() {
+  const elems = document.querySelectorAll('[data-i18n]');
+  elems.forEach(el => {
+    const key = el.dataset.i18n;
+    const txt = window.i18n[currentLang][key];
+    if (!txt) return;
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+      el.value = txt;
+    } else {
+      el.textContent = txt;
+    }
+  });
+
+  const phElems = document.querySelectorAll('[data-i18n-ph]');
+  phElems.forEach(el => {
+    const key = el.dataset.i18nPh;
+    const txt = window.i18n[currentLang][key];
+    if (txt) el.placeholder = txt;
+  });
+
+  // Set text direction for RTL languages
+  document.documentElement.dir = currentLang === 'fa' ? 'rtl' : 'ltr';
+}
+
+applyTranslations();
+
+$('#lang-en').addEventListener('click', () => {
+  localStorage.setItem('lang', 'en');
+  applyTranslations();
+});
+$('#lang-fa').addEventListener('click', () => {
+  localStorage.setItem('lang', 'fa');
+  applyTranslations();
+});
+
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
@@ -953,7 +990,7 @@ const userProfilePhone = $('#user-profile-phone');
 const sidebarLogoutBtn = $('#sidebar-logout-btn');
 
 let currentAuthPhone = '';
-let currentLang = 'en';
+// currentLang is declared once near the top of this file
 let isIranIp = false;
 
 // Translate UI elements

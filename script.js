@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cmd) {
             cmd.addEventListener('click', () => {
                 navigator.clipboard.writeText(cmd.textContent.trim()).then(() => {
-                    if (hint) { hint.textContent = 'کپی شد ✓'; setTimeout(() => { hint.textContent = 'برای کپی کلیک کن'; }, 2000); }
+                    if (hint) { hint.textContent = 'Copied ✓'; setTimeout(() => { hint.textContent = 'Click to copy'; }, 2000); }
                 });
             });
         }

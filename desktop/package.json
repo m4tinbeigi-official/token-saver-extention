@@ -22,14 +22,13 @@
     "appId": "ir.tokensaver.desktop",
     "productName": "Token Saver",
     "files": [
-      "main.js",
-      "preload.js",
-      "config-engine.js",
-      "tools-registry.js",
+      "*.js",
       "src/**/*",
       "build/icon.png",
       "build/icon.ico",
-      "node_modules/**/*"
+      "node_modules/**/*",
+      "!make-assets.py",
+      "!test-engine.js"
     ],
     "directories": {
       "output": "release",
