@@ -1299,106 +1299,324 @@ h1, h2, h3, h4 {
     .term-line { flex-direction: column; gap: 4px; }
 }
 
-/* Typography for Tutorial Markdown Content */
+/* ============ TUTORIAL PAGE ============ */
+.tutorial-hero {
+    padding: 8rem 0 3rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.tutorial-body {
+    padding-top: 1rem;
+}
+
+/* Full-width reading container */
+.container-wide {
+    width: 100%;
+    max-width: min(1560px, 94vw);
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* Two-column layout: sticky TOC + content */
+.tutorial-layout {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 3rem;
+    align-items: start;
+}
+
+/* --- Table of contents --- */
+.toc-sidebar {
+    position: sticky;
+    top: 100px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    direction: rtl;
+}
+
+.toc-inner {
+    border-right: 2px solid var(--card-border);
+    padding-right: 1.25rem;
+}
+
+.toc-title {
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    opacity: 0.7;
+}
+
+.toc-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.toc-list a {
+    display: block;
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    border-right: 2px solid transparent;
+    margin-right: -1.25rem;
+    transition: var(--transition-fast);
+}
+
+.toc-list a:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.toc-list a.active {
+    color: var(--text-primary);
+    background: var(--gradient-brand-soft);
+    border-right-color: var(--accent-purple);
+    font-weight: 600;
+}
+
+.toc-l3 a {
+    font-size: 0.82rem;
+    padding-right: 1.5rem;
+    opacity: 0.85;
+}
+
+/* ============ PROSE (markdown content) ============ */
 .prose {
-    padding: 3rem;
-    font-size: 1.1rem;
-    line-height: 1.8;
+    padding: 3.5rem;
+    font-size: 1.08rem;
+    line-height: 2;
+    color: var(--text-secondary);
+}
+
+/* Constrain text blocks for comfortable reading; tables/diagrams stay full-width */
+.prose > p,
+.prose > ul,
+.prose > ol,
+.prose > blockquote,
+.prose > h1,
+.prose > h2,
+.prose > h3,
+.prose > h4 {
+    max-width: 85ch;
 }
 
 .prose h1, .prose h2, .prose h3, .prose h4 {
     color: var(--text-primary);
-    margin-top: 2.5rem;
-    margin-bottom: 1rem;
+    line-height: 1.35;
+    scroll-margin-top: 100px;
 }
 
-.prose h1 { font-size: 2.2rem; }
+.prose h1 {
+    font-size: 2.4rem;
+    margin: 0 0 1.5rem;
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
 .prose h2 {
-    font-size: 1.8rem;
+    font-size: 1.7rem;
+    margin-top: 3.5rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.6rem;
+    padding-right: 1rem;
     border-bottom: 1px solid var(--card-border);
-    padding-bottom: 0.5rem;
+    position: relative;
+}
+
+.prose h2::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0.15em;
+    width: 5px;
+    height: 1.1em;
+    border-radius: 3px;
+    background: var(--gradient-brand);
+}
+
+.prose h3 {
+    font-size: 1.3rem;
+    margin-top: 2.5rem;
+    margin-bottom: 0.85rem;
+}
+
+/* Lead paragraph (first paragraph after the main title) */
+.prose h1 + p {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    line-height: 1.9;
 }
 
 .prose p {
     margin-bottom: 1.5rem;
-    color: var(--text-secondary);
 }
 
 .prose ul, .prose ol {
     margin-bottom: 1.5rem;
-    margin-right: 2rem;
-    color: var(--text-secondary);
+    margin-right: 1.5rem;
+    padding-right: 0.5rem;
 }
 
 .prose li {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.6rem;
+}
+
+.prose li::marker {
+    color: var(--accent-purple);
+}
+
+.prose strong {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.prose a {
+    color: #60a5fa;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(96, 165, 250, 0.4);
+    transition: var(--transition-fast);
+}
+
+.prose a:hover {
+    color: #93c5fd;
+    border-bottom-color: #93c5fd;
+}
+
+/* Inline code */
+.prose :not(pre) > code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+    color: #c084fc;
+    background: rgba(139, 92, 246, 0.12);
+    padding: 0.15em 0.45em;
+    border-radius: 6px;
+    direction: ltr;
+    unicode-bidi: embed;
+}
+
+.prose pre {
+    background: #0b0d12;
+    padding: 1.5rem;
+    border-radius: 12px;
+    overflow-x: auto;
+    margin: 0 0 1.75rem;
+    border: 1px solid var(--card-border);
+    direction: ltr;
+}
+
+.prose pre code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+    color: #c9d1d9;
+    line-height: 1.7;
+}
+
+.prose blockquote {
+    margin: 0 0 1.75rem;
+    padding: 0.5rem 1.25rem;
+    border-right: 3px solid var(--accent-purple);
+    background: rgba(139, 92, 246, 0.06);
+    border-radius: 0 8px 8px 0;
+    color: var(--text-secondary);
+}
+
+/* --- Tables: scrollable, zebra, sticky header --- */
+.table-wrap {
+    overflow-x: auto;
+    margin: 0 0 2rem;
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.015);
+    -webkit-overflow-scrolling: touch;
 }
 
 .prose table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 2rem;
-    overflow-x: auto;
-    display: block;
+    min-width: 760px;
+    font-size: 0.92rem;
 }
 
 .prose th, .prose td {
-    padding: 1rem;
-    border: 1px solid var(--card-border);
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--card-border);
+    border-left: 1px solid var(--card-border);
     text-align: right;
-    color: var(--text-secondary);
+    vertical-align: top;
+    line-height: 1.7;
 }
 
-.prose th {
-    background: rgba(255, 255, 255, 0.05);
+.prose td { color: var(--text-secondary); }
+.prose th:first-child, .prose td:first-child { border-left: none; }
+.prose tr:last-child td { border-bottom: none; }
+
+.prose thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #14141f;
     color: var(--text-primary);
+    font-weight: 700;
+    white-space: nowrap;
 }
 
-.prose strong {
-    color: var(--text-primary);
+.prose tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.025);
 }
 
-.prose pre {
-    background: #000;
-    padding: 1.5rem;
-    border-radius: 8px;
-    overflow-x: auto;
-    margin-bottom: 1.5rem;
-    border: 1px solid var(--card-border);
+.prose tbody tr:hover {
+    background: rgba(99, 102, 241, 0.08);
 }
 
-.prose code {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.9em;
-    color: var(--accent-blue);
-}
-
-.prose a {
-    color: var(--accent-blue);
-    text-decoration: underline;
-}
-
-.tutorial-hero {
-    padding: 8rem 0 4rem;
-    position: relative;
-    overflow: hidden;
-}
-
-/* Mermaid graph styles */
+/* Mermaid diagrams */
 .mermaid {
     margin: 2rem 0;
     background: rgba(255, 255, 255, 0.02);
     padding: 1.5rem;
-    border-radius: 8px;
+    border-radius: 12px;
     border: 1px solid var(--card-border);
     overflow-x: auto;
     text-align: center;
 }
 
-/* Mobile responsive for prose */
+/* --- Tutorial responsive --- */
+@media (max-width: 1024px) {
+    .tutorial-layout {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    .toc-sidebar {
+        position: static;
+        max-height: none;
+        overflow: visible;
+    }
+    .toc-inner {
+        border-right: none;
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        background: var(--card-bg);
+    }
+    .toc-list { gap: 0; }
+    .toc-list a { margin-right: 0; }
+}
+
 @media (max-width: 768px) {
     .prose {
         padding: 1.5rem;
+        font-size: 1rem;
+        line-height: 1.9;
     }
+    .prose h1 { font-size: 1.9rem; }
+    .prose h2 { font-size: 1.45rem; }
 }
 

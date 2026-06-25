@@ -63,15 +63,28 @@
             </div>
         </section>
 
-        <section class="section">
-            <div class="container">
-                <div class="glass-card prose">
+        <section class="section tutorial-body">
+            <div class="container-wide tutorial-layout">
+                <aside class="toc-sidebar">
+                    <div class="toc-inner">
+                        <div class="toc-title">فهرست مطالب</div>
+                        <ul class="toc-list">
+                            <li class="toc-l2"><a href="#sec-1">خلاصه اجرایی</a></li>
+                            <li class="toc-l2"><a href="#sec-2">نقشه مفهومی و روش ارزیابی</a></li>
+                            <li class="toc-l2"><a href="#sec-3">ابزارهای مستقیم فشرده‌سازی و پروکسی</a></li>
+                            <li class="toc-l2"><a href="#sec-4">ابزارهای codebase index و repo-to-prompt</a></li>
+                            <li class="toc-l2"><a href="#sec-5">لایه‌های memory و ابزارهای رسمی و پژوهشی</a></li>
+                            <li class="toc-l2"><a href="#sec-6">جمع‌بندی تحلیلی و محدودیت‌ها</a></li>
+                        </ul>
+                    </div>
+                </aside>
+                <article class="glass-card prose" id="tutorial-content">
                     <h1>فهرست به‌روز ابزارهای متن‌باز برای کاهش مصرف توکن و هزینه در کار با مدل‌های ابری</h1>
-<h2>خلاصه اجرایی</h2>
+<h2 id="sec-1">خلاصه اجرایی</h2>
 <p>اگر هدف اصلی شما <strong>کم‌کردن مستقیم قبض API</strong> باشد، ابزارها عملاً به چهار خانواده تقسیم می‌شوند. خانواده اول، <strong>proxy/compactor</strong>ها هستند که قبل از رسیدن داده به مدل، خروجی‌های پرحجم، لاگ‌ها، JSON، diff و RAG chunkها را فشرده می‌کنند؛ در این دسته، <strong>Headroom، RTK، snip، imptokens، Claw Compactor، Toonify MCP</strong> و تا حدی <strong>Token Optimizer</strong> بیشترین اثر را دارند. خانواده دوم، <strong>code graph / code intelligence</strong>ها هستند که به‌جای فرستادن فایل‌به‌فایل به مدل، یک گراف یا ایندکس ساختاری می‌سازند و فقط پاسخ ساختاری لازم را برمی‌گردانند؛ در این دسته <strong>codebase-memory-mcp، CodeGraph، Serena، jCodeMunch، code-review-graph، CodeGraphContext</strong> مهم‌ترین‌ها هستند. خانواده سوم، <strong>repo-to-prompt / repo digest</strong>ها مثل <strong>Repomix</strong> و <strong>Gitingest</strong> هستند که الزاماً «فشرده‌ساز» نیستند، اما ورودی را prompt-friendly و اندازه‌پذیر می‌کنند. خانواده چهارم، <strong>memory / long-term memory</strong>ها مثل <strong>Mem0، Graphiti، Cognee، projectmem، agentmemory، Engram</strong> هستند که به‌جای حمل کل تاریخچه، حافظه قابل‌بازیابی می‌سازند و از این راه هزینه را کم می‌کنند. </p>
 <p>از نظر <strong>قدرت عددی کاهش توکن</strong>، قوی‌ترین اعداد رسمیِ قابل‌اتکا در این مرور به این‌ها تعلق دارد: <strong>LLMLingua</strong> با «تا 20× فشرده‌سازی» در مقاله اصلی، <strong>codebase-memory-mcp</strong> با «10× توکن کمتر و 2.1× ابزار کمتر» روی 31 مخزن، <strong>jCodeMunch</strong> با «95%+» و بنچمارک متوسط 95% روی 15 تسک/3 مخزن، <strong>Headroom</strong> با ادعای 60–95%، <strong>RTK</strong> و <strong>snip</strong> با 60–90%، و <strong>Mem0</strong> با بیش از 90% صرفه‌جویی در token cost در مقاله‌اش. در مقابل، ابزارهایی مثل <strong>Serena، Context7، Repomix، Gitingest، Cognee، Engram</strong> معمولاً ارزششان بیشتر در «کاهش context غیرضروری» و «بهبود بازیابی» است تا یک درصد ساده و جهان‌شمولِ کاهش توکن. </p>
 <p>از نظر <strong>بازده عملیاتی</strong>، بهترین نتایج معمولاً از <strong>ترکیب سه لایه</strong> به‌دست می‌آید: یک shell/output compactor برای لاگ و تست، یک code graph برای حذف file-crawl، و یک memory layer برای حذف re-explaining بین سشن‌ها. اگر فقط یکی را بخواهید، انتخاب به workload بستگی دارد: برای <strong>coding agentها روی ریپوی متوسط/بزرگ</strong>، <code>codebase-memory-mcp</code> یا <code>CodeGraph</code> بیشترین ROI را دارند؛ برای <strong>CLI-heavy workflows</strong>، <code>RTK</code> یا <code>snip</code> سریع‌ترین نصب و سریع‌ترین برگشت سرمایه را می‌دهند؛ برای <strong>RAG / prompt-heavy apps</strong>، <code>Headroom</code> و <code>LLMLingua</code> گزینه‌های جدی‌ترند؛ و برای <strong>cross-session agents</strong>، <code>Mem0</code> یا <code>agentmemory</code> معمولاً از خلاصه‌سازی naïve مقرون‌به‌صرفه‌تر می‌شوند. </p>
-<h2>نقشه مفهومی و روش ارزیابی</h2>
+<h2 id="sec-2">نقشه مفهومی و روش ارزیابی</h2>
 <p>در این گزارش، «<strong>سادگی راه‌اندازی</strong>» را از 1 تا 5 این‌طور امتیاز داده‌ام: <strong>5</strong> یعنی نصب یک‌مرحله‌ای، بدون سرویس جانبی، و با دستورهای روشن؛ <strong>3</strong> یعنی نصب متوسط با چند prerequisite یا پیکربندی MCP/DB/SDK؛ <strong>1</strong> یعنی راه‌اندازی سنگین، چند سرویسه، یا نیازمند زیرساخت جداگانه. «<strong>اثر</strong>» هم از 1 تا 5 بر اساس ترکیب <strong>بلوغ ابزار، وسعت پوشش، و شدت کاهش توکن/هزینه</strong> داده شده است: <strong>5</strong> برای ابزارهایی با کاهش درشت یا مزیت ساختاری تکرارشونده، <strong>3</strong> برای بهبودهای معنادار ولی محدودتر، و <strong>1</strong> برای ابزارهای حاشیه‌ای یا صرفاً کمکی. هرجا عدد بنچمارک رسمی پیدا نشده، مقدار را دقیقاً <code>unspecified</code> گذاشته‌ام. </p>
 <pre><code class="language-mermaid">flowchart LR
     A[کد/لاگ/JSON/RAG/تاریخچه گفتگو] --&gt; B{کدام لایه؟}
@@ -88,9 +101,9 @@
     I --&gt; F
 </code></pre>
 <p>این نمودار عمداً ساده‌سازی شده است: در عمل، <strong>proxyها</strong> بیشتر روی token volume خام اثر می‌گذارند، <strong>graph/index</strong>ها روی حذف file-by-file exploration، و <strong>memory layer</strong>ها روی حذف تکرار context بین سشن‌ها. همین تفاوت دلیل اصلی این است که بعضی ابزارها روی «همه workloadها» عالی نیستند اما روی workload درست، اثر بسیار بیشتری از یک فشرده‌ساز عمومی می‌گذارند. </p>
-<h2>ابزارهای مستقیم فشرده‌سازی و پروکسی</h2>
+<h2 id="sec-3">ابزارهای مستقیم فشرده‌سازی و پروکسی</h2>
 <p>جدول زیر ابزارهایی را پوشش می‌دهد که <strong>به‌صورت مستقیم</strong> حجم context ورودی به مدل را کم می‌کنند؛ یعنی قبل از ارسال به API یا قبل از ورود خروجی ابزارها به context window، یک مرحله فشرده‌سازی/فیلتر اعمال می‌کنند.</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>پروژه</th>
@@ -213,7 +226,7 @@
 <td>repo/paper.</td>
 <td>با همان repo LLMLingua منتشر می‌شود؛ release جداگانه واضحی در منابع رسمی این مرور پیدا نشد.</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <pre><code class="language-mermaid">xychart-beta
 title &quot;مقایسه نمایه‌ای درصد کاهش توکن&quot;
 x-axis [&quot;LLMLingua&quot;,&quot;jCodeMunch&quot;,&quot;Codebase-Memory&quot;,&quot;Headroom&quot;,&quot;RTK&quot;,&quot;snip&quot;,&quot;imptokens&quot;]
@@ -221,9 +234,9 @@ y-axis &quot;درصد&quot; 0 --&gt; 100
 bar [95,95,90,60,60,60,37]
 </code></pre>
 <p>این نمودار <strong>مقایسه‌ی نرمال‌سازی‌شده و محافظه‌کارانه</strong> است، نه benchmark برابر-با-برابر. برای ابزارهای بازه‌ای، کمینه یا عدد canonical‌تر را گذاشته‌ام؛ برای مثال LLMLingua از 20× به‌صورت تقریبی معادل 95% reduction در نظر گرفته شده، codebase-memory از 10× کمتر شدن توکن معادل 90%، و imptokens از تنظیم پیشنهادی رسمی 37.2% استفاده شده است. </p>
-<h2>ابزارهای codebase index و repo-to-prompt</h2>
+<h2 id="sec-4">ابزارهای codebase index و repo-to-prompt</h2>
 <p>این گروه معمولاً وقتی بیشترین ارزش را دارد که عامل هوشمند شما روی <strong>مخزن‌های واقعی، چندفایلی، و پر از dependency</strong> کار می‌کند. اینجا مسئله اصلی «فشرده‌کردن متن» نیست، بلکه <strong>جلوگیری از exploration پرهزینه</strong> است.</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>پروژه</th>
@@ -346,11 +359,11 @@ bar [95,95,90,60,60,60,37]
 <td>repo/site.</td>
 <td><strong>2025-07-31</strong> (<code>v0.3.1</code>).</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <p>تحلیل این جدول روشن است: <strong>برای repoهای بزرگ، code graphها اغلب از prompt compressorهای صرف مؤثرترند</strong>، چون اصلاً مانع تولید context بیهوده می‌شوند. همین‌جا تفاوت <code>codebase-memory-mcp</code> و <code>CodeGraph</code> با <code>Repomix/Gitingest</code> دیده می‌شود: دو ابزار اول «مسئله discovery» را حل می‌کنند؛ دو ابزار آخر فقط «بسته‌بندی» را بهتر می‌کنند. بنابراین اگر عامل شما زیاد <code>grep → read → grep → read</code> می‌کند، رفتن به سمت graph تقریباً همیشه اثر بیشتری از صرفاً compact‌کردن output دارد. </p>
-<h2>لایه‌های memory و ابزارهای رسمی و پژوهشی</h2>
+<h2 id="sec-5">لایه‌های memory و ابزارهای رسمی و پژوهشی</h2>
 <p>ابزارهای حافظه بلندمدت، reduction را از مسیر دیگری می‌آورند: شما به‌جای paste کردن history یا خلاصه‌سازی دستی هر session، فقط <strong>memoryهای مرتبط را search/retrieve</strong> می‌کنید. در عمل، این لایه‌ها برای agentهای طولانی‌عمر از compactorهای صرف مهم‌تر می‌شوند.</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
 <th>پروژه / ابزار</th>
@@ -485,9 +498,9 @@ bar [95,95,90,60,60,60,37]
 <td>paper.</td>
 <td>مقاله اصلی 2022 است.</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <p>در این بخش یک نکته مهم هست: <strong>provider-side caching تقریباً همیشه باید با tool-side compression ترکیب شود</strong>. OpenAI و Anthropic وقتی prefix ثابت، system prompt، tool definitions یا history تکراری دارید بسیار قوی‌اند؛ اما اگر قبل از آن، agent شما هر بار 2MB تست لاگ و 20 فایل نامرتبط را هم بفرستد، cache فقط بخشی از مسئله را حل می‌کند. برعکس، اگر با <code>RTK/snip/Headroom</code> یا یک graph/index، نویز را اول کم کنید و بعد prompt caching provider را هم فعال نگه دارید، اثر تجمعی بسیار بالاتر می‌شود. </p>
-<h2>جمع‌بندی تحلیلی و محدودیت‌ها</h2>
+<h2 id="sec-6">جمع‌بندی تحلیلی و محدودیت‌ها</h2>
 <p>برای <strong>بیشترین بازده عملی</strong>، پیشنهاد معماری به این صورت است:</p>
 <p>اگر workflow شما <strong>CLI-heavy coding</strong> است، stack ساده و بسیار پربازده این است: <strong>RTK یا snip</strong> برای shell output، به‌علاوه <strong>CodeGraph</strong> یا <strong>codebase-memory-mcp</strong> برای semantic/code-graph context. این ترکیب هم discovery cost را کم می‌کند و هم output noise را. برای repoهای بزرگ یا monorepoها، این دسته از ابزارها معمولاً از هر prompt compressor عمومی مؤثرترند، چون مشکل را در منبع حل می‌کنند. </p>
 <p>اگر workload شما <strong>generic RAG / application prompts / long documents</strong> است، stack بهتر غالباً <strong>Headroom</strong> یا <strong>LLMLingua/LLMLingua-2</strong> به‌همراه <strong>OpenAI/Anthropic prompt caching</strong> است. <code>Headroom</code> برای integration breadth و reversible compression جذاب است، و <code>LLMLingua</code> هنوز قوی‌ترین reference research برای prompt compression cloud-agnostic باقی مانده است. </p>
@@ -496,7 +509,7 @@ bar [95,95,90,60,60,60,37]
 <p>از نظر <strong>محدودیت‌های این مرور</strong>، سه نکته را باید صریح گفت. اول، همه پروژه‌ها benchmark قابل‌بازتولید و هم‌مقیاس ندارند؛ برای چند پروژه، مخصوصاً <strong>Context7، Repomix، Gitingest، Engram، Cognee، CodeGraphContext</strong>، داده benchmark کاهش توکن در snippetهای رسمی بازیابی‌شده یا وجود نداشت یا برای قیاس عادلانه کافی نبود، و به همین دلیل <code>unspecified</code> ثبت شد. دوم، برای بعضی پروژه‌های پرشتاب، <strong>release metadata</strong> یکنواخت نبود؛ نمونه روشن آن feed اصلی <strong>Mem0</strong> است که latest entry در صفحه release بیشتر plugin-centric دیده می‌شود. سوم، در این پاس منبع‌محور، برای <strong>Google Gemini</strong> و <strong>AWS Bedrock</strong> به‌اندازه OpenAI/Anthropic، مواد رسمی با همان کیفیت و جزئیات در dataset فعلی بازیابی نشد؛ بنابراین آن‌ها را در تحلیل نهایی به‌صورت کمی و رتبه‌بندی‌شده نیاوردم، نه به این دلیل که قابلیت‌های مرتبط ندارند، بلکه به این دلیل که نمی‌خواستم بدون منبع هم‌سطح، قیاس عددی ارائه کنم. </p>
 <p>اگر بخواهم یک نسخه خیلی فشرده بدهم: <strong>برای coding agents بزرگ‌مقیاس، <code>codebase-memory-mcp</code> و <code>CodeGraph</code> بالاترین اثر ساختاری را دارند؛ برای output-heavy workflows، <code>RTK</code> و <code>snip</code> سریع‌ترین برد هستند؛ برای prompt-heavy appها، <code>Headroom</code> و <code>LLMLingua</code> مهم‌ترین نام‌ها هستند؛ و برای sessionهای طولانی، <code>Mem0</code> و <code>agentmemory</code> بیشترین صرفه‌جویی مرکب را می‌سازند.</strong> </p>
 
-                </div>
+                </article>
             </div>
         </section>
     </main>
@@ -530,6 +543,23 @@ bar [95,95,90,60,60,60,37]
         });
         if (window.mermaid && document.querySelector('.mermaid')) {
           try { mermaid.run({ querySelector: '.mermaid' }); } catch (e) { console.warn('mermaid render skipped:', e); }
+        }
+
+        // Highlight the current section in the table of contents
+        const tocLinks = Array.from(document.querySelectorAll('.toc-list a'));
+        const headings = tocLinks
+          .map(a => document.getElementById(a.getAttribute('href').slice(1)))
+          .filter(Boolean);
+        if ('IntersectionObserver' in window && headings.length) {
+          const spy = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                const id = entry.target.id;
+                tocLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+              }
+            });
+          }, { rootMargin: '-80px 0px -70% 0px', threshold: 0 });
+          headings.forEach(h => spy.observe(h));
         }
       });
     </script>

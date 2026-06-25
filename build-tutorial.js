@@ -8,7 +8,26 @@ let mdContent = fs.readFileSync('deep-research-report.md', 'utf-8');
 mdContent = mdContent.replace(/cite.*?/g, '');
 
 // Convert to HTML
-const htmlContent = marked.parse(mdContent);
+let htmlContent = marked.parse(mdContent);
+
+// Add ids to h2/h3 headings and collect a table of contents
+let headingIndex = 0;
+const toc = [];
+htmlContent = htmlContent.replace(/<h([23])>([\s\S]*?)<\/h\1>/g, (m, level, inner) => {
+  headingIndex++;
+  const id = 'sec-' + headingIndex;
+  const text = inner.replace(/<[^>]+>/g, '').trim();
+  toc.push({ id, text, level: Number(level) });
+  return `<h${level} id="${id}">${inner}</h${level}>`;
+});
+
+// Wrap tables in a horizontally-scrollable container for readability
+htmlContent = htmlContent.replace(/<table>([\s\S]*?)<\/table>/g,
+  '<div class="table-wrap"><table>$1</table></div>');
+
+const tocHtml = toc
+  .map(t => `<li class="toc-l${t.level}"><a href="#${t.id}">${t.text}</a></li>`)
+  .join('\n                            ');
 
 // Template for tutorial.html
 const template = `<!DOCTYPE html>
@@ -76,11 +95,19 @@ const template = `<!DOCTYPE html>
             </div>
         </section>
 
-        <section class="section">
-            <div class="container">
-                <div class="glass-card prose">
+        <section class="section tutorial-body">
+            <div class="container-wide tutorial-layout">
+                <aside class="toc-sidebar">
+                    <div class="toc-inner">
+                        <div class="toc-title">فهرست مطالب</div>
+                        <ul class="toc-list">
+                            ${tocHtml}
+                        </ul>
+                    </div>
+                </aside>
+                <article class="glass-card prose" id="tutorial-content">
                     ${htmlContent}
-                </div>
+                </article>
             </div>
         </section>
     </main>
@@ -114,6 +141,23 @@ const template = `<!DOCTYPE html>
         });
         if (window.mermaid && document.querySelector('.mermaid')) {
           try { mermaid.run({ querySelector: '.mermaid' }); } catch (e) { console.warn('mermaid render skipped:', e); }
+        }
+
+        // Highlight the current section in the table of contents
+        const tocLinks = Array.from(document.querySelectorAll('.toc-list a'));
+        const headings = tocLinks
+          .map(a => document.getElementById(a.getAttribute('href').slice(1)))
+          .filter(Boolean);
+        if ('IntersectionObserver' in window && headings.length) {
+          const spy = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                const id = entry.target.id;
+                tocLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+              }
+            });
+          }, { rootMargin: '-80px 0px -70% 0px', threshold: 0 });
+          headings.forEach(h => spy.observe(h));
         }
       });
     </script>
