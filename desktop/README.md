@@ -32,6 +32,35 @@ npm run dist:mac
 
 خروجی‌ها در پوشه‌ی `release/` ساخته می‌شوند.
 
+### build یک‌کلیکی
+
+- مک: فایل `build-all.command` را در Finder دابل‌کلیک کن (مک را native و ویندوز را با Docker/Wine می‌سازد).
+- ویندوز: فایل `build-all.bat` را دابل‌کلیک کن.
+
+## آیکون و assets
+
+آیکون اپ و بک‌گراند DMG با اسکریپت `make-assets.py` ساخته می‌شوند (خروجی در `build/`):
+
+```bash
+python3 make-assets.py   # نیازمند Pillow
+```
+
+تولید می‌کند: `icon.png` (1024)، `icon.ico` (ویندوز)، `icon.icns` (مک)، و `dmg-background.png`. electron-builder این‌ها را خودکار برمی‌دارد.
+
+## نصب روی مک (نکته مهم برای اپ unsigned)
+
+چون اپ هنوز با Apple Developer ID امضا/notarize نشده، مک ممکن است هنگام باز کردن خطای «is damaged» یا «unidentified developer» بدهد. دو راه:
+
+1. **راست‌کلیک روی اپ → Open** (به‌جای دابل‌کلیک)، سپس در دیالوگ Open را بزن.
+2. یا فایل `fix-mac-run.command` را دابل‌کلیک کن — که نشان quarantine را پاک و اپ را ad-hoc امضا می‌کند:
+
+```bash
+xattr -cr "/Applications/Token Saver.app"
+codesign --force --deep --sign - "/Applications/Token Saver.app"
+```
+
+برای حذف کامل این هشدارها، در آینده می‌توان اپ را با Apple Developer ID امضا و notarize کرد.
+
 ## جریان کار اپ
 
 ۱. **انتخاب پروژه** — پوشه‌ی ریشه انتخاب می‌شود؛ Stack، دستور تست/build و کانفیگ‌های موجود تشخیص داده می‌شوند (فقط خواندن).

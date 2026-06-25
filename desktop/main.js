@@ -22,6 +22,7 @@ function createWindow() {
     minHeight: 620,
     backgroundColor: '#050508',
     title: 'Token Saver',
+    icon: path.join(__dirname, 'build', process.platform === 'win32' ? 'icon.ico' : 'icon.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
