@@ -5,9 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Token Saver - زیرساخت سبک‌تر برای AI Coding Agents</title>
     <meta name="description" content="زیرساخت سبک‌تر برای AI Coding Agents؛ توکن کمتر، context تمیزتر، هزینه قابل‌کنترل‌تر.">
+    <meta name="theme-color" content="#050508">
+
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Token Saver — زیرساخت سبک‌تر برای AI Coding Agents">
+    <meta property="og:description" content="توکن کمتر، context تمیزتر، هزینه قابل‌کنترل‌تر. مصرف توکن ابزارهای AI خود را بهینه کنید.">
+    <meta property="og:url" content="https://tokensaver.ir">
+    <meta property="og:image" content="https://tokensaver.ir/og-image.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Token Saver — زیرساخت سبک‌تر برای AI Coding Agents">
+    <meta name="twitter:description" content="توکن کمتر، context تمیزتر، هزینه قابل‌کنترل‌تر.">
+
+    <!-- Favicon (inline SVG) -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233b82f6'/%3E%3Cstop offset='1' stop-color='%2310b981'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='%23050508'/%3E%3Cpath d='M16 5l8 4v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V9l8-4z' fill='none' stroke='url(%23g)' stroke-width='2'/%3E%3Ctext x='16' y='21' font-size='11' font-family='monospace' font-weight='bold' fill='url(%23g)' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
+
+    <!-- Persian webfont -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="scroll-progress" id="scroll-progress"></div>
     <header class="header" id="header">
         <div class="container header-container">
             <div class="logo">
@@ -72,25 +94,25 @@
                             </div>
                             <div class="terminal-title">token-audit.sh</div>
                         </div>
-                        <div class="terminal-body">
+                        <div class="terminal-body" id="terminal-body">
                             <div class="term-section term-before">
-                                <div class="term-label">-- Before (Raw Workflow) --</div>
-                                <div class="term-line"><span class="term-key">npm test output:</span> <span class="term-val error">18,240 tokens</span></div>
-                                <div class="term-line"><span class="term-key">repeated file reads:</span> <span class="term-val error">42</span></div>
-                                <div class="term-line"><span class="term-key">noisy logs:</span> <span class="term-val error">high</span></div>
+                                <div class="term-label term-reveal">-- Before (Raw Workflow) --</div>
+                                <div class="term-line term-reveal"><span class="term-key">npm test output:</span> <span class="term-val error"><span class="term-count" data-target="18240" data-comma="1">0</span> tokens</span></div>
+                                <div class="term-line term-reveal"><span class="term-key">repeated file reads:</span> <span class="term-val error"><span class="term-count" data-target="42">0</span></span></div>
+                                <div class="term-line term-reveal"><span class="term-key">noisy logs:</span> <span class="term-val error">high</span></div>
                             </div>
-                            
-                            <div class="term-divider">
+
+                            <div class="term-divider term-reveal">
                                 <div class="term-arrow">↓</div>
                             </div>
-                            
+
                             <div class="term-section term-after">
-                                <div class="term-label">-- After (Token Saver) --</div>
-                                <div class="term-line"><span class="term-key">compressed output:</span> <span class="term-val success">4,120 tokens</span></div>
-                                <div class="term-line"><span class="term-key">code intelligence:</span> <span class="term-val success">targeted code graph lookup</span></div>
-                                <div class="term-line"><span class="term-key">context:</span> <span class="term-val success">cleaner & focused</span></div>
+                                <div class="term-label term-reveal">-- After (Token Saver) --</div>
+                                <div class="term-line term-reveal"><span class="term-key">compressed output:</span> <span class="term-val success"><span class="term-count" data-target="4120" data-comma="1">0</span> tokens</span></div>
+                                <div class="term-line term-reveal"><span class="term-key">code intelligence:</span> <span class="term-val success">targeted code graph lookup</span></div>
+                                <div class="term-line term-reveal"><span class="term-key">context:</span> <span class="term-val success">cleaner &amp; focused</span></div>
                             </div>
-                            
+
                             <div class="term-cursor">_</div>
                         </div>
                     </div>
@@ -161,31 +183,115 @@
             <div class="container">
                 <div class="section-header fade-in-up">
                     <h2 class="section-title">خدمات تخصصی <span>Token Saver</span></h2>
+                    <p class="section-desc">راهکارهای تجاری و عملیاتی برای کنترل هزینه‌های هوش مصنوعی در سطح تیم و سازمان</p>
                 </div>
-                <div class="grid grid-3">
-                    <div class="glass-card service-card fade-in-up">
+                <div class="grid grid-3 service-grid">
+                    <!-- Card 1 -->
+                    <div class="glass-card service-card-premium fade-in-up">
+                        <div class="service-icon icon-blue">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                        </div>
                         <h4>AI Token Audit</h4>
-                        <p>بررسی دقیق میزان مصرف فعلی و شناسایی نقاط نشت توکن در workflow شما.</p>
+                        <p class="service-desc">بررسی promptها، tool outputها، لاگ‌ها، تنظیمات agent و مسیرهای پرمصرف.</p>
+                        <div class="service-badges">
+                            <span class="badge badge-outline">آسان</span>
+                            <span class="badge badge-blue">اثر: بسیار زیاد</span>
+                        </div>
+                        <ul class="service-features">
+                            <li>گزارش مصرف و نقاط اتلاف</li>
+                            <li>پیشنهاد ابزار مناسب</li>
+                            <li>نقشه کاهش هزینه</li>
+                        </ul>
                     </div>
-                    <div class="glass-card service-card fade-in-up delay-1">
+
+                    <!-- Card 2 -->
+                    <div class="glass-card service-card-premium fade-in-up delay-1">
+                        <div class="service-icon icon-purple">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+                        </div>
                         <h4>Claude Code / Cursor Optimization</h4>
-                        <p>تنظیم و بهینه‌سازی اختصاصی محیط‌ها و IDEهای مبتنی بر AI.</p>
+                        <p class="service-desc">تنظیم workflow برای Claude Code، Cursor، Windsurf، Codex CLI، Gemini و Aider.</p>
+                        <div class="service-badges">
+                            <span class="badge badge-outline">متوسط</span>
+                            <span class="badge badge-purple">اثر: زیاد</span>
+                        </div>
+                        <ul class="service-features">
+                            <li>کانفیگ پیشنهادی</li>
+                            <li>Rule و hook مناسب</li>
+                            <li>کاهش context تکراری</li>
+                        </ul>
                     </div>
-                    <div class="glass-card service-card fade-in-up delay-2">
+
+                    <!-- Card 3 -->
+                    <div class="glass-card service-card-premium fade-in-up delay-2">
+                        <div class="service-icon icon-green">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                        </div>
                         <h4>Output Compression Setup</h4>
-                        <p>پیاده‌سازی پایپ‌لاین‌های فشرده‌سازی خروجی ابزارها پیش از تغذیه به AI.</p>
+                        <p class="service-desc">راه‌اندازی ابزارهایی مثل RTK، snip، Headroom یا فیلترهای سفارشی برای لاگ و خروجی.</p>
+                        <div class="service-badges">
+                            <span class="badge badge-outline">پیشرفته</span>
+                            <span class="badge badge-green">اثر: بسیار زیاد</span>
+                        </div>
+                        <ul class="service-features">
+                            <li>فیلتر خروجی‌های پرنویز</li>
+                            <li>خلاصه‌سازی لاگ‌ها</li>
+                            <li>جلوگیری از ارسال داده زائد</li>
+                        </ul>
                     </div>
-                    <div class="glass-card service-card fade-in-up">
+
+                    <!-- Card 4 -->
+                    <div class="glass-card service-card-premium fade-in-up">
+                        <div class="service-icon icon-blue">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                        </div>
                         <h4>Codebase Graph Setup</h4>
-                        <p>راه‌اندازی ساختار گرافیکال از سورس‌کد برای دسترسی بهینه‌تر ایجنت‌ها.</p>
+                        <p class="service-desc">استفاده از codebase-mcp، CodeGraph یا Serena برای فهم ساختاری کدبیس.</p>
+                        <div class="service-badges">
+                            <span class="badge badge-outline">پیشرفته</span>
+                            <span class="badge badge-blue">اثر: بسیار زیاد</span>
+                        </div>
+                        <ul class="service-features">
+                            <li>کاهش file crawling</li>
+                            <li>جستجوی دقیق‌تر symbolها</li>
+                            <li>پاسخ‌های مرتبط‌تر</li>
+                        </ul>
                     </div>
-                    <div class="glass-card service-card fade-in-up delay-1">
+
+                    <!-- Card 5 -->
+                    <div class="glass-card service-card-premium fade-in-up delay-1">
+                        <div class="service-icon icon-purple">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        </div>
                         <h4>Prompt Caching Strategy</h4>
-                        <p>طراحی استراتژی کش کردن پرامپت‌ها برای کاهش چشمگیر هزینه‌های تکراری.</p>
+                        <p class="service-desc">طراحی prompt structure برای استفاده بهتر از caching در OpenAI، Anthropic و Claude.</p>
+                        <div class="service-badges">
+                            <span class="badge badge-outline">متوسط</span>
+                            <span class="badge badge-purple">اثر: متوسط</span>
+                        </div>
+                        <ul class="service-features">
+                            <li>جداسازی prefixهای ثابت</li>
+                            <li>کاهش هزینه ورودی‌های تکراری</li>
+                            <li>بهینه‌سازی system prompt</li>
+                        </ul>
                     </div>
-                    <div class="glass-card service-card fade-in-up delay-2">
+
+                    <!-- Card 6 -->
+                    <div class="glass-card service-card-premium fade-in-up delay-2">
+                        <div class="service-icon icon-green">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                        </div>
                         <h4>Agent Memory Layer</h4>
-                        <p>اضافه کردن لایه حافظه به ایجنت‌های سازمان شما برای یادگیری مستمر.</p>
+                        <p class="service-desc">طراحی حافظه بلندمدت با ابزارهایی مثل Mem0، Graphiti، Cognee یا agentmemory.</p>
+                        <div class="service-badges">
+                            <span class="badge badge-outline">پیشرفته</span>
+                            <span class="badge badge-green">اثر: زیاد</span>
+                        </div>
+                        <ul class="service-features">
+                            <li>حفظ تصمیم‌ها بین سشن‌ها</li>
+                            <li>کاهش توضیح مجدد context</li>
+                            <li>مدیریت knowledge پروژه</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -239,28 +345,51 @@
                     <h2 class="section-title">تاثیرات <span>ملموس</span> در سیستم شما</h2>
                     <p class="section-desc">نتایج زیر بسته به پروژه و در workflowهای پرنویز متغیر است</p>
                 </div>
-                <div class="grid grid-3">
+                <div class="grid grid-4 impact-grid">
                     <div class="impact-item fade-in-up">
-                        <div class="impact-number">Context</div>
-                        <p>تمیزتر و بهینه‌تر برای پاسخ‌های دقیق‌تر</p>
+                        <div class="impact-number"><span class="stat-number" data-target="68">0</span><span class="stat-suffix">٪</span></div>
+                        <p>کاهش توکن خروجی در workflowهای پرنویز</p>
                     </div>
                     <div class="impact-item fade-in-up delay-1">
-                        <div class="impact-number">Log</div>
-                        <p>کاهش لاگ‌های اضافه و اطلاعات حاشیه‌ای</p>
+                        <div class="impact-number"><span class="stat-number" data-target="42">0</span><span class="stat-suffix">٪</span></div>
+                        <p>کاهش خواندن تکراری فایل‌ها با code graph</p>
                     </div>
                     <div class="impact-item fade-in-up delay-2">
-                        <div class="impact-number">Search</div>
+                        <div class="impact-number"><span class="stat-number" data-target="3.5" data-decimals="1">0</span><span class="stat-suffix">x</span></div>
                         <p>جستجوی دقیق‌تر کد به جای پویش کور</p>
                     </div>
-                    <div class="impact-item fade-in-up">
-                        <div class="impact-number">Cost</div>
-                        <p>کاهش چشمگیر هزینه‌های تکراری پردازش</p>
-                    </div>
-                    <div class="impact-item fade-in-up delay-1">
-                        <div class="impact-number">Workflow</div>
-                        <p>فرآیندهای قابل‌اندازه‌گیری و سیستماتیک</p>
+                    <div class="impact-item fade-in-up delay-3">
+                        <div class="impact-number"><span class="stat-number" data-target="55">0</span><span class="stat-suffix">٪</span></div>
+                        <p>کاهش هزینه‌های تکراری پردازش context</p>
                     </div>
                 </div>
+                <div class="chart-card glass-card fade-in-up" id="compare-chart">
+                    <div class="chart-head">
+                        <h3>مصرف توکن یک سشن تست (نمونه واقعی)</h3>
+                        <div class="chart-legend">
+                            <span class="legend-item"><span class="legend-dot dot-before"></span> قبل</span>
+                            <span class="legend-item"><span class="legend-dot dot-after"></span> بعد</span>
+                        </div>
+                    </div>
+                    <div class="chart-rows">
+                        <div class="chart-row">
+                            <div class="chart-row-label">خروجی npm test</div>
+                            <div class="chart-track"><div class="chart-bar bar-before" data-pct="100"><span class="bar-value">۱۸,۲۴۰</span></div></div>
+                            <div class="chart-track"><div class="chart-bar bar-after" data-pct="23"><span class="bar-value">۴,۱۲۰</span></div></div>
+                        </div>
+                        <div class="chart-row">
+                            <div class="chart-row-label">context هر سشن</div>
+                            <div class="chart-track"><div class="chart-bar bar-before" data-pct="100"><span class="bar-value">۱۰۰٪</span></div></div>
+                            <div class="chart-track"><div class="chart-bar bar-after" data-pct="42"><span class="bar-value">۴۲٪</span></div></div>
+                        </div>
+                        <div class="chart-row">
+                            <div class="chart-row-label">خواندن تکراری فایل</div>
+                            <div class="chart-track"><div class="chart-bar bar-before" data-pct="100"><span class="bar-value">۴۲</span></div></div>
+                            <div class="chart-track"><div class="chart-bar bar-after" data-pct="17"><span class="bar-value">۷</span></div></div>
+                        </div>
+                    </div>
+                </div>
+                <p class="impact-note">* اعداد، میانگین‌های مشاهده‌شده در workflowهای پرنویز هستند و بسته به پروژه متغیرند؛ نتیجه واقعی پس از Audit مشخص می‌شود.</p>
             </div>
         </section>
 

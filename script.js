@@ -9,6 +9,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // 1b. Scroll progress bar
+    const progressBar = document.getElementById('scroll-progress');
+    const updateProgress = () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        if (progressBar) progressBar.style.width = pct + '%';
+    };
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    // 1c. Cursor-following spotlight on glass cards
+    document.querySelectorAll('.glass-card').forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            card.style.setProperty('--mx', (e.clientX - rect.left) + 'px');
+            card.style.setProperty('--my', (e.clientY - rect.top) + 'px');
+        });
+    });
+
     // 2. Mobile Menu Toggle
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const nav = document.getElementById('nav');
@@ -63,35 +83,67 @@ document.addEventListener('DOMContentLoaded', () => {
         fadeObserver.observe(el);
     });
 
-    // 5. Number Counter Animation (for Impact section if numbers are added)
-    const statsElements = document.querySelectorAll('.stat-number');
-    let counted = false;
+    // 5. Number Counter Animation (Impact section) — supports decimals
+    const animateCount = (stat) => {
+        const target = parseFloat(stat.getAttribute('data-target'));
+        const decimals = parseInt(stat.getAttribute('data-decimals') || '0', 10);
+        const duration = 1600;
+        const start = performance.now();
+        const easeOut = t => 1 - Math.pow(1 - t, 3);
 
-    const statsObserver = new IntersectionObserver((entries) => {
+        const tick = (now) => {
+            const p = Math.min((now - start) / duration, 1);
+            const value = target * easeOut(p);
+            stat.textContent = value.toFixed(decimals);
+            if (p < 1) requestAnimationFrame(tick);
+            else stat.textContent = target.toFixed(decimals);
+        };
+        requestAnimationFrame(tick);
+    };
+
+    const statsObserver = new IntersectionObserver((entries, obs) => {
         entries.forEach(entry => {
-            if (entry.isIntersecting && !counted) {
-                counted = true;
-                statsElements.forEach(stat => {
-                    const target = parseInt(stat.getAttribute('data-target'));
-                    const duration = 2000; // 2 seconds
-                    const step = Math.ceil(target / (duration / 16)); // ~60fps
-                    let current = 0;
-
-                    const updateCounter = () => {
-                        current += step;
-                        if (current > target) current = target;
-                        stat.textContent = current;
-                        if (current < target) {
-                            requestAnimationFrame(updateCounter);
-                        }
-                    };
-                    updateCounter();
-                });
+            if (entry.isIntersecting) {
+                animateCount(entry.target);
+                obs.unobserve(entry.target);
             }
         });
     }, { threshold: 0.5 });
 
-    statsElements.forEach(el => statsObserver.observe(el));
+    document.querySelectorAll('.stat-number').forEach(el => statsObserver.observe(el));
+
+    // 5b. Terminal: play line-reveal + count token numbers when in view
+    const countTo = (el) => {
+        const target = parseFloat(el.getAttribute('data-target'));
+        const useComma = el.getAttribute('data-comma') === '1';
+        const duration = 1400;
+        const start = performance.now();
+        const easeOut = t => 1 - Math.pow(1 - t, 3);
+        const fmt = n => useComma ? Math.round(n).toLocaleString('en-US') : String(Math.round(n));
+        const tick = (now) => {
+            const p = Math.min((now - start) / duration, 1);
+            el.textContent = fmt(target * easeOut(p));
+            if (p < 1) requestAnimationFrame(tick);
+            else el.textContent = fmt(target);
+        };
+        requestAnimationFrame(tick);
+    };
+
+    const terminal = document.querySelector('.terminal-mockup');
+    if (terminal) {
+        const termObserver = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    terminal.classList.add('playing');
+                    setTimeout(() => {
+                        terminal.querySelectorAll('.term-count').forEach(countTo);
+                    }, 500);
+                    obs.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.3 });
+        termObserver.observe(terminal);
+    }
 
     // 6. FAQ Accordion
     const faqItems = document.querySelectorAll('.faq-item');
