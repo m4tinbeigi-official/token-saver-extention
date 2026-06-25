@@ -145,6 +145,23 @@ document.addEventListener('DOMContentLoaded', () => {
         termObserver.observe(terminal);
     }
 
+    // 5c. Before/after comparison chart — animate bar widths on reveal
+    const chart = document.getElementById('compare-chart');
+    if (chart) {
+        chart.querySelectorAll('.chart-bar').forEach(bar => {
+            bar.style.setProperty('--w', (bar.getAttribute('data-pct') || 0) + '%');
+        });
+        const chartObserver = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-view');
+                    obs.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.3 });
+        chartObserver.observe(chart);
+    }
+
     // 6. FAQ Accordion
     const faqItems = document.querySelectorAll('.faq-item');
     faqItems.forEach(item => {
@@ -167,26 +184,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 7. Contact Form (Mailto)
-    const contactForm = document.getElementById('contact-form');
-    if (contactForm) {
-        contactForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const emailInput = document.getElementById('email').value;
-            const subject = encodeURIComponent('درخواست Audit برای Token Saver');
-            const body = encodeURIComponent(`سلام،\n\nما علاقه‌مند به دریافت Token Audit برای زیرساخت هوش مصنوعی خود هستیم.\nایمیل ارتباطی ما: ${emailInput}\n\nلطفاً در اسرع وقت با ما تماس بگیرید.\n\nبا تشکر`);
-            window.location.href = `mailto:hello@tokensaver.ir?subject=${subject}&body=${body}`;
-            
-            // Reset form
-            contactForm.reset();
-            
-            // Simple feedback
-            const btn = contactForm.querySelector('button');
-            const originalText = btn.textContent;
-            btn.textContent = 'در حال انتقال...';
-            setTimeout(() => {
-                btn.textContent = originalText;
-            }, 3000);
-        });
-    }
 });
