@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
 const https = require('https');
+const { autoUpdater } = require('electron-updater');
 
 const { scanProject, generatePlan } = require('./config-engine');
 const { TOOLS, getTool, platformKey } = require('./tools-registry');
@@ -40,6 +41,12 @@ app.whenReady().then(() => {
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
+  // In-app auto-update from GitHub Releases (packaged builds only).
+  // Note: works on Windows; macOS auto-update needs a signed app.
+  if (app.isPackaged) {
+    autoUpdater.autoDownload = true;
+    try { autoUpdater.checkForUpdatesAndNotify(); } catch (_e) {}
+  }
 });
 
 app.on('window-all-closed', () => {

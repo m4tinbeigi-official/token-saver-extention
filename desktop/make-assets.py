@@ -106,12 +106,9 @@ icon.save(os.path.join(OUT, "icon.png"))
 # Windows .ico (multi-size)
 icon.save(os.path.join(OUT, "icon.ico"),
           sizes=[(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)])
-# macOS .icns (Pillow supports writing icns)
-try:
-    icon.resize((1024, 1024)).save(os.path.join(OUT, "icon.icns"))
-    print("icns: ok")
-except Exception as e:
-    print("icns: skipped (" + str(e) + ") — electron-builder will generate it from icon.png")
+# NOTE: we intentionally do NOT ship a Pillow-generated icon.icns.
+# Pillow's .icns can be rejected by electron-builder/iconutil. Instead we point
+# mac.icon at icon.png (1024x1024) and let electron-builder generate a valid .icns.
 
 # ---- DMG background ----
 def dmg_background(w=660, h=420):

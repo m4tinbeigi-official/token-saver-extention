@@ -1,7 +1,7 @@
 {
   "name": "tokensaver-desktop",
   "productName": "Token Saver",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "بهینه‌سازی مصرف توکن AI Coding Agents با یک کلیک — برای ویندوز و مک",
   "main": "main.js",
   "author": "Token Saver",
@@ -9,9 +9,10 @@
   "scripts": {
     "start": "electron .",
     "test": "node test-engine.js",
-    "dist": "electron-builder",
-    "dist:win": "electron-builder --win",
-    "dist:mac": "electron-builder --mac"
+    "assets": "python3 make-assets.py",
+    "dist": "electron-builder --publish never",
+    "dist:win": "electron-builder --win --publish never",
+    "dist:mac": "electron-builder --mac --publish never"
   },
   "devDependencies": {
     "electron": "^31.0.0",
@@ -30,10 +31,18 @@
       "output": "release",
       "buildResources": "build"
     },
+    "publish": [
+      { "provider": "github", "owner": "m4tinbeigi-official", "repo": "tokensaver" }
+    ],
     "win": {
       "icon": "build/icon.ico",
       "target": [
-        { "target": "nsis", "arch": ["x64"] }
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
       "artifactName": "TokenSaver-Setup-${version}.${ext}"
     },
@@ -48,9 +57,15 @@
       "createDesktopShortcut": true
     },
     "mac": {
-      "icon": "build/icon.icns",
+      "icon": "build/icon.png",
       "target": [
-        { "target": "dmg", "arch": ["x64", "arm64"] }
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
       ],
       "category": "public.app-category.developer-tools",
       "artifactName": "TokenSaver-${version}-${arch}.${ext}",
@@ -59,14 +74,29 @@
       "gatekeeperAssess": false
     },
     "dmg": {
-      "icon": "build/icon.icns",
+      "icon": "build/icon.png",
       "background": "build/dmg-background.png",
       "iconSize": 120,
-      "window": { "width": 660, "height": 420 },
+      "window": {
+        "width": 660,
+        "height": 420
+      },
       "contents": [
-        { "x": 180, "y": 210, "type": "file" },
-        { "x": 480, "y": 210, "type": "link", "path": "/Applications" }
+        {
+          "x": 180,
+          "y": 210,
+          "type": "file"
+        },
+        {
+          "x": 480,
+          "y": 210,
+          "type": "link",
+          "path": "/Applications"
+        }
       ]
     }
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
   }
 }

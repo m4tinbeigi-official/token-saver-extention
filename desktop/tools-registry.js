@@ -58,19 +58,33 @@ const TOOLS = [
         note: 'روی ویندوز به محیط bash (WSL یا Git Bash) نیاز دارد. اگر نصب نبود، دستور را در WSL/Git Bash اجرا کن.'
       }
     }
-  }
+  },
 
-  // ───────────────────────────────────────────────────────────────
-  // مثال افزودن ابزار جدید در آینده:
-  // {
-  //   id: 'snip',
-  //   name: 'snip — فشرده‌سازی خروجی shell',
-  //   tagline: '۶۰–۹۰٪ توکن کمتر در خروجی دستورها',
-  //   repo: '...',
-  //   description: '...', howItWorks: '...', claims: [...], notes: [...],
-  //   afterInstall: 'snip init',
-  //   install: { mac:{type:'shell',cmd:'brew install snip'}, win:{...}, linux:{...} }
-  // }
+  {
+    id: 'snip',
+    name: 'snip — فشرده‌سازی خروجی دستورها',
+    tagline: '۶۰–۹۰٪ توکن کمتر در خروجی shell',
+    repo: 'https://github.com/getsavvyinc/snip',
+    recommended: false,
+    description:
+      'یک فیلتر سبک که خروجی پرحجم دستورها (تست، build، لاگ، JSON) را قبل از رسیدن به agent خلاصه و فشرده می‌کند، بدون از‌دست‌رفتن سیگنال مهم.',
+    howItWorks:
+      'بعد از نصب، `snip init` را اجرا کن تا با agentهای پشتیبانی‌شده یکپارچه شود؛ از آن پس خروجی دستورها خودکار فیلتر می‌شود.',
+    claims: [
+      'ادعای پروژه: ۶۰–۹۰٪ کاهش توکن روی خروجی دستورهای رایج',
+      'نمونه رسمی: خروجی go test از ۶۸۹ به ۱۶ توکن (~۹۷٪ کمتر)'
+    ],
+    notes: [
+      'تک‌باینری سبک با degradation امن؛ فیلترها قابل‌تنظیم‌اند.',
+      'مکمل عالی برای code graph: یکی نویز خروجی را کم می‌کند، دیگری file-crawl را.'
+    ],
+    afterInstall: 'دستور `snip init` را در ریشه پروژه اجرا کن.',
+    install: {
+      mac: { type: 'shell', cmd: 'curl -fsSL https://snip.sh/install.sh | bash' },
+      linux: { type: 'shell', cmd: 'curl -fsSL https://snip.sh/install.sh | bash' },
+      win: { type: 'shell', cmd: 'curl -fsSL https://snip.sh/install.sh | bash', note: 'روی ویندوز به WSL یا Git Bash نیاز دارد.' }
+    }
+  }
 ];
 
 function getTool(id) {

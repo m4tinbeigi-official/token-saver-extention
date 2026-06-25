@@ -55,6 +55,8 @@ jobs:
           path: |
             desktop/release/*.dmg
             desktop/release/*.exe
+            desktop/release/*.blockmap
+            desktop/release/latest*.yml
           if-no-files-found: ignore
 
   # ── مرحله ۲: انتشار یک Release با هر دو نصبی ──
