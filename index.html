@@ -1,1 +1,371 @@
-salam
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Saver - بهینه‌سازی مصرف توکن ابزارهای AI</title>
+    <meta name="description" content="سرویسی برای کاهش مصرف توکن، کاهش هزینه API، بهینه‌سازی context و سبک‌تر کردن workflow ابزارهای هوش مصنوعی">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header" id="header">
+        <div class="container header-container">
+            <div class="logo">
+                <a href="#">Token Saver</a>
+            </div>
+            <nav class="nav" id="nav">
+                <ul class="nav-list">
+                    <li><a href="#problem">مشکل</a></li>
+                    <li><a href="#solution">راهکار</a></li>
+                    <li><a href="#services">خدمات</a></li>
+                    <li><a href="#tools">ابزارها</a></li>
+                    <li><a href="#pricing">قیمت</a></li>
+                    <li><a href="#faq">سوالات</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <a href="#contact" class="btn btn-primary">درخواست Audit</a>
+                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="منو">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero" id="hero">
+            <div class="glow-blob blob-1"></div>
+            <div class="glow-blob blob-2"></div>
+            <div class="container hero-container">
+                <div class="hero-content fade-in-up">
+                    <h1 class="hero-title">مصرف توکن ابزارهای AI را <span>کنترل کنید</span></h1>
+                    <p class="hero-subtitle">
+                        Token Saver به تیم‌ها کمک می‌کند context شلوغ، لاگ‌های حجیم، خواندن تکراری فایل‌ها و هزینه‌های پنهان AI coding agents را کاهش دهند.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="#contact" class="btn btn-primary btn-large">درخواست بررسی رایگان</a>
+                        <a href="#solution" class="btn btn-secondary btn-large">مشاهده روش کار</a>
+                    </div>
+                </div>
+                <div class="hero-graphic fade-in-up delay-1">
+                    <div class="glass-card stat-card">
+                        <div class="stat-number" data-target="90">0</div>
+                        <div class="stat-symbol">%</div>
+                        <p class="stat-text">کاهش در بعضی خروجی‌های پرنویز، بسته به پروژه و workflow</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Problem Section -->
+        <section class="section" id="problem">
+            <div class="container">
+                <div class="section-header fade-in-up">
+                    <h2 class="section-title">مشکل از مدل نیست؛ گاهی <span>context</span> زیادی کثیف است</h2>
+                    <p class="section-desc">هزینه‌های پنهان و افت کیفیت پاسخ‌ها از کجا ناشی می‌شود؟</p>
+                </div>
+                <div class="grid grid-3">
+                    <div class="glass-card problem-card fade-in-up">
+                        <h3>لاگ‌های حجیم</h3>
+                        <p>لاگ‌های اضافه و اطلاعات غیرضروری وارد مدل می‌شوند و context را اشغال می‌کنند.</p>
+                    </div>
+                    <div class="glass-card problem-card fade-in-up delay-1">
+                        <h3>فایل‌های تکراری</h3>
+                        <p>فایل‌های یکسان در هر سشن دوباره خوانده می‌شوند و هزینه توکن را افزایش می‌دهند.</p>
+                    </div>
+                    <div class="glass-card problem-card fade-in-up delay-2">
+                        <h3>فراموشی Agent</h3>
+                        <p>ایجنت بین سشن‌ها تصمیم‌های قبلی را فراموش می‌کند و نیاز به شروع مجدد دارد.</p>
+                    </div>
+                    <div class="glass-card problem-card fade-in-up">
+                        <h3>عدم استفاده از Caching</h3>
+                        <p>از قابلیت Prompt Caching در APIها به درستی استفاده نمی‌شود.</p>
+                    </div>
+                    <div class="glass-card problem-card fade-in-up delay-1">
+                        <h3>عدم شفافیت هزینه</h3>
+                        <p>هزینه واقعی مصرف توکن و نرخ ROI ابزارها برای تیم شفاف نیست.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Solution Section -->
+        <section class="section bg-darker" id="solution">
+            <div class="container">
+                <div class="section-header fade-in-up">
+                    <h2 class="section-title">راهکار ما برای <span>بهینه‌سازی</span></h2>
+                </div>
+                <div class="grid grid-3">
+                    <div class="glass-card feature-card fade-in-up">
+                        <div class="feature-icon blue-gradient"></div>
+                        <h3>Output Compression</h3>
+                        <p>فشرده‌سازی خروجی‌ها و حذف نویزها پیش از ارسال به مدل برای حفظ توکن‌های ارزشمند.</p>
+                    </div>
+                    <div class="glass-card feature-card fade-in-up delay-1">
+                        <div class="feature-icon green-gradient"></div>
+                        <h3>Codebase Intelligence</h3>
+                        <p>استفاده از گراف کد و جستجوی معنایی هوشمند به جای خواندن کورکورانه کل فایل‌ها.</p>
+                    </div>
+                    <div class="glass-card feature-card fade-in-up delay-2">
+                        <div class="feature-icon purple-gradient"></div>
+                        <h3>Agent Memory</h3>
+                        <p>ایجاد لایه حافظه بلندمدت برای ایجنت‌ها تا تصمیمات و ساختارها را در سشن‌های بعدی به یاد بیاورند.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section class="section" id="services">
+            <div class="container">
+                <div class="section-header fade-in-up">
+                    <h2 class="section-title">خدمات تخصصی <span>Token Saver</span></h2>
+                </div>
+                <div class="grid grid-3">
+                    <div class="glass-card service-card fade-in-up">
+                        <h4>AI Token Audit</h4>
+                        <p>بررسی دقیق میزان مصرف فعلی و شناسایی نقاط نشت توکن در workflow شما.</p>
+                    </div>
+                    <div class="glass-card service-card fade-in-up delay-1">
+                        <h4>Claude Code / Cursor Optimization</h4>
+                        <p>تنظیم و بهینه‌سازی اختصاصی محیط‌ها و IDEهای مبتنی بر AI.</p>
+                    </div>
+                    <div class="glass-card service-card fade-in-up delay-2">
+                        <h4>Output Compression Setup</h4>
+                        <p>پیاده‌سازی پایپ‌لاین‌های فشرده‌سازی خروجی ابزارها پیش از تغذیه به AI.</p>
+                    </div>
+                    <div class="glass-card service-card fade-in-up">
+                        <h4>Codebase Graph Setup</h4>
+                        <p>راه‌اندازی ساختار گرافیکال از سورس‌کد برای دسترسی بهینه‌تر ایجنت‌ها.</p>
+                    </div>
+                    <div class="glass-card service-card fade-in-up delay-1">
+                        <h4>Prompt Caching Strategy</h4>
+                        <p>طراحی استراتژی کش کردن پرامپت‌ها برای کاهش چشمگیر هزینه‌های تکراری.</p>
+                    </div>
+                    <div class="glass-card service-card fade-in-up delay-2">
+                        <h4>Agent Memory Layer</h4>
+                        <p>اضافه کردن لایه حافظه به ایجنت‌های سازمان شما برای یادگیری مستمر.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tools Section -->
+        <section class="section bg-darker" id="tools">
+            <div class="container">
+                <div class="section-header fade-in-up">
+                    <h2 class="section-title">ابزارهای مورد استفاده در <span>بهینه‌سازی</span></h2>
+                </div>
+                <div class="grid grid-2">
+                    <div class="tool-category fade-in-up">
+                        <h4 class="text-blue">Compression</h4>
+                        <ul>
+                            <li>Headroom, RTK, snip, LLMLingua, imptokens</li>
+                        </ul>
+                    </div>
+                    <div class="tool-category fade-in-up delay-1">
+                        <h4 class="text-green">Code Intelligence</h4>
+                        <ul>
+                            <li>codebase-memory-mcp, CodeGraph, Serena, jCodeMunch</li>
+                        </ul>
+                    </div>
+                    <div class="tool-category fade-in-up">
+                        <h4 class="text-purple">Repo Packaging</h4>
+                        <ul>
+                            <li>Repomix, Gitingest</li>
+                        </ul>
+                    </div>
+                    <div class="tool-category fade-in-up delay-1">
+                        <h4 class="text-blue">Memory</h4>
+                        <ul>
+                            <li>Mem0, Graphiti, Cognee, agentmemory</li>
+                        </ul>
+                    </div>
+                    <div class="tool-category fade-in-up tool-full-width">
+                        <h4 class="text-green">Provider Optimization</h4>
+                        <ul>
+                            <li>OpenAI Prompt Caching, Anthropic Prompt Caching, Claude Code Auto-compaction</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Impact Section -->
+        <section class="section" id="impact">
+            <div class="container">
+                <div class="section-header fade-in-up">
+                    <h2 class="section-title">تاثیرات <span>محافظه‌کارانه</span> اما ملموس</h2>
+                </div>
+                <div class="grid grid-3">
+                    <div class="impact-item fade-in-up">
+                        <div class="impact-number">Context</div>
+                        <p>تمیزتر و بهینه‌تر برای پاسخ‌های دقیق‌تر</p>
+                    </div>
+                    <div class="impact-item fade-in-up delay-1">
+                        <div class="impact-number">Log</div>
+                        <p>کاهش لاگ‌های اضافه و اطلاعات حاشیه‌ای</p>
+                    </div>
+                    <div class="impact-item fade-in-up delay-2">
+                        <div class="impact-number">Search</div>
+                        <p>جستجوی دقیق‌تر کد به جای پویش کور</p>
+                    </div>
+                    <div class="impact-item fade-in-up">
+                        <div class="impact-number">Cost</div>
+                        <p>کاهش چشمگیر هزینه‌های تکراری پردازش</p>
+                    </div>
+                    <div class="impact-item fade-in-up delay-1">
+                        <div class="impact-number">Workflow</div>
+                        <p>فرآیندهای قابل‌اندازه‌گیری و سیستماتیک</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Process Section -->
+        <section class="section bg-darker" id="process">
+            <div class="container">
+                <div class="section-header fade-in-up">
+                    <h2 class="section-title">مراحل <span>همکاری</span></h2>
+                </div>
+                <div class="process-steps">
+                    <div class="process-step fade-in-up">
+                        <div class="step-number">۱</div>
+                        <h3>Audit</h3>
+                        <p>بررسی وضعیت فعلی مصرف و گلوگاه‌ها</p>
+                    </div>
+                    <div class="process-step fade-in-up delay-1">
+                        <div class="step-number">۲</div>
+                        <h3>طراحی Stack</h3>
+                        <p>انتخاب بهترین ابزارها متناسب با نیاز تیم</p>
+                    </div>
+                    <div class="process-step fade-in-up delay-2">
+                        <div class="step-number">۳</div>
+                        <h3>راه‌اندازی</h3>
+                        <p>پیاده‌سازی و استقرار راهکارهای بهینه‌سازی</p>
+                    </div>
+                    <div class="process-step fade-in-up delay-3">
+                        <div class="step-number">۴</div>
+                        <h3>پایش</h3>
+                        <p>نظارت مستمر و بهبود فرآیندها در طول زمان</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section class="section" id="pricing">
+            <div class="container">
+                <div class="section-header fade-in-up">
+                    <h2 class="section-title">پلن‌های <span>سرمایه‌گذاری</span></h2>
+                </div>
+                <div class="grid grid-3">
+                    <div class="glass-card pricing-card fade-in-up">
+                        <h3>Starter Audit</h3>
+                        <div class="price">پایه</div>
+                        <ul class="pricing-features">
+                            <li>بررسی کامل Workflow</li>
+                            <li>گزارش نشت توکن‌ها</li>
+                            <li>ارائه پیشنهادات بهینه‌سازی</li>
+                        </ul>
+                        <a href="#contact" class="btn btn-outline btn-full">انتخاب پلن</a>
+                    </div>
+                    <div class="glass-card pricing-card popular fade-in-up delay-1">
+                        <div class="popular-badge">پیشنهاد ویژه</div>
+                        <h3>Pro Setup</h3>
+                        <div class="price">حرفه‌ای</div>
+                        <ul class="pricing-features">
+                            <li>تمام ویژگی‌های پلن پایه</li>
+                            <li>راه‌اندازی Output Compression</li>
+                            <li>تنظیم Prompt Caching</li>
+                            <li>بهینه‌سازی IDEها</li>
+                        </ul>
+                        <a href="#contact" class="btn btn-primary btn-full">انتخاب پلن</a>
+                    </div>
+                    <div class="glass-card pricing-card fade-in-up delay-2">
+                        <h3>Team Optimization</h3>
+                        <div class="price">تیمی</div>
+                        <ul class="pricing-features">
+                            <li>تمام ویژگی‌های پلن حرفه‌ای</li>
+                            <li>راه‌اندازی Agent Memory</li>
+                            <li>پیاده‌سازی Codebase Graph</li>
+                            <li>پشتیبانی و پایش اختصاصی</li>
+                        </ul>
+                        <a href="#contact" class="btn btn-outline btn-full">انتخاب پلن</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section class="section bg-darker" id="faq">
+            <div class="container">
+                <div class="section-header fade-in-up">
+                    <h2 class="section-title">سوالات <span>متداول</span></h2>
+                </div>
+                <div class="faq-container">
+                    <div class="faq-item fade-in-up">
+                        <button class="faq-btn">Token Saver دقیقا چه کار می‌کند؟ <span class="arrow"></span></button>
+                        <div class="faq-content">
+                            <p>ما با استفاده از ابزارها و استراتژی‌های مدرن، میزان توکن مصرفی توسط AI agents شما را بهینه‌سازی می‌کنیم تا ضمن حفظ کیفیت کدهای تولیدی، هزینه‌های شما کاهش یابد.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item fade-in-up delay-1">
+                        <button class="faq-btn">چقدر کاهش هزینه خواهیم داشت؟ <span class="arrow"></span></button>
+                        <div class="faq-content">
+                            <p>بسته به میزان استفاده، نوع پروژه‌ها و Workflow فعلی تیم شما، می‌توانیم مصرف توکن‌های غیرضروری را تا حد زیادی (در برخی موارد بین ۶۰ تا ۹۰ درصد در خروجی‌های پرنویز) کاهش دهیم.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item fade-in-up delay-2">
+                        <button class="faq-btn">آیا کیفیت خروجی هوش مصنوعی افت می‌کند؟ <span class="arrow"></span></button>
+                        <div class="faq-content">
+                            <p>خیر. در واقع با حذف نویزها، ارائه ساختار گرافیکال کدبیس و ایجاد حافظه بلندمدت، دقت پاسخ‌دهی ایجنت‌ها افزایش می‌یابد زیرا context مرتبط‌تری دریافت می‌کنند.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item fade-in-up delay-3">
+                        <button class="faq-btn">نحوه شروع همکاری چگونه است؟ <span class="arrow"></span></button>
+                        <div class="faq-content">
+                            <p>فرآیند از یک Audit یا بررسی اولیه شروع می‌شود تا گلوگاه‌های سازمان شما شناسایی شده و سپس معماری مناسب پیشنهاد گردد.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final CTA -->
+        <section class="section cta-section" id="contact">
+            <div class="glow-blob blob-3"></div>
+            <div class="container text-center fade-in-up">
+                <h2 class="section-title">آماده بهینه‌سازی هزینه‌های AI خود هستید؟</h2>
+                <p class="section-desc mb-8">همین حالا با ما تماس بگیرید تا درخواست Audit شما را ثبت کنیم.</p>
+                <form class="contact-form" id="contact-form">
+                    <input type="email" id="email" placeholder="ایمیل خود را وارد کنید..." required class="form-input">
+                    <button type="submit" class="btn btn-primary btn-large">درخواست Audit</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-container">
+            <div class="footer-brand">
+                <div class="logo">Token Saver</div>
+                <p>سرویسی برای کنترل و بهینه‌سازی مصرف ابزارهای AI</p>
+            </div>
+            <div class="footer-links">
+                <a href="mailto:hello@tokensaver.ir" class="footer-link">hello@tokensaver.ir</a>
+                <a href="https://wa.me/#" target="_blank" class="footer-link">ارتباط در واتس‌اپ</a>
+                <a href="https://tokensaver.ir" class="footer-link">tokensaver.ir</a>
+            </div>
+        </div>
+        <div class="footer-bottom text-center">
+            <p>&copy; 2026 Token Saver. تمامی حقوق محفوظ است.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
