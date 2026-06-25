@@ -953,6 +953,83 @@ const userProfilePhone = $('#user-profile-phone');
 const sidebarLogoutBtn = $('#sidebar-logout-btn');
 
 let currentAuthPhone = '';
+let currentLang = 'en';
+let isIranIp = false;
+
+// Translate UI elements
+function applyLanguage() {
+  const dict = window.i18n ? window.i18n[currentLang] : null;
+  if (!dict) return;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = dict[el.getAttribute('data-i18n')];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    el.placeholder = dict[el.getAttribute('data-i18n-ph')];
+  });
+  
+  const googleStep = $('#auth-step-google');
+  const phoneStep = $('#auth-step-phone');
+  const descText = $('#auth-desc-text');
+  
+  if (googleStep && phoneStep && descText) {
+    if (currentLang === 'fa' || isIranIp) {
+      googleStep.classList.add('hidden');
+      phoneStep.classList.remove('hidden');
+      descText.textContent = dict.auth_desc_otp;
+    } else {
+      googleStep.classList.remove('hidden');
+      phoneStep.classList.add('hidden');
+      descText.textContent = dict.auth_desc_google;
+    }
+  }
+}
+
+// IP Geolocation Check
+async function checkIpGeolocation() {
+  try {
+    const res = await fetch('http://ip-api.com/json');
+    const data = await res.json();
+    if (data && data.countryCode === 'IR') {
+      isIranIp = true;
+      currentLang = 'fa';
+      applyLanguage();
+    }
+  } catch (e) {
+    console.warn("Could not check geolocation", e);
+  }
+}
+
+// Setup Language Switchers & Check IP
+document.addEventListener('DOMContentLoaded', () => {
+  applyLanguage();
+  checkIpGeolocation();
+  
+  const btnEn = $('#lang-en');
+  const btnFa = $('#lang-fa');
+  if (btnEn) btnEn.addEventListener('click', () => { currentLang = 'en'; applyLanguage(); });
+  if (btnFa) btnFa.addEventListener('click', () => { currentLang = 'fa'; applyLanguage(); });
+  
+  const googleBtn = $('#auth-google-btn');
+  if (googleBtn) {
+    googleBtn.addEventListener('click', async () => {
+      authStatusMsg.style.color = '#f59e0b';
+      authStatusMsg.textContent = 'در حال هدایت به مروگر جهت ورود با گوگل...';
+      try {
+        const res = await api.openGoogleAuth();
+        if (res && res.token) {
+          localStorage.setItem('tokensaver_user_token', res.token);
+          checkStartupAuth();
+        } else {
+          authStatusMsg.style.color = '#ef4444';
+          authStatusMsg.textContent = 'فرآیند ورود لغو شد یا با خطا مواجه شد.';
+        }
+      } catch (err) {
+        authStatusMsg.style.color = '#ef4444';
+        authStatusMsg.textContent = 'خطا در ارتباط با سرور.';
+      }
+    });
+  }
+});
 
 // Check Auth Status on Launch
 async function checkStartupAuth() {

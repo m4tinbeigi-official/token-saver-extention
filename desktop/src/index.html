@@ -1,66 +1,71 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Token Saver</title>
+  <title data-i18n="app_title">Token Saver</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="app">
+  <div class="lang-switcher" style="position: absolute; top: 1rem; right: 1rem; z-index: 1000;">
+    <button id="lang-en" class="btn btn-ghost" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">EN</button>
+    <button id="lang-fa" class="btn btn-ghost" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; margin-left: 0.3rem;">فا</button>
+  </div>
+
     <!-- Sidebar / steps -->
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-mark">T</div>
-        <div class="brand-name">Token Saver</div>
+        <div class="brand-name" data-i18n="app_title">Token Saver</div>
       </div>
       
       <!-- User profile in sidebar -->
       <div class="user-sidebar-profile hidden" id="user-sidebar-profile" style="margin: 1.5rem 1rem; padding: 0.8rem; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; text-align: center;">
-        <div id="user-profile-name" style="font-weight: bold; font-size: 0.82rem; color: #e2e8f0; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">کاربر TokenSaver</div>
+        <div id="user-profile-name" style="font-weight: bold; font-size: 0.82rem; color: #e2e8f0; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;" data-i18n="sidebar_user">TokenSaver User</div>
         <div id="user-profile-phone" style="font-size: 0.72rem; color: var(--muted); margin-top: 0.2rem; font-family: monospace;">09120000000</div>
-        <button class="btn btn-ghost" id="sidebar-logout-btn" style="margin-top: 0.6rem; padding: 0.3rem 0.8rem; font-size: 0.72rem; width: 100%; border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; border-radius: 4px; height: auto; cursor: pointer;">خروج از حساب</button>
+        <button class="btn btn-ghost" id="sidebar-logout-btn" style="margin-top: 0.6rem; padding: 0.3rem 0.8rem; font-size: 0.72rem; width: 100%; border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; border-radius: 4px; height: auto; cursor: pointer;" data-i18n="sidebar_logout">Logout</button>
       </div>
 
       <ol class="steps" id="steps">
-        <li data-step="0" class="active"><span>۱</span> پروژه</li>
-        <li data-step="1"><span>۲</span> سؤال‌ها</li>
-        <li data-step="2"><span>۳</span> ابزارها</li>
-        <li data-step="3"><span>۴</span> کانفیگ</li>
-        <li data-step="4"><span>۵</span> مانیتور زنده</li>
+        <li data-step="0" class="active"><span>1</span> <span data-i18n="sidebar_step1">Project</span></li>
+        <li data-step="1"><span>2</span> <span data-i18n="sidebar_step2">Survey</span></li>
+        <li data-step="2"><span>3</span> <span data-i18n="sidebar_step3">Tools</span></li>
+        <li data-step="3"><span>4</span> <span data-i18n="sidebar_step4">Config</span></li>
+        <li data-step="4"><span>5</span> <span data-i18n="sidebar_step5">Monitor</span> زنده</li>
       </ol>
-      <div class="sidebar-foot" id="app-version">برای ویندوز و مک</div>
+      <div class="sidebar-foot" id="app-version" data-i18n="sidebar_foot">For Mac & Windows</div>
     </aside>
 
     <!-- Main -->
     <main class="main">
       <!-- STEP 0: pick project -->
       <section class="screen active" data-screen="0">
-        <h1>پروژه‌ات را انتخاب کن</h1>
-        <p class="muted">پوشه‌ی ریشه‌ی پروژه را انتخاب کن تا Stack و دستورهایش را تشخیص دهیم. هیچ فایلی بدون تأیید تو تغییر نمی‌کند.</p>
-        <button class="btn btn-primary btn-lg" id="pick-btn">انتخاب پوشه پروژه</button>
+        <h1 data-i18n="screen0_title">Select your project</h1>
+        <p class="muted" data-i18n="screen0_desc">Select the root folder of your project to detect the stack and commands. No files will be modified without your approval.</p>
+        <button class="btn btn-primary btn-lg" id="pick-btn" data-i18n="screen0_btn">Select Project Folder</button>
         <div class="scan-card hidden" id="scan-card">
-          <div class="scan-row"><span>مسیر</span><b id="scan-path">—</b></div>
-          <div class="scan-row"><span>Stack</span><b id="scan-stacks">—</b></div>
-          <div class="scan-row"><span>تست</span><b id="scan-tests">—</b></div>
+          <div class="scan-row"><span data-i18n="scan_path">Path</span><b id="scan-path">—</b></div>
+          <div class="scan-row"><span data-i18n="scan_stack">Stack</span><b id="scan-stacks">—</b></div>
+          <div class="scan-row"><span data-i18n="scan_test">Test</span><b id="scan-tests">—</b></div>
           <div class="scan-row"><span>build</span><b id="scan-build">—</b></div>
-          <div class="scan-row"><span>کانفیگ موجود</span><b id="scan-existing">—</b></div>
+          <div class="scan-row"><span data-i18n="scan_config">Existing Config</span><b id="scan-existing">—</b></div>
         </div>
 
         <!-- پروژه‌های مدیریت‌شده -->
         <div class="history-section hidden" id="history-section">
-          <h2 class="history-title">پروژه‌های مدیریت‌شده</h2>
+          <h2 class="history-title" data-i18n="history_title">Managed Projects</h2>
           <div class="history-list" id="history-list"></div>
         </div>
       </section>
 
       <!-- STEP 1: questions + user info -->
       <section class="screen" data-screen="1">
-        <h1>چند سؤال فنی</h1>
-        <p class="muted">بر اساس پاسخ‌ها، ابزار و کانفیگ مناسب را پیشنهاد می‌دهیم.</p>
+        <h1 data-i18n="screen1_title">Quick Survey</h1>
+        <p class="muted" data-i18n="screen1_desc">Based on your answers, we'll recommend the right tools and configuration.</p>
 
         <div class="q">
-          <h3>کدام agentها را استفاده می‌کنی؟</h3>
+          <h3 data-i18n="q1_title">Which agents do you use?</h3>
           <div class="opts" data-name="agents" data-multi="1">
             <button class="opt selected" data-val="claude-code">Claude Code</button>
             <button class="opt" data-val="cursor">Cursor</button>
@@ -74,41 +79,41 @@
         </div>
 
         <div class="q">
-          <h3>چه خروجی‌هایی پرنویز هستند؟</h3>
+          <h3 data-i18n="q2_title">Which outputs are noisy?</h3>
           <div class="opts" data-name="noisy" data-multi="1">
-            <button class="opt selected" data-val="tests">خروجی تست‌ها</button>
-            <button class="opt selected" data-val="build">لاگ build</button>
-            <button class="opt selected" data-val="logs">لاگ‌های اجرا</button>
-            <button class="opt" data-val="lockfiles">lockfileها</button>
-            <button class="opt" data-val="generated">فایل‌های تولیدی/minified</button>
+            <button class="opt selected" data-val="tests" data-i18n="q_opt_tests">Test outputs</button>
+            <button class="opt selected" data-val="build" data-i18n="q_opt_build">Build logs</button>
+            <button class="opt selected" data-val="logs" data-i18n="q_opt_logs">Execution logs</button>
+            <button class="opt" data-val="lockfiles" data-i18n="q_opt_lock">Lockfiles</button>
+            <button class="opt" data-val="generated" data-i18n="q_opt_gen">Generated/Minified</button>
           </div>
         </div>
 
         <div class="q">
-          <h3>اندازه‌ی ریپو؟</h3>
+          <h3 data-i18n="q3_title">Repository size?</h3>
           <div class="opts" data-name="repoSize" data-multi="0">
-            <button class="opt selected" data-val="small">کوچک</button>
-            <button class="opt" data-val="medium">متوسط</button>
-            <button class="opt" data-val="large">بزرگ / مونوریپو</button>
+            <button class="opt selected" data-val="small" data-i18n="q_opt_small">Small</button>
+            <button class="opt" data-val="medium" data-i18n="q_opt_med">Medium</button>
+            <button class="opt" data-val="large" data-i18n="q_opt_large">Large / Monorepo</button>
           </div>
         </div>
 
         <div class="q">
-          <h3>اولویت اصلی؟</h3>
+          <h3 data-i18n="q4_title">Main priority?</h3>
           <div class="opts" data-name="priority" data-multi="0">
-            <button class="opt" data-val="cost">کاهش هزینه</button>
-            <button class="opt" data-val="quality">کیفیت context</button>
-            <button class="opt selected" data-val="both">هر دو</button>
+            <button class="opt" data-val="cost" data-i18n="q_opt_cost">Reduce Cost</button>
+            <button class="opt" data-val="quality" data-i18n="q_opt_qual">Context Quality</button>
+            <button class="opt selected" data-val="both" data-i18n="q_opt_both">Both</button>
           </div>
         </div>
 
         <div class="q">
-          <h3>provider اصلی؟</h3>
+          <h3 data-i18n="q5_title">Primary provider?</h3>
           <div class="opts" data-name="provider" data-multi="0">
             <button class="opt selected" data-val="anthropic">Anthropic / Claude</button>
             <button class="opt" data-val="openai">OpenAI</button>
             <button class="opt" data-val="gemini">Gemini</button>
-            <button class="opt" data-val="mixed">ترکیبی</button>
+            <button class="opt" data-val="mixed" data-i18n="q_opt_mixed">Mixed</button>
           </div>
         </div>
 
@@ -125,14 +130,14 @@
 
       <!-- STEP 2: tools -->
       <section class="screen" data-screen="2">
-        <h1>ابزارهای صرفه‌جویی توکن</h1>
-        <p class="muted">این ابزارهای متن‌باز را می‌توانی مستقیم از همین‌جا روی پروژه‌ات نصب کنی. نصب فقط با کلیک خودت و با نمایش خروجی زنده انجام می‌شود.</p>
+        <h1 data-i18n="screen2_title">Token Saving Tools</h1>
+        <p class="muted" data-i18n="screen2_desc">Install these open-source tools directly into your project. Installation runs locally with live output.</p>
         
         <!-- سیستم عیب‌یابی پیش‌نیازها -->
         <div class="diag-card" id="diag-card">
           <div class="diag-head">
-            <span class="diag-title">سیستم عیب‌یابی پیش‌نیازها</span>
-            <button class="btn btn-ghost btn-sm" id="diag-refresh-btn">بررسی مجدد</button>
+            <span class="diag-title" data-i18n="diag_title">Prerequisites Diagnostic</span>
+            <button class="btn btn-ghost btn-sm" id="diag-refresh-btn" data-i18n="diag_refresh">Re-check</button>
           </div>
           <div class="diag-grid">
             <div class="diag-item" data-dep="git"><span>Git</span><b class="status">—</b></div>
@@ -146,7 +151,7 @@
         <div id="notifications-banner" class="hidden" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.6rem; position: relative; backdrop-filter: blur(12px);">
           <div style="display: flex; align-items: center; gap: 0.5rem;">
             <span style="font-size: 1.1rem;">🔔</span>
-            <h4 style="margin: 0; font-size: 0.9rem; color: #60a5fa; font-weight: bold;">پیام جدید از مدیریت سیستم</h4>
+            <h4 style="margin: 0; font-size: 0.9rem; color: #60a5fa; font-weight: bold;" data-i18n="notif_title">New System Message</h4>
             <button id="notif-close-btn" style="position: absolute; top: 0.8rem; left: 0.8rem; background: none; border: none; color: #94a3b8; font-size: 1.1rem; cursor: pointer; line-height: 1;">×</button>
           </div>
           <div id="notification-content" style="font-size: 0.82rem; color: #e2e8f0; line-height: 1.5; white-space: pre-line;"></div>
@@ -156,12 +161,12 @@
         <div class="license-card" id="license-card" style="margin-bottom: 1.5rem;">
           <div class="license-row" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
             <div class="license-desc">
-              <h3 style="font-size: 0.95rem; font-weight: 700; color: #f59e0b;">فعال‌سازی نسخه پرو TokenSaver</h3>
-              <p style="color: var(--muted); font-size: 0.8rem; margin-top: 0.2rem;">با خرید لایسنس، تمام ابزارهای فشرده‌سازی پرو باز و فعال می‌شوند.</p>
+              <h3 style="font-size: 0.95rem; font-weight: 700; color: #f59e0b;" data-i18n="license_title">Activate TokenSaver Pro</h3>
+              <p style="color: var(--muted); font-size: 0.8rem; margin-top: 0.2rem;" data-i18n="license_desc">Purchasing a license unlocks all advanced pro compression tools.</p>
             </div>
             <div class="license-actions" style="display: flex; gap: 0.6rem; align-items: center;">
-              <input type="text" id="license-key-input" class="field" placeholder="کد لایسنس (TS-PRO-...)" style="padding: 0.5rem 0.8rem; font-size: 0.85rem; width: 200px; font-family: monospace;">
-              <button class="btn btn-primary" id="license-verify-btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;">تأیید لایسنس</button>
+              <input type="text" id="license-key-input" class="field" data-i18n-ph="license_ph" placeholder="License Key (TS-PRO-...)" style="padding: 0.5rem 0.8rem; font-size: 0.85rem; width: 200px; font-family: monospace;">
+              <button class="btn btn-primary" id="license-verify-btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;" data-i18n="license_verify">Verify</button>
               <button class="btn btn-pro" id="license-buy-btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;">خرید آنلاین (۵۰,۰۰۰ تومان)</button>
             </div>
           </div>
@@ -170,10 +175,10 @@
 
         <!-- دسته‌بندی ابزارها -->
         <div class="category-filters" style="display: flex; gap: 0.6rem; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 0.8rem;">
-          <button class="filter-btn active" data-category="all" style="padding: 0.4rem 1rem; background: rgba(59,130,246,0.1); border: 1px solid #3b82f6; color: #3b82f6; border-radius: 20px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: all 0.3s;">همه ابزارها</button>
-          <button class="filter-btn" data-category="compression" style="padding: 0.4rem 1rem; background: none; border: 1px solid rgba(255, 255, 255, 0.08); color: #94a3b8; border-radius: 20px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: all 0.3s;">فشرده‌سازی و پروکسی</button>
-          <button class="filter-btn" data-category="index" style="padding: 0.4rem 1rem; background: none; border: 1px solid rgba(255, 255, 255, 0.08); color: #94a3b8; border-radius: 20px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: all 0.3s;">ایندکس کدبیس</button>
-          <button class="filter-btn" data-category="memory" style="padding: 0.4rem 1rem; background: none; border: 1px solid rgba(255, 255, 255, 0.08); color: #94a3b8; border-radius: 20px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: all 0.3s;">لایه‌های حافظه</button>
+          <button class="filter-btn active" data-category="all" style="padding: 0.4rem 1rem; background: rgba(59,130,246,0.1); border: 1px solid #3b82f6; color: #3b82f6; border-radius: 20px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: all 0.3s;" data-i18n="filter_all">All Tools</button>
+          <button class="filter-btn" data-category="compression" style="padding: 0.4rem 1rem; background: none; border: 1px solid rgba(255, 255, 255, 0.08); color: #94a3b8; border-radius: 20px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: all 0.3s;" data-i18n="filter_comp">Compression & Proxy</button>
+          <button class="filter-btn" data-category="index" style="padding: 0.4rem 1rem; background: none; border: 1px solid rgba(255, 255, 255, 0.08); color: #94a3b8; border-radius: 20px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: all 0.3s;" data-i18n="filter_idx">Codebase Index</button>
+          <button class="filter-btn" data-category="memory" style="padding: 0.4rem 1rem; background: none; border: 1px solid rgba(255, 255, 255, 0.08); color: #94a3b8; border-radius: 20px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: all 0.3s;" data-i18n="filter_mem">Memory Layers</button>
         </div>
 
         <div class="tools-list" id="tools-list"></div>
@@ -181,7 +186,7 @@
 
       <!-- STEP 3: config preview + apply -->
       <section class="screen" data-screen="3">
-        <h1>کانفیگ پروژه</h1>
+        <h1 data-i18n="screen3_title">Project Configuration</h1>
         <p class="muted">این فایل‌های کانفیگ ساخته می‌شوند. محتوا را ببین و سپس اعمال کن. فایل‌های موجود <b>ادغام</b> می‌شوند (نه جایگزین) و بکاپ <code>.tokensaver.bak</code> گرفته می‌شود.</p>
         <div class="impact-panel hidden" id="impact-panel"></div>
         <div class="preview-wrap">
@@ -190,7 +195,7 @@
         </div>
         <div class="reco" id="reco"></div>
         <div class="action-row-wrap" style="display:flex; gap:1rem; align-items:center; margin-bottom:1.5rem;">
-          <button class="btn btn-primary btn-lg" id="apply-btn">اعمال کانفیگ روی پروژه</button>
+          <button class="btn btn-primary btn-lg" id="apply-btn" data-i18n="apply_btn">Apply Config to Project</button>
           <button class="btn btn-ghost btn-lg" id="export-team-btn" disabled>خروجی کانفیگ تیمی (.json)</button>
         </div>
         <div class="result hidden" id="result"></div>
@@ -198,16 +203,15 @@
 
       <!-- STEP 4: Live Token Monitor -->
       <section class="screen" data-screen="4">
-        <h1>مانیتور زنده مصرف توکن</h1>
-        <p class="muted">با فعال‌سازی پروکسی سرور داخلی، مصرف توکن و مقدار هزینه‌ای که با فیلتر نویز صرفه‌جویی می‌شود را به صورت زنده مشاهده کنید.</p>
+        <h1 data-i18n="screen4_title">Live Token Monitor</h1>
+        <p class="muted" data-i18n="screen4_desc">Enable the internal proxy server to see token consumption and savings in real-time.</p>
         
         <div class="proxy-control-card">
           <div class="proxy-status-row">
-            <div class="proxy-badge off" id="proxy-status-badge">پروکسی خاموش است</div>
-            <button class="btn btn-primary" id="proxy-toggle-btn">شروع پروکسی مانیتورینگ</button>
+            <div class="proxy-badge off" id="proxy-status-badge" data-i18n="proxy_off">Proxy is OFF</div>
+            <button class="btn btn-primary" id="proxy-toggle-btn" data-i18n="proxy_toggle_start">Start Monitoring Proxy</button>
           </div>
-          <div class="proxy-address-info hidden" id="proxy-address-info">
-            پروکسی محلی فعال است روی: <code>http://127.0.0.1:9999</code>
+          <div class="proxy-address-info hidden" id="proxy-address-info" data-i18n="proxy_info">Local proxy active on: <code>http://127.0.0.1:9999</code>
           </div>
           
           <hr class="card-hr" style="border: none; border-top: 1px solid var(--border); margin: 1.2rem 0;">
@@ -220,7 +224,7 @@
             </div>
             <div class="budget-inputs-row" style="display: flex; gap: 1rem; margin-top: 0.8rem;">
               <div class="budget-field" style="flex: 1;">
-                <span class="label-small" style="display: block; margin-bottom: 0.35rem;">حداکثر توکن ورودی در هر درخواست:</span>
+                <span class="label-small" style="display: block; margin-bottom: 0.35rem;" data-i18n="budget_limit">Max input tokens per request:</span>
                 <input type="number" id="budget-tokens-limit" class="field" style="width: 100%; padding: 0.5rem 0.8rem; font-size: 0.85rem;" value="100000" step="10000">
               </div>
               <div class="budget-field" style="flex: 1;">
@@ -233,21 +237,21 @@
 
         <div class="stats-grid">
           <div class="stat-box">
-            <span class="stat-label">کل درخواست‌ها</span>
+            <span class="stat-label" data-i18n="stat_req">Total Requests</span>
             <b class="stat-val" id="stat-requests">۰</b>
           </div>
           <div class="stat-box">
-            <span class="stat-label">توکن‌های پردازش‌شده</span>
+            <span class="stat-label" data-i18n="stat_tok">Processed Tokens</span>
             <b class="stat-val" id="stat-tokens">۰</b>
           </div>
           <div class="stat-box saving">
-            <span class="stat-label">توکن‌های صرفه‌جویی‌شده</span>
+            <span class="stat-label" data-i18n="stat_save">Tokens Saved</span>
             <b class="stat-val" id="stat-saved">۰</b>
           </div>
         </div>
 
         <div class="proxy-guide">
-          <h3>راهنمای تنظیم آدرس پایه در ادیتورها:</h3>
+          <h3 data-i18n="proxy_guide">Base URL Guide:</h3>
           <ul>
             <li><b>Cursor:</b> به بخش Settings -> Models -> Override OpenAI Base URL رفته و آدرس <code>http://127.0.0.1:9999/v1</code> را قرار دهید.</li>
             <li><b>Claude Code:</b> قبل از اجرای کلود کد، متغیر محیطی را تنظیم کنید: <code>export ANTHROPIC_BASE_URL=http://127.0.0.1:9999</code></li>
@@ -256,17 +260,17 @@
         </div>
 
         <div class="proxy-log-container">
-          <h3>لاگ زنده درخواست‌ها</h3>
+          <h3 data-i18n="proxy_log_title">Live Request Log</h3>
           <div class="proxy-table-wrap">
             <table class="proxy-table">
               <thead>
                 <tr>
-                  <th>زمان</th>
-                  <th>مدل</th>
-                  <th>متد / آدرس</th>
-                  <th>توکن ورودی</th>
-                  <th>توکن خروجی</th>
-                  <th>صرفه‌جویی</th>
+                  <th data-i18n="th_time">Time</th>
+                  <th data-i18n="th_model">Model</th>
+                  <th data-i18n="th_method">Method / Path</th>
+                  <th data-i18n="th_in">Tokens In</th>
+                  <th data-i18n="th_out">Tokens Out</th>
+                  <th data-i18n="th_saved">Saved</th>
                 </tr>
               </thead>
               <tbody id="proxy-log-body">
@@ -279,8 +283,8 @@
 
       <!-- nav -->
       <div class="nav">
-        <button class="btn btn-ghost" id="back-btn" disabled>قبلی</button>
-        <button class="btn btn-primary" id="next-btn" disabled>بعدی</button>
+        <button class="btn btn-ghost" id="back-btn" disabled data-i18n="nav_prev">Previous</button>
+        <button class="btn btn-primary" id="next-btn" disabled data-i18n="nav_next">Next</button>
       </div>
     </main>
   </div>
@@ -302,10 +306,10 @@
       <div class="tool-after"></div>
       <div class="tool-ui-url hidden" style="margin-top: 0.5rem; font-size: 0.8rem; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.15); padding: 0.5rem; border-radius: 6px; color: #60a5fa;"></div>
       <div class="tool-actions">
-        <button class="btn btn-primary tool-install">نصب خودکار</button>
-        <button class="btn btn-ghost tool-cancel hidden">لغو نصب</button>
-        <button class="btn btn-ghost tool-repo">صفحه پروژه</button>
-        <button class="btn btn-ghost tool-copy">کپی دستور</button>
+        <button class="btn btn-primary tool-install" data-i18n="tool_btn_install">Auto Install</button>
+        <button class="btn btn-ghost tool-cancel hidden" data-i18n="tool_btn_cancel">Cancel</button>
+        <button class="btn btn-ghost tool-repo" data-i18n="tool_btn_repo">Project Page</button>
+        <button class="btn btn-ghost tool-copy" data-i18n="tool_btn_copy">Copy Command</button>
       </div>
       <p class="tool-secnote">این دستور یک اسکریپت نصب از اینترنت اجرا می‌کند. می‌توانی قبلش با «کپی دستور» آن را بررسی کنی.</p>
       <pre class="tool-log hidden"></pre>
@@ -330,31 +334,40 @@
     <div class="modal-card auth-card">
       <div class="brand-auth" style="display: flex; align-items: center; justify-content: center; gap: 0.8rem; margin-bottom: 1.5rem;">
         <div class="brand-mark" style="width: 40px; height: 40px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.5rem; border-radius: 8px; box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);">T</div>
-        <div class="brand-name" style="font-weight: 800; font-size: 1.5rem; background: linear-gradient(to left, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Token Saver</div>
+        <div class="brand-name" style="font-weight: 800; font-size: 1.5rem; background: linear-gradient(to left, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;" data-i18n="app_title">Token Saver</div>
       </div>
-      <h2 class="modal-title" style="margin-bottom: 0.5rem;">ورود / ثبت‌نام در نرم‌افزار</h2>
-      <p class="modal-text" style="font-size: 0.82rem; color: var(--muted); margin-bottom: 2rem;">برای استفاده از Token Saver، شماره موبایل خود را وارد کرده و کد تأیید یکبار مصرف (OTP) دریافت کنید.</p>
+      <h2 class="modal-title" style="margin-bottom: 0.5rem;" data-i18n="auth_title">Login / Register</h2>
+      <p class="modal-text" id="auth-desc-text" style="font-size: 0.82rem; color: var(--muted); margin-bottom: 2rem;" data-i18n="auth_desc_otp">برای استفاده از Token Saver، شماره موبایل خود را وارد کرده و کد تأیید یکبار مصرف (OTP) دریافت کنید.</p>
       
+      <!-- Step 0: Google Auth (for non-Iran IPs / English users) -->
+      <div class="auth-step-panel hidden" id="auth-step-google" style="display: flex; flex-direction: column; gap: 1rem; align-items: center; justify-content: center; min-height: 150px;">
+        <button class="btn btn-primary" id="auth-google-btn" style="padding: 0.85rem 1.5rem; font-weight: bold; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.8rem; background: #fff; color: #1e293b; border: 1px solid #e2e8f0;">
+          <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          <span data-i18n="auth_google_btn">Sign in with Google</span>
+        </button>
+      </div>
+
       <!-- Step 1: Request OTP -->
       <div class="auth-step-panel" id="auth-step-phone" style="display: flex; flex-direction: column; gap: 1rem;">
-        <input type="text" id="auth-phone" class="field" placeholder="شماره موبایل (مثال: 09123456789)" maxlength="11" style="text-align: center; font-size: 1rem; padding: 0.7rem 1rem;">
+        <input type="text" id="auth-phone" class="field" data-i18n-ph="auth_phone_ph" placeholder="Phone Number (e.g. 09123456789)" maxlength="11" style="text-align: center; font-size: 1rem; padding: 0.7rem 1rem;">
         <input type="text" id="auth-name" class="field" placeholder="نام و نام‌خانوادگی (برای اولین ورود)" style="padding: 0.7rem 1rem;">
-        <input type="email" id="auth-email" class="field" placeholder="ایمیل (اختیاری)" style="padding: 0.7rem 1rem;">
-        <button class="btn btn-primary" id="auth-send-btn" style="padding: 0.75rem; font-weight: bold;">دریافت کد تایید</button>
+        <input type="email" id="auth-email" class="field" data-i18n-ph="auth_email_ph" placeholder="Email (optional)" style="padding: 0.7rem 1rem;">
+        <button class="btn btn-primary" id="auth-send-btn" style="padding: 0.75rem; font-weight: bold;" data-i18n="auth_send_btn">Get OTP Code</button>
       </div>
       
       <!-- Step 2: Verify OTP -->
       <div class="auth-step-panel hidden" id="auth-step-code" style="display: flex; flex-direction: column; gap: 1rem;">
         <p class="modal-text" style="font-size: 0.85rem; color: #e2e8f0; margin-bottom: 0.5rem;">کد تایید ۶ رقمی به شماره <span id="auth-target-phone" style="font-weight: bold; color: #60a5fa;"></span> ارسال شد.</p>
-        <input type="text" id="auth-code" class="field" placeholder="کد تایید ۶ رقمی" maxlength="6" style="text-align: center; letter-spacing: 4px; font-weight: bold; font-size: 1.25rem; padding: 0.7rem 1rem;">
-        <button class="btn btn-primary" id="auth-verify-btn" style="padding: 0.75rem; font-weight: bold;">تأیید و ورود</button>
-        <button class="btn btn-ghost" id="auth-change-phone-btn" style="font-size: 0.82rem; padding: 0.5rem;">تغییر شماره موبایل</button>
+        <input type="text" id="auth-code" class="field" data-i18n-ph="auth_code_ph" placeholder="6-digit code" maxlength="6" style="text-align: center; letter-spacing: 4px; font-weight: bold; font-size: 1.25rem; padding: 0.7rem 1rem;">
+        <button class="btn btn-primary" id="auth-verify-btn" style="padding: 0.75rem; font-weight: bold;" data-i18n="auth_verify_btn">Verify & Login</button>
+        <button class="btn btn-ghost" id="auth-change-phone-btn" style="font-size: 0.82rem; padding: 0.5rem;" data-i18n="auth_change_phone">Change Phone Number</button>
       </div>
       
       <div class="auth-status-msg" id="auth-status-msg" style="margin-top: 1rem; font-size: 0.85rem; min-height: 1.2em; color: #ef4444;"></div>
     </div>
   </div>
 
+  <script src="i18n.js"></script>
   <script src="renderer.js"></script>
 </body>
 </html>

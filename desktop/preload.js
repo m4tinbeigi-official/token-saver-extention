@@ -51,6 +51,7 @@ contextBridge.exposeInMainWorld('tokensaver', {
   // SMS OTP Auth & sync
   sendOtp: (phoneNumber) => ipcRenderer.invoke('send-otp', { phoneNumber }),
   verifyOtp: (phoneNumber, code, name, email) => ipcRenderer.invoke('verify-otp', { phoneNumber, code, name, email }),
+  openGoogleAuth: () => ipcRenderer.invoke('open-google-auth'),
   checkAuthStatus: (token) => ipcRenderer.invoke('check-auth-status', token),
   fetchNotifications: (token) => ipcRenderer.invoke('fetch-notifications', token),
   syncProject: (token, projectPath, name, savedTokens, savedPercent) =>

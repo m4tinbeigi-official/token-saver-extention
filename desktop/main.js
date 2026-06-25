@@ -558,6 +558,50 @@ ipcMain.handle('verify-otp', async (_e, { phoneNumber, code, name, email }) => {
   return serverRequest('/api/auth/verify-otp', 'POST', { phoneNumber, code, name, email });
 });
 
+ipcMain.handle('open-google-auth', async () => {
+  return new Promise(async (resolve) => {
+    try {
+      const res = await serverRequest('/api/auth/google/url', 'GET');
+      if (!res.ok || !res.url) {
+        resolve({ ok: false, error: res.error || 'Failed to get auth url' });
+        return;
+      }
+      
+      const authWindow = new BrowserWindow({
+        width: 500,
+        height: 650,
+        webPreferences: { nodeIntegration: false, contextIsolation: true },
+        autoHideMenuBar: true
+      });
+      
+      authWindow.webContents.on('will-navigate', (event, url) => {
+        if (url.startsWith('tokensaver://auth')) {
+          event.preventDefault();
+          const token = new URL(url).searchParams.get('token');
+          authWindow.close();
+          resolve({ ok: true, token });
+        }
+      });
+      
+      authWindow.webContents.on('did-navigate', (event, url) => {
+        if (url.startsWith('tokensaver://auth')) {
+          const token = new URL(url).searchParams.get('token');
+          authWindow.close();
+          resolve({ ok: true, token });
+        }
+      });
+      
+      authWindow.on('closed', () => {
+        resolve({ ok: false, error: 'User closed window' });
+      });
+      
+      authWindow.loadURL(res.url);
+    } catch (err) {
+      resolve({ ok: false, error: err.message });
+    }
+  });
+});
+
 ipcMain.handle('check-auth-status', async (_e, token) => {
   return serverRequest('/api/auth/status', 'GET', null, token);
 });
