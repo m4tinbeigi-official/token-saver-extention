@@ -21,7 +21,9 @@
     <!-- Mermaid script for rendering diagrams -->
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <script>
-      mermaid.initialize({ startOnLoad: true, theme: 'dark', themeVariables: { fontFamily: 'Vazirmatn' } });
+      if (window.mermaid) {
+        mermaid.initialize({ startOnLoad: false, theme: 'dark', themeVariables: { fontFamily: 'Vazirmatn' } });
+      }
     </script>
 </head>
 <body>
@@ -63,7 +65,7 @@
 
         <section class="section">
             <div class="container">
-                <div class="glass-card prose fade-in-up delay-1">
+                <div class="glass-card prose">
                     <h1>فهرست به‌روز ابزارهای متن‌باز برای کاهش مصرف توکن و هزینه در کار با مدل‌های ابری</h1>
 <h2>خلاصه اجرایی</h2>
 <p>اگر هدف اصلی شما <strong>کم‌کردن مستقیم قبض API</strong> باشد، ابزارها عملاً به چهار خانواده تقسیم می‌شوند. خانواده اول، <strong>proxy/compactor</strong>ها هستند که قبل از رسیدن داده به مدل، خروجی‌های پرحجم، لاگ‌ها، JSON، diff و RAG chunkها را فشرده می‌کنند؛ در این دسته، <strong>Headroom، RTK، snip، imptokens، Claw Compactor، Toonify MCP</strong> و تا حدی <strong>Token Optimizer</strong> بیشترین اثر را دارند. خانواده دوم، <strong>code graph / code intelligence</strong>ها هستند که به‌جای فرستادن فایل‌به‌فایل به مدل، یک گراف یا ایندکس ساختاری می‌سازند و فقط پاسخ ساختاری لازم را برمی‌گردانند؛ در این دسته <strong>codebase-memory-mcp، CodeGraph، Serena، jCodeMunch، code-review-graph، CodeGraphContext</strong> مهم‌ترین‌ها هستند. خانواده سوم، <strong>repo-to-prompt / repo digest</strong>ها مثل <strong>Repomix</strong> و <strong>Gitingest</strong> هستند که الزاماً «فشرده‌ساز» نیستند، اما ورودی را prompt-friendly و اندازه‌پذیر می‌کنند. خانواده چهارم، <strong>memory / long-term memory</strong>ها مثل <strong>Mem0، Graphiti، Cognee، projectmem، agentmemory، Engram</strong> هستند که به‌جای حمل کل تاریخچه، حافظه قابل‌بازیابی می‌سازند و از این راه هزینه را کم می‌کنند. </p>
@@ -516,7 +518,7 @@ bar [95,95,90,60,60,60,37]
 
     <script src="script.js"></script>
     <script>
-      // Automatically convert mermaid code blocks to actual mermaid divs
+      // Convert mermaid code blocks to mermaid divs, then render them
       document.addEventListener('DOMContentLoaded', () => {
         const blocks = document.querySelectorAll('pre code.language-mermaid');
         blocks.forEach(block => {
@@ -526,6 +528,9 @@ bar [95,95,90,60,60,60,37]
           mermaidDiv.textContent = block.textContent;
           pre.replaceWith(mermaidDiv);
         });
+        if (window.mermaid && document.querySelector('.mermaid')) {
+          try { mermaid.run({ querySelector: '.mermaid' }); } catch (e) { console.warn('mermaid render skipped:', e); }
+        }
       });
     </script>
 </body>

@@ -34,7 +34,9 @@ const template = `<!DOCTYPE html>
     <!-- Mermaid script for rendering diagrams -->
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <script>
-      mermaid.initialize({ startOnLoad: true, theme: 'dark', themeVariables: { fontFamily: 'Vazirmatn' } });
+      if (window.mermaid) {
+        mermaid.initialize({ startOnLoad: false, theme: 'dark', themeVariables: { fontFamily: 'Vazirmatn' } });
+      }
     </script>
 </head>
 <body>
@@ -76,7 +78,7 @@ const template = `<!DOCTYPE html>
 
         <section class="section">
             <div class="container">
-                <div class="glass-card prose fade-in-up delay-1">
+                <div class="glass-card prose">
                     ${htmlContent}
                 </div>
             </div>
@@ -100,7 +102,7 @@ const template = `<!DOCTYPE html>
 
     <script src="script.js"></script>
     <script>
-      // Automatically convert mermaid code blocks to actual mermaid divs
+      // Convert mermaid code blocks to mermaid divs, then render them
       document.addEventListener('DOMContentLoaded', () => {
         const blocks = document.querySelectorAll('pre code.language-mermaid');
         blocks.forEach(block => {
@@ -110,6 +112,9 @@ const template = `<!DOCTYPE html>
           mermaidDiv.textContent = block.textContent;
           pre.replaceWith(mermaidDiv);
         });
+        if (window.mermaid && document.querySelector('.mermaid')) {
+          try { mermaid.run({ querySelector: '.mermaid' }); } catch (e) { console.warn('mermaid render skipped:', e); }
+        }
       });
     </script>
 </body>
