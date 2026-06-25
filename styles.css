@@ -1298,3 +1298,107 @@ h1, h2, h3, h4 {
     .section { padding: 60px 0; }
     .term-line { flex-direction: column; gap: 4px; }
 }
+
+/* Typography for Tutorial Markdown Content */
+.prose {
+    padding: 3rem;
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+    color: var(--text-primary);
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.prose h1 { font-size: 2.2rem; }
+.prose h2 {
+    font-size: 1.8rem;
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 0.5rem;
+}
+
+.prose p {
+    margin-bottom: 1.5rem;
+    color: var(--text-secondary);
+}
+
+.prose ul, .prose ol {
+    margin-bottom: 1.5rem;
+    margin-right: 2rem;
+    color: var(--text-secondary);
+}
+
+.prose li {
+    margin-bottom: 0.5rem;
+}
+
+.prose table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2rem;
+    overflow-x: auto;
+    display: block;
+}
+
+.prose th, .prose td {
+    padding: 1rem;
+    border: 1px solid var(--card-border);
+    text-align: right;
+    color: var(--text-secondary);
+}
+
+.prose th {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.prose strong {
+    color: var(--text-primary);
+}
+
+.prose pre {
+    background: #000;
+    padding: 1.5rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--card-border);
+}
+
+.prose code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+    color: var(--accent-blue);
+}
+
+.prose a {
+    color: var(--accent-blue);
+    text-decoration: underline;
+}
+
+.tutorial-hero {
+    padding: 8rem 0 4rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Mermaid graph styles */
+.mermaid {
+    margin: 2rem 0;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    overflow-x: auto;
+    text-align: center;
+}
+
+/* Mobile responsive for prose */
+@media (max-width: 768px) {
+    .prose {
+        padding: 1.5rem;
+    }
+}
+

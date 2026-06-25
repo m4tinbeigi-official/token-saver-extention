@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آموزش Token Saver - کاهش توکن‌ها رایگان</title>
+    <meta name="description" content="آموزش جامع متن‌باز برای کاهش توکن و هزینه در کار با مدل‌های ابری.">
+    <meta name="theme-color" content="#050508">
+
+    <!-- Favicon (inline SVG) -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233b82f6'/%3E%3Cstop offset='1' stop-color='%2310b981'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='%23050508'/%3E%3Cpath d='M16 5l8 4v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V9l8-4z' fill='none' stroke='url(%23g)' stroke-width='2'/%3E%3Ctext x='16' y='21' font-size='11' font-family='monospace' font-weight='bold' fill='url(%23g)' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
+
+    <!-- Persian webfont -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Mermaid script for rendering diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({ startOnLoad: true, theme: 'dark', themeVariables: { fontFamily: 'Vazirmatn' } });
+    </script>
+</head>
+<body>
+    <div class="scroll-progress" id="scroll-progress"></div>
+    <header class="header" id="header" style="background: rgba(5,5,8,0.9); backdrop-filter: blur(12px);">
+        <div class="container header-container">
+            <div class="logo">
+                <a href="index.html">Token Saver</a>
+            </div>
+            <nav class="nav" id="nav">
+                <ul class="nav-list">
+                    <li><a href="index.html#problem">مشکل</a></li>
+                    <li><a href="index.html#solution">راهکار</a></li>
+                    <li><a href="index.html#services">خدمات</a></li>
+                    <li><a href="index.html#pricing">قیمت</a></li>
+                    <li><a href="tutorial.html" class="active">آموزش رایگان</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <a href="index.html#contact" class="btn btn-primary">درخواست Token Audit</a>
+                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="منو">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="section tutorial-hero">
+            <div class="hero-bg-grid"></div>
+            <div class="hero-radial-glow"></div>
+            <div class="container text-center fade-in-up">
+                <h1 class="hero-title">آموزش <span>جامع و رایگان</span></h1>
+                <p class="hero-subtitle mb-8">خودتان معماری بهینه را پیاده‌سازی کنید. نیازی به پرداخت هزینه نیست اگر دانش فنی دارید.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <div class="glass-card prose fade-in-up delay-1">
+                    <h1>فهرست به‌روز ابزارهای متن‌باز برای کاهش مصرف توکن و هزینه در کار با مدل‌های ابری</h1>
+<h2>خلاصه اجرایی</h2>
+<p>اگر هدف اصلی شما <strong>کم‌کردن مستقیم قبض API</strong> باشد، ابزارها عملاً به چهار خانواده تقسیم می‌شوند. خانواده اول، <strong>proxy/compactor</strong>ها هستند که قبل از رسیدن داده به مدل، خروجی‌های پرحجم، لاگ‌ها، JSON، diff و RAG chunkها را فشرده می‌کنند؛ در این دسته، <strong>Headroom، RTK، snip، imptokens، Claw Compactor، Toonify MCP</strong> و تا حدی <strong>Token Optimizer</strong> بیشترین اثر را دارند. خانواده دوم، <strong>code graph / code intelligence</strong>ها هستند که به‌جای فرستادن فایل‌به‌فایل به مدل، یک گراف یا ایندکس ساختاری می‌سازند و فقط پاسخ ساختاری لازم را برمی‌گردانند؛ در این دسته <strong>codebase-memory-mcp، CodeGraph، Serena، jCodeMunch، code-review-graph، CodeGraphContext</strong> مهم‌ترین‌ها هستند. خانواده سوم، <strong>repo-to-prompt / repo digest</strong>ها مثل <strong>Repomix</strong> و <strong>Gitingest</strong> هستند که الزاماً «فشرده‌ساز» نیستند، اما ورودی را prompt-friendly و اندازه‌پذیر می‌کنند. خانواده چهارم، <strong>memory / long-term memory</strong>ها مثل <strong>Mem0، Graphiti، Cognee، projectmem، agentmemory، Engram</strong> هستند که به‌جای حمل کل تاریخچه، حافظه قابل‌بازیابی می‌سازند و از این راه هزینه را کم می‌کنند. </p>
+<p>از نظر <strong>قدرت عددی کاهش توکن</strong>، قوی‌ترین اعداد رسمیِ قابل‌اتکا در این مرور به این‌ها تعلق دارد: <strong>LLMLingua</strong> با «تا 20× فشرده‌سازی» در مقاله اصلی، <strong>codebase-memory-mcp</strong> با «10× توکن کمتر و 2.1× ابزار کمتر» روی 31 مخزن، <strong>jCodeMunch</strong> با «95%+» و بنچمارک متوسط 95% روی 15 تسک/3 مخزن، <strong>Headroom</strong> با ادعای 60–95%، <strong>RTK</strong> و <strong>snip</strong> با 60–90%، و <strong>Mem0</strong> با بیش از 90% صرفه‌جویی در token cost در مقاله‌اش. در مقابل، ابزارهایی مثل <strong>Serena، Context7، Repomix، Gitingest، Cognee، Engram</strong> معمولاً ارزششان بیشتر در «کاهش context غیرضروری» و «بهبود بازیابی» است تا یک درصد ساده و جهان‌شمولِ کاهش توکن. </p>
+<p>از نظر <strong>بازده عملیاتی</strong>، بهترین نتایج معمولاً از <strong>ترکیب سه لایه</strong> به‌دست می‌آید: یک shell/output compactor برای لاگ و تست، یک code graph برای حذف file-crawl، و یک memory layer برای حذف re-explaining بین سشن‌ها. اگر فقط یکی را بخواهید، انتخاب به workload بستگی دارد: برای <strong>coding agentها روی ریپوی متوسط/بزرگ</strong>، <code>codebase-memory-mcp</code> یا <code>CodeGraph</code> بیشترین ROI را دارند؛ برای <strong>CLI-heavy workflows</strong>، <code>RTK</code> یا <code>snip</code> سریع‌ترین نصب و سریع‌ترین برگشت سرمایه را می‌دهند؛ برای <strong>RAG / prompt-heavy apps</strong>، <code>Headroom</code> و <code>LLMLingua</code> گزینه‌های جدی‌ترند؛ و برای <strong>cross-session agents</strong>، <code>Mem0</code> یا <code>agentmemory</code> معمولاً از خلاصه‌سازی naïve مقرون‌به‌صرفه‌تر می‌شوند. </p>
+<h2>نقشه مفهومی و روش ارزیابی</h2>
+<p>در این گزارش، «<strong>سادگی راه‌اندازی</strong>» را از 1 تا 5 این‌طور امتیاز داده‌ام: <strong>5</strong> یعنی نصب یک‌مرحله‌ای، بدون سرویس جانبی، و با دستورهای روشن؛ <strong>3</strong> یعنی نصب متوسط با چند prerequisite یا پیکربندی MCP/DB/SDK؛ <strong>1</strong> یعنی راه‌اندازی سنگین، چند سرویسه، یا نیازمند زیرساخت جداگانه. «<strong>اثر</strong>» هم از 1 تا 5 بر اساس ترکیب <strong>بلوغ ابزار، وسعت پوشش، و شدت کاهش توکن/هزینه</strong> داده شده است: <strong>5</strong> برای ابزارهایی با کاهش درشت یا مزیت ساختاری تکرارشونده، <strong>3</strong> برای بهبودهای معنادار ولی محدودتر، و <strong>1</strong> برای ابزارهای حاشیه‌ای یا صرفاً کمکی. هرجا عدد بنچمارک رسمی پیدا نشده، مقدار را دقیقاً <code>unspecified</code> گذاشته‌ام. </p>
+<pre><code class="language-mermaid">flowchart LR
+    A[کد/لاگ/JSON/RAG/تاریخچه گفتگو] --&gt; B{کدام لایه؟}
+    B --&gt; C[Proxy یا Compactor]
+    B --&gt; D[Code Index یا Graph]
+    B --&gt; E[Repo-to-Prompt Digest]
+    B --&gt; F[Long-term Memory]
+    C --&gt; G[ورودی فشرده‌تر]
+    D --&gt; G
+    E --&gt; G
+    F --&gt; G
+    G --&gt; H[OpenAI / Claude / Gemini / Bedrock / ...]
+    H --&gt; I[پاسخ]
+    I --&gt; F
+</code></pre>
+<p>این نمودار عمداً ساده‌سازی شده است: در عمل، <strong>proxyها</strong> بیشتر روی token volume خام اثر می‌گذارند، <strong>graph/index</strong>ها روی حذف file-by-file exploration، و <strong>memory layer</strong>ها روی حذف تکرار context بین سشن‌ها. همین تفاوت دلیل اصلی این است که بعضی ابزارها روی «همه workloadها» عالی نیستند اما روی workload درست، اثر بسیار بیشتری از یک فشرده‌ساز عمومی می‌گذارند. </p>
+<h2>ابزارهای مستقیم فشرده‌سازی و پروکسی</h2>
+<p>جدول زیر ابزارهایی را پوشش می‌دهد که <strong>به‌صورت مستقیم</strong> حجم context ورودی به مدل را کم می‌کنند؛ یعنی قبل از ارسال به API یا قبل از ورود خروجی ابزارها به context window، یک مرحله فشرده‌سازی/فیلتر اعمال می‌کنند.</p>
+<table>
+<thead>
+<tr>
+<th>پروژه</th>
+<th>دسته</th>
+<th>شرح کوتاه</th>
+<th>پلتفرم‌ها / LLMهای هدف</th>
+<th>کاهش توکن با منبع</th>
+<th>سادگی راه‌اندازی</th>
+<th>اثر</th>
+<th>محدودیت‌ها و نکات امنیت/پرایوسی</th>
+<th>repo / docs</th>
+<th>آخرین release</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Headroom</strong></td>
+<td>compression/proxy</td>
+<td>کتابخانه + proxy + MCP؛ خروجی ابزار، لاگ، فایل، RAG chunk و history را قبل از رسیدن به LLM فشرده می‌کند.</td>
+<td>Anthropic، OpenAI، Bedrock، هر کلاینت OpenAI-compatible؛ Claude Code، Codex، Cursor، Aider، Copilot CLI، OpenClaw، OpenCode و…</td>
+<td><strong>60–95%</strong> کمتر طبق README.</td>
+<td><strong>4/5</strong> — <code>pip install &quot;headroom-ai[all]&quot;</code> یا npm/docker؛ Python 3.10+؛ برای compression کامل ممکن است ONNX Runtime و مدل Hugging Face دانلود شود.</td>
+<td><strong>5/5</strong></td>
+<td>روی ماشین محلی اجرا می‌شود، اما برای بعضی قابلیت‌ها runtime asset از <code>cdn.pyke.io</code> و مدل از Hugging Face دریافت می‌شود؛ در محیط‌های corp/TLS سخت‌گیر باید تنظیمات CA/TLS را مدیریت کنید.</td>
+<td>repo/docs در README.</td>
+<td><strong>2026-06-22</strong> (<code>0.27.0</code>).</td>
+</tr>
+<tr>
+<td><strong>RTK</strong></td>
+<td>shell-output compactor / proxy</td>
+<td>proxy سطح shell برای بازنویسی و فیلتر خروجی دستورها؛ تمرکز روی workflowهای توسعه.</td>
+<td>Claude Code، Copilot، Cursor، Gemini CLI، Codex، Windsurf، Cline، OpenCode، Hermes، Kiro، Antigravity و…</td>
+<td><strong>60–90%</strong> روی command outputهای رایج.</td>
+<td><strong>5/5</strong> — Homebrew / install script / Cargo / binary؛ تک‌باینری Rust، صفر dependency.</td>
+<td><strong>4/5</strong></td>
+<td>روی Windows hook خودکار کامل ندارد و به حالت instruction fallback می‌رود؛ telemetry به‌صورت <strong>opt-in</strong> است و پیش‌فرض خاموش.</td>
+<td>repo/docs.</td>
+<td><strong>2026-06-24</strong> پیرامون نسخه <code>0.28.2</code> در README.</td>
+</tr>
+<tr>
+<td><strong>snip</strong></td>
+<td>shell-output compactor / proxy</td>
+<td>فیلتر YAMLمحور برای shell output؛ ایده RTK را با موتور Go و DSL داده‌محور پیاده می‌کند.</td>
+<td>Claude Code، Cursor، Copilot، Gemini CLI، Windsurf، Cline، Codex، Kilo Code، Antigravity، Aider و هر ابزار shell-based.</td>
+<td><strong>60–90%</strong> به‌صورت عمومی؛ نمونه رسمی: <code>go test</code> از 689 توکن به 16 توکن یعنی <strong>97.7%</strong> کمتر.</td>
+<td><strong>5/5</strong> — install script / Homebrew / <code>go install</code>؛ بعد <code>snip init</code>.</td>
+<td><strong>4/5</strong></td>
+<td>فیلترها YAML هستند و graceful degradation دارد، اما اگر ruleهای محلی خیلی aggressive شوند می‌توانند سیگنال مهم را حذف کنند؛ این ریسک ذاتی همه compactorهای rule-based است.</td>
+<td>repo/wiki docs.</td>
+<td><strong>2026-06-22</strong> (<code>v0.19.0</code>).</td>
+</tr>
+<tr>
+<td><strong>imptokens</strong></td>
+<td>compression library / local preprocessor</td>
+<td>preprocessor عمومیِ متن قبل از هر LLM؛ دو موتور دارد: sentence mode بدون مدل و logprob mode با مدل محلی کوچک روی <code>llama.cpp</code>.</td>
+<td>Claude، GPT-4/5، Gemini، Ollama محلی، هر backend پشت LiteLLM.</td>
+<td>sentence و logprob هر دو <strong>30–70%</strong> را هدف می‌گیرند؛ تنظیم پیش‌فرض پیشنهادی در benchmark: <strong>37.2% کاهش توکن با 95% حفظ key-fact</strong>.</td>
+<td><strong>4/5</strong> — CLI-first؛ sentence mode تقریباً zero-dependency، logprob mode دانلود ~700MB مدل محلی می‌خواهد.</td>
+<td><strong>4/5</strong></td>
+<td>کاملاً محلی اجرا می‌شود؛ برای mode اصلی باید مدل محلی داشته باشید و سرعت/کیفیت به سخت‌افزار وابسته است. مزیت بزرگش همین local-first بودن روی Apple Silicon/CUDA/Vulkan/CPU است.</td>
+<td>repo.</td>
+<td><strong>2026-03-05</strong> (<code>v0.1.0</code>).</td>
+</tr>
+<tr>
+<td><strong>Claw Compactor</strong></td>
+<td>compression engine / OpenCompress ecosystem</td>
+<td>موتور deterministic چندمرحله‌ای برای فشرده‌سازی LLM context؛ تمرکز روی کد، JSON و routing محتوایی.</td>
+<td>به‌صورت عمومی برای agent workspaceها؛ جزء هسته اکوسیستم OpenCompress/OpenClaw در منابع رسمی پیدا شد.</td>
+<td>README فعلی: <strong>15–82%</strong> بسته به نوع محتوا؛ متادیتای استنادی قدیمی‌تر حتی <strong>50–97%</strong> را ذکر کرده، بنابراین باید این اعداد را heterogeneous دانست.</td>
+<td><strong>3/5</strong> — ابزار Python با تست زیاد، ولی معماری و pipeline آن نسبت به RTK/snip پیچیده‌تر است.</td>
+<td><strong>3/5</strong></td>
+<td>deterministic و «بدون هزینه inference مدل» تبلیغ می‌شود؛ با این حال بنچمارک‌هایش ناهمگن‌اند و باید قبل از production روی دیتای خودتان validate شود.</td>
+<td>repo/docs.</td>
+<td><strong>2026-03-18</strong> (<code>v7.0.0</code>)؛ metadata قدیمی‌تر <code>2026-03-09</code> برای <code>1.0.0</code> هم وجود دارد.</td>
+</tr>
+<tr>
+<td><strong>Toonify MCP</strong></td>
+<td>context-compression plugin</td>
+<td>پلاگین/سرور MCP برای Claude Code که JSON/CSV/YAML/log/stack trace/source file را قبل از ورود به context trim می‌کند.</td>
+<td>Claude Code plugin یا MCP server on-demand.</td>
+<td>READMEهای ترجمه‌شده پروژه <strong>30–65%</strong> کاهش استفاده از Claude API tokens را مطرح می‌کنند.</td>
+<td><strong>4/5</strong> — <code>npm install</code>, build و <code>toonify-mcp setup</code>; برای Claude Code plug-and-play است.</td>
+<td><strong>3/5</strong></td>
+<td>scope آن بیشتر روی <strong>tool output</strong> است، نه روی کل معماری context. همچنین automatic background behavior ممکن است روی debugging بعضی edge caseها visibility را کم کند.</td>
+<td>repo/site.</td>
+<td><strong>unspecified</strong></td>
+</tr>
+<tr>
+<td><strong>Token Optimizer</strong></td>
+<td>multi-surface token optimizer</td>
+<td>فقط output compressor نیست؛ روی 8 سطح اتلاف context کار می‌کند: command output، re-readها، configs، memory، compaction و model routing.</td>
+<td>Claude Code، VS Code، Codex، OpenClaw، OpenCode، Hermes، Copilot؛ Cursor/Windsurf در roadmap.</td>
+<td>target رسمی: <strong>5–15%</strong> context recovery؛ تا <strong>25%+</strong> با autocompact management.</td>
+<td><strong>4/5</strong> — plugin/installer محور؛ یک‌بار <code>/token-optimizer</code> اجرا می‌شود و بعد خودکار کار می‌کند.</td>
+<td><strong>3/5</strong></td>
+<td>مزیتش cache-safe و zero-telemetry بودن است، اما numbers آن به‌شدت workflow-dependent است و مثل RTK/headroom یک درصد جهان‌شمول مستقیم برای همه promptها نمی‌دهد.</td>
+<td>repo/site.</td>
+<td><strong>حداقل 2026-06</strong> در releaseهای v5.x روی issue/repo دیده می‌شود؛ تاریخ دقیق latest در این مرور به‌صورت مستقیم freeze نشد.</td>
+</tr>
+<tr>
+<td><strong>LLMLingua</strong></td>
+<td>research-grade prompt compression</td>
+<td>فشرده‌سازی prompt با یک مدل کوچک برای حذف tokenهای کم‌اهمیت، قابل‌استفاده روی black-box LLMها.</td>
+<td>مستقل از provider؛ مناسب OpenAI/Anthropic/Gemini/Bedrock چون روی ورودی کار می‌کند.</td>
+<td>مقاله اصلی: <strong>تا 20× compression</strong> با افت کم عملکرد.</td>
+<td><strong>3/5</strong> — بیشتر library/research artifact است تا ابزار plug-and-play برابر با RTK/snIP.</td>
+<td><strong>4/5</strong></td>
+<td>quality به task بستگی دارد؛ انتقال‌پذیری compression به معماری‌های غیر autoregressive هم یکنواخت نیست.</td>
+<td>repo/paper.</td>
+<td><strong>2024-04-09</strong> (<code>v0.2.0</code> release surfaced).</td>
+</tr>
+<tr>
+<td><strong>LLMLingua-2</strong></td>
+<td>research-grade prompt compression</td>
+<td>نسخه task-agnostic با data distillation از GPT-4 و encoder سبک‌تر برای compression faithfulتر.</td>
+<td>مستقل از provider؛ paper روی LLMهای مختلف ارزیابی شده است.</td>
+<td><strong>2× تا 5× compression</strong>، <strong>1.6× تا 2.9×</strong> سرعت end-to-end، و <strong>3× تا 6×</strong> سریع‌تر از روش‌های قبلی.</td>
+<td><strong>3/5</strong></td>
+<td><strong>4/5</strong></td>
+<td>هنوز library/research-first است و مثل هر prompt compressor نیازمند ارزیابی task-specific است.</td>
+<td>repo/paper.</td>
+<td>با همان repo LLMLingua منتشر می‌شود؛ release جداگانه واضحی در منابع رسمی این مرور پیدا نشد.</td>
+</tr>
+</tbody></table>
+<pre><code class="language-mermaid">xychart-beta
+title &quot;مقایسه نمایه‌ای درصد کاهش توکن&quot;
+x-axis [&quot;LLMLingua&quot;,&quot;jCodeMunch&quot;,&quot;Codebase-Memory&quot;,&quot;Headroom&quot;,&quot;RTK&quot;,&quot;snip&quot;,&quot;imptokens&quot;]
+y-axis &quot;درصد&quot; 0 --&gt; 100
+bar [95,95,90,60,60,60,37]
+</code></pre>
+<p>این نمودار <strong>مقایسه‌ی نرمال‌سازی‌شده و محافظه‌کارانه</strong> است، نه benchmark برابر-با-برابر. برای ابزارهای بازه‌ای، کمینه یا عدد canonical‌تر را گذاشته‌ام؛ برای مثال LLMLingua از 20× به‌صورت تقریبی معادل 95% reduction در نظر گرفته شده، codebase-memory از 10× کمتر شدن توکن معادل 90%، و imptokens از تنظیم پیشنهادی رسمی 37.2% استفاده شده است. </p>
+<h2>ابزارهای codebase index و repo-to-prompt</h2>
+<p>این گروه معمولاً وقتی بیشترین ارزش را دارد که عامل هوشمند شما روی <strong>مخزن‌های واقعی، چندفایلی، و پر از dependency</strong> کار می‌کند. اینجا مسئله اصلی «فشرده‌کردن متن» نیست، بلکه <strong>جلوگیری از exploration پرهزینه</strong> است.</p>
+<table>
+<thead>
+<tr>
+<th>پروژه</th>
+<th>دسته</th>
+<th>شرح کوتاه</th>
+<th>پلتفرم‌ها / LLMهای هدف</th>
+<th>کاهش توکن با منبع</th>
+<th>سادگی راه‌اندازی</th>
+<th>اثر</th>
+<th>محدودیت‌ها و نکات امنیت/پرایوسی</th>
+<th>repo / docs</th>
+<th>آخرین release</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>codebase-memory-mcp</strong></td>
+<td>codebase index/graph</td>
+<td>knowledge graph پایدار مبتنی بر Tree-sitter + MCP؛ پرسش‌های ساختاری را بدون file-crawl پاسخ می‌دهد.</td>
+<td>Claude Code، Codex CLI، Gemini CLI، Zed، OpenCode، Antigravity، Aider، KiloCode، VS Code، OpenClaw، Kiro و هر MCP client.</td>
+<td>paper: <strong>10× توکن کمتر</strong> و <strong>2.1× ابزار کمتر</strong> روی 31 repo؛ headline repo حتی <strong>99% fewer tokens</strong> را هم بازاریابی می‌کند، ولی عدد paper اتکاپذیرتر است.</td>
+<td><strong>5/5</strong> — single static binary، zero dependencies، install script و حتی npm/pip/go distribution.</td>
+<td><strong>5/5</strong></td>
+<td>data کاملاً local می‌ماند؛ امنیت supply-chain نسبتاً خوب مستندسازی شده: checksums، Sigstore، SLSA، VirusTotal scan.</td>
+<td>repo/site/paper.</td>
+<td><strong>2026-06-12</strong> (<code>v0.8.1</code>).</td>
+</tr>
+<tr>
+<td><strong>CodeGraph</strong></td>
+<td>codebase index/graph</td>
+<td>گراف دانش کد local-first با auto-sync و MCP؛ agent را از <code>grep/read</code> پی‌درپی خلاص می‌کند.</td>
+<td>Claude Code، Cursor، Codex CLI، OpenCode، Hermes Agent، Gemini CLI، Antigravity، Kiro.</td>
+<td>benchmark رسمی روی 7 repo: <strong>58% ابزار کمتر</strong>، <strong>22% سریع‌تر</strong>، و بسته به repo <strong>23% تا 64% توکن کمتر</strong>.</td>
+<td><strong>4/5</strong> — <code>npx @colbymchenry/codegraph</code> و بعد <code>codegraph init</code>.</td>
+<td><strong>5/5</strong></td>
+<td>100% local و بدون API key؛ اما payoff مالی روی مخزن‌های کوچک کمتر از payoff سرعت/precision است.</td>
+<td>repo/docs.</td>
+<td><strong>2026-06-24</strong> (<code>v1.1.1</code>).</td>
+</tr>
+<tr>
+<td><strong>Serena</strong></td>
+<td>codebase index/semantic IDE tools</td>
+<td>semantic retrieval/edit/refactor/debugging در سطح symbol؛ از LSP یا JetBrains backend استفاده می‌کند.</td>
+<td>هر MCP client/LLM؛ Claude Code، Codex، OpenCode، Gemini CLI، VS Code/Cursor/JetBrains assistants و…</td>
+<td><strong>unspecified</strong>؛ خود پروژه بیشتر روی «semantic precision» و «ابزار IDE-level» تأکید دارد تا درصد reduction.</td>
+<td><strong>4/5</strong> — فقط <code>uv</code> prerequisite دارد؛ <code>uv tool install -p 3.13 serena-agent</code> و <code>serena init</code>. برای بعضی زبان‌ها ممکن است LSPهای اضافه لازم شوند.</td>
+<td><strong>4/5</strong></td>
+<td>versionهای marketplace را خود پروژه توصیه نمی‌کند؛ backend زبان‌-سرور یا JetBrains plugin dependency اضافه ایجاد می‌کند.</td>
+<td>repo/docs.</td>
+<td><strong>2026-05-26</strong> (<code>v1.5.3</code>).</td>
+</tr>
+<tr>
+<td><strong>jCodeMunch MCP</strong></td>
+<td>codebase index/graph</td>
+<td>retrieval نمادمحور برای کد GitHub via tree-sitter AST.</td>
+<td>Claude Code، Cursor و هر MCP client؛ عمدتاً روی GitHub source retrieval.</td>
+<td>benchmark رسمی repo: <strong>95% average token reduction</strong> روی 15 task / 3 repo، با <strong>99.8% peak</strong>.</td>
+<td><strong>4/5</strong> — package/releaseهای آماده دارد، ولی نسبت به ابزار local graph-only کمی GitHub-centricتر است.</td>
+<td><strong>4/5</strong></td>
+<td>چون retrieval آن GitHubمحور است، برای repoهای کاملاً local یا air-gapped مزیتش کمتر از graphهای local-first است.</td>
+<td>repo/site.</td>
+<td><strong>2026-06-24</strong> (<code>v1.108.82</code>).</td>
+</tr>
+<tr>
+<td><strong>code-review-graph</strong></td>
+<td>codebase index/graph</td>
+<td>persistent map برای review/workflowهای large-repo؛ blast radius و minimal review context می‌سازد.</td>
+<td>Codex، Claude Code، Cursor، Windsurf، Zed، Continue، OpenCode، Antigravity، Gemini CLI، Qwen، Qoder، Kiro، Copilot و Copilot CLI.</td>
+<td>benchmarkهای رسمی دارد ولی یک درصدِ واحدِ headline در snippetهای بازیابی‌شده روشن نبود؛ <strong>unspecified</strong>.</td>
+<td><strong>4/5</strong> — <code>pip install code-review-graph &amp;&amp; code-review-graph install</code>؛ Python 3.10+، و build اولیه ~10s برای 500 فایل.</td>
+<td><strong>4/5</strong></td>
+<td>local-first است، اما در تغییرهای خیلی کوچک، graph context می‌تواند از naïve file read بزرگ‌تر شود؛ خود README این trade-off را شفاف گفته است.</td>
+<td>repo/site.</td>
+<td><strong>2026-06-10</strong> (<code>v2.3.6</code>).</td>
+</tr>
+<tr>
+<td><strong>CodeGraphContext</strong></td>
+<td>codebase index/graph</td>
+<td>MCP server + CLI که کد محلی را در graph DB ایندکس می‌کند و graph visualization هم می‌دهد.</td>
+<td>MCP-compatible assistants.</td>
+<td><strong>unspecified</strong></td>
+<td><strong>3/5</strong> — Python 3.10+؛ graph DB و visualization آن نسبت به codebase-memory/codegraph کمی سنگین‌تر به نظر می‌رسد.</td>
+<td><strong>3/5</strong></td>
+<td>مزیت اصلی exploration بصری و graph querying است؛ benchmark headline در منبع رسمی بازیابی‌شده مشخص نبود.</td>
+<td>repo/docs.</td>
+<td><strong>unspecified</strong></td>
+</tr>
+<tr>
+<td><strong>Context7</strong></td>
+<td>doc/index retrieval</td>
+<td>به‌جای کد پروژه، documentation به‌روز کتابخانه‌ها را برای AI editorها فراهم می‌کند؛ هدف اصلی کاهش hallucination و بار context دستی است.</td>
+<td>AI code editors و MCP clients.</td>
+<td><strong>unspecified</strong></td>
+<td><strong>4/5</strong> — MCP server آماده دارد؛ releaseهای frequent.</td>
+<td><strong>3/5</strong></td>
+<td>عدد reduction رسمی ندیدم؛ ارزشش بیشتر در <strong>fresh docs retrieval</strong> است تا فشرده‌سازی مستقیم. همچنین مسائل auth/private endpointها هنوز active issue دارند.</td>
+<td>repo/site.</td>
+<td><strong>2026-06-22</strong> (<code>3.2.2</code>).</td>
+</tr>
+<tr>
+<td><strong>Repomix</strong></td>
+<td>repo-to-prompt</td>
+<td>کل repo را در یک فایل AI-friendly pack می‌کند، token count هم می‌دهد و <code>--token-budget</code> دارد.</td>
+<td>Claude، ChatGPT، DeepSeek، Perplexity، Gemini، Gemma، Llama، Grok و…</td>
+<td><strong>unspecified</strong>؛ بیشتر optimizerِ بسته‌بندی و budget guard است تا compressor.</td>
+<td><strong>5/5</strong> — one-command CLI و browser UI.</td>
+<td><strong>3/5</strong></td>
+<td>اگر بی‌فیلتر کل repo را pack کنید، هنوز ممکن است context بزرگ شود؛ مزیت اصلی‌اش نظم، ignore-awareness و token visibility است.</td>
+<td>repo/site.</td>
+<td><strong>latest surfaced: v1.15.0</strong>.</td>
+</tr>
+<tr>
+<td><strong>Gitingest</strong></td>
+<td>repo-to-prompt</td>
+<td>digest متنی prompt-friendly از repo از روی URL یا دایرکتوری می‌سازد و token count گزارش می‌کند.</td>
+<td>هر LLM/workflow که ingest متنی بخواهد.</td>
+<td><strong>unspecified</strong></td>
+<td><strong>5/5</strong> — <code>pip install gitingest</code> یا <code>pipx install gitingest</code>؛ Python 3.8+.</td>
+<td><strong>2/5</strong></td>
+<td>برای private repo به GitHub PAT نیاز دارد؛ این ابزار context را قابل‌مصرف‌تر می‌کند ولی ذاتاً graph/memory/proxy نیست.</td>
+<td>repo/site.</td>
+<td><strong>2025-07-31</strong> (<code>v0.3.1</code>).</td>
+</tr>
+</tbody></table>
+<p>تحلیل این جدول روشن است: <strong>برای repoهای بزرگ، code graphها اغلب از prompt compressorهای صرف مؤثرترند</strong>، چون اصلاً مانع تولید context بیهوده می‌شوند. همین‌جا تفاوت <code>codebase-memory-mcp</code> و <code>CodeGraph</code> با <code>Repomix/Gitingest</code> دیده می‌شود: دو ابزار اول «مسئله discovery» را حل می‌کنند؛ دو ابزار آخر فقط «بسته‌بندی» را بهتر می‌کنند. بنابراین اگر عامل شما زیاد <code>grep → read → grep → read</code> می‌کند، رفتن به سمت graph تقریباً همیشه اثر بیشتری از صرفاً compact‌کردن output دارد. </p>
+<h2>لایه‌های memory و ابزارهای رسمی و پژوهشی</h2>
+<p>ابزارهای حافظه بلندمدت، reduction را از مسیر دیگری می‌آورند: شما به‌جای paste کردن history یا خلاصه‌سازی دستی هر session، فقط <strong>memoryهای مرتبط را search/retrieve</strong> می‌کنید. در عمل، این لایه‌ها برای agentهای طولانی‌عمر از compactorهای صرف مهم‌تر می‌شوند.</p>
+<table>
+<thead>
+<tr>
+<th>پروژه / ابزار</th>
+<th>دسته</th>
+<th>شرح کوتاه</th>
+<th>پلتفرم‌ها / LLMهای هدف</th>
+<th>کاهش توکن / هزینه با منبع</th>
+<th>سادگی راه‌اندازی</th>
+<th>اثر</th>
+<th>محدودیت‌ها و نکات امنیت/پرایوسی</th>
+<th>repo / docs</th>
+<th>آخرین release</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Mem0</strong></td>
+<td>memory/long-term</td>
+<td>memory layer عمومی برای agentها و assistantها؛ library، CLI، self-hosted server و platform دارد.</td>
+<td>OpenAI پیش‌فرض است ولی LLMها و embeddingهای متنوع را پشتیبانی می‌کند؛ همچنین skills/plugins برای Claude Code، Codex، Cursor، OpenCode، OpenClaw و… دارد.</td>
+<td>paper: <strong>91% lower p95 latency</strong> و <strong>90%+ token cost savings</strong>؛ repo bench جدید هم LongMemEval/LoCoMo را با حدود 6.8–7.0K token نشان می‌دهد.</td>
+<td><strong>3/5</strong> — library ساده است، ولی self-hosted جدی نیازمند server/bootstrap/auth و provider config است.</td>
+<td><strong>5/5</strong></td>
+<td>اگر cloud/platform استفاده کنید، data residency و retention باید جداگانه بررسی شود؛ self-hosted auth هم به‌صورت پیش‌فرض فعال است. release feed اصلی repo هم کمی plugin-centric شده است.</td>
+<td>repo/docs/paper.</td>
+<td><strong>2026-06-17</strong> در صفحه release اصلی، latest ورودی plugin دیده می‌شود؛ برای core server tagging وضعیت یکدست نیست.</td>
+</tr>
+<tr>
+<td><strong>Graphiti</strong></td>
+<td>memory/temporal graph</td>
+<td>temporal knowledge graph برای agent memory؛ facts را همراه زمان و provenance نگه می‌دارد.</td>
+<td>framework برای agentها؛ graph backends متعدد.</td>
+<td>paper: <strong>تا 18.5% بهبود accuracy</strong> و <strong>90% کاهش latency</strong> نسبت به baselineها؛ درصد token reduction صریح در snippetهای بررسی‌شده <strong>unspecified</strong> است.</td>
+<td><strong>2/5</strong> — معمولاً نیازمند graph DB و ingestion pipeline است.</td>
+<td><strong>3/5</strong></td>
+<td>برای production باید backend graph و accuracy/retrieval کیفیت‌سنجی شود؛ issueهای active درباره schema/config هم وجود دارد.</td>
+<td>repo/paper.</td>
+<td><strong>2026-06-08</strong> (<code>v0.29.2</code>).</td>
+</tr>
+<tr>
+<td><strong>Cognee</strong></td>
+<td>memory/long-term</td>
+<td>AI memory platform مبتنی بر knowledge graph + vector reasoning.</td>
+<td>self-hosted knowledge graph engine و MCP/docker modes.</td>
+<td><strong>unspecified</strong></td>
+<td><strong>2/5</strong> — docker/env-file/MCP/config؛ برای production از Mem0 سنگین‌تر به نظر می‌رسد.</td>
+<td><strong>3/5</strong></td>
+<td>memory platform کامل است، ولی benchmark token-centric شفاف در snippetهای رسمی بازیابی‌شده نداشت؛ چند issue درباره usability و سازگاری هم دیده می‌شود.</td>
+<td>repo/release.</td>
+<td><strong>2026-06-21</strong> (<code>v1.2.1</code>).</td>
+</tr>
+<tr>
+<td><strong>projectmem</strong></td>
+<td>memory/long-term</td>
+<td>local-first, event-sourced memory/judgment layer برای AI coding agents.</td>
+<td>ابزارهای coding agent محلی؛ بر local/no-cloud بودن تأکید دارد.</td>
+<td>paper/repo: در MCP mode حدود <strong>800–1,500 توکن</strong> بارگیری می‌کند، در حالی‌که بدون memory layer حدود <strong>5,000–20,000 توکن</strong> برای بازسازی context هر session تخمین زده شده است.</td>
+<td><strong>4/5</strong> — tutorial 15 دقیقه‌ای و تمرکز local-first.</td>
+<td><strong>4/5</strong></td>
+<td>local-first بودن مزیت privacy است، اما اکوسیستم و integration breadth آن هنوز کوچکتر از Mem0 است.</td>
+<td>repo/paper.</td>
+<td><strong>latest surfaced: v0.1.4</strong>.</td>
+</tr>
+<tr>
+<td><strong>agentmemory</strong></td>
+<td>memory/long-term</td>
+<td>persistent memory برای AI coding agents؛ memoryها را بین sessionها inject/search می‌کند.</td>
+<td>Claude Code، Copilot CLI، Cursor، Gemini CLI، Codex CLI، Hermes، OpenClaw، OpenCode و هر MCP/HTTP agent.</td>
+<td>scorecard repo: در LongMemEval-S، <strong>R@5=95.2%</strong>؛ مدل cost آن نشان می‌دهد <code>~170K tokens/yr</code> در برابر <code>~650K</code> برای LLM-summarized memory و <code>19.5M+</code> برای paste-full-context. این یعنی تقریباً <strong>74% کمتر</strong> از summarized baseline و <strong>&gt;99% کمتر</strong> از full-context baseline، البته این بخش یک <strong>استنتاج از جدول خود پروژه</strong> است.</td>
+<td><strong>4/5</strong> — <code>npx @agentmemory/agentmemory</code> و سرور واحد؛ benchmark harness هم open است.</td>
+<td><strong>4/5</strong></td>
+<td>چون memory پایدار می‌سازد، hygiene و scope isolation مهم است؛ خود release notes پروژه هم به security fix در agent-scope اشاره کرده‌اند.</td>
+<td>repo/docs.</td>
+<td><strong>2026-06-07</strong> (<code>0.9.27</code>).</td>
+</tr>
+<tr>
+<td><strong>Engram</strong></td>
+<td>memory/long-term</td>
+<td>persistent shared memory infrastructure برای coding agents.</td>
+<td>coding agents؛ daemon/binary install.</td>
+<td><strong>unspecified</strong></td>
+<td><strong>4/5</strong> — binary install پایدار برای Linux/macOS در README دیده می‌شود.</td>
+<td><strong>3/5</strong></td>
+<td>benchmark token-centric رسمی در snippetها دیده نشد؛ ارزش آن بیشتر در shared persistent memory است.</td>
+<td>repo.</td>
+<td><strong>unspecified</strong>؛ README به «Binary Installation (v4+)» اشاره می‌کند.</td>
+</tr>
+<tr>
+<td><strong>OpenAI Prompt Caching</strong></td>
+<td>official best-practice/tool</td>
+<td>cache خودکار prefixهای تکراری؛ برای repeated system prompts / tools / history بسیار مؤثر است.</td>
+<td>OpenAI API روی مدل‌های جدید.</td>
+<td><strong>تا 80% latency کمتر</strong> و <strong>تا 90% input cost کمتر</strong>؛ pricing page هم cached input را عموماً بسیار ارزان‌تر نشان می‌دهد.</td>
+<td><strong>5/5</strong> — خودکار و بدون تغییر کد.</td>
+<td><strong>5/5</strong></td>
+<td>در داده‌های OpenAI، extended prompt caching شامل نگه‌داری state رمزنگاری‌شده روی GPU-local storage تا سقف 24 ساعت می‌شود؛ برای <code>store=&quot;false&quot;</code> retention سمت سرور برای compaction صفر است.</td>
+<td>docs.</td>
+<td>رسمی و جاری؛ release-style version ندارد.</td>
+</tr>
+<tr>
+<td><strong>Anthropic Prompt Caching / Claude Code cost features</strong></td>
+<td>official best-practice/tool</td>
+<td>prompt caching و auto-compaction برای کاهش هزینه در Claude API/Claude Code.</td>
+<td>Claude API و Claude Code.</td>
+<td>release notes و docs: <strong>تا 80% latency کمتر</strong> و <strong>تا 90% cost کمتر</strong>؛ cached input tokens برای مدل‌های واجد شرایط با <strong>10% قیمت input base</strong> حساب می‌شوند و به rate limit هم شمرده نمی‌شوند.</td>
+<td><strong>5/5</strong> — automatic caching یا top-level <code>cache_control</code>.</td>
+<td><strong>5/5</strong></td>
+<td>Claude Code خودش auto-compaction و prompt caching دارد؛ اما مثل هر caching provider-side باید data policy مدل/plan شما بررسی شود. در docs Anthropic این قابلیت با ZDR هم سازگار توصیف شده است.</td>
+<td>docs.</td>
+<td>رسمی و جاری؛ release-style version ندارد.</td>
+</tr>
+<tr>
+<td><strong>tiktoken / Ollama tokenize / llama.cpp count_tokens</strong></td>
+<td>tokenizer / optimizer utilities</td>
+<td>این‌ها compressor نیستند، ولی برای <strong>budgeting، splitting، validation و preflight token counting</strong> حیاتی‌اند. <code>tiktoken</code> tokenizer سریع OpenAI است؛ Ollama endpointهای tokenize/detokenize دارد؛ <code>llama.cpp</code> هم endpoint رسمی <code>count_tokens</code> دارد.</td>
+<td>OpenAI-token budgeting، Ollama local stacks، llama.cpp local stacks.</td>
+<td><strong>unspecified</strong> برای کاهش مستقیم؛ اما <code>tiktoken</code> از نظر performance <strong>3–6×</strong> سریع‌تر از tokenizer متن‌باز comparable گزارش شده است.</td>
+<td><strong>5/5</strong></td>
+<td><strong>2/5</strong></td>
+<td>این ابزارها به‌تنهایی توکن را کم نمی‌کنند؛ فقط measurement و guardrail می‌دهند. برای pipelineهای Ollama/llama.cpp، همین اندازه‌گیری دقیق معمولاً پیش‌نیاز کمپرسورهای محلی است.</td>
+<td>repos/docs.</td>
+<td>Ollama tokenize endpoints از 2025-08 pull request رسمی surfaced شد؛ <code>llama.cpp</code> docs جاری‌اند.</td>
+</tr>
+<tr>
+<td><strong>ReLM</strong></td>
+<td>adjacent research</td>
+<td>مستقیماً prompt compressor نیست؛ برای validation/querying/control با regular expressions روی LLMهاست و efficiency ارزیابی را بالا می‌برد.</td>
+<td>research/system-level.</td>
+<td><strong>تا 15× system efficiency</strong> و <strong>2.5× data efficiency</strong> در evaluation pipelineها.</td>
+<td><strong>2/5</strong></td>
+<td><strong>2/5</strong></td>
+<td>چون هدف اصلی‌اش کاهش هزینه inference کاربردی نیست، آن را در دسته «adjacent» نگه داشته‌ام، نه core token-saving stack.</td>
+<td>paper.</td>
+<td>مقاله اصلی 2022 است.</td>
+</tr>
+</tbody></table>
+<p>در این بخش یک نکته مهم هست: <strong>provider-side caching تقریباً همیشه باید با tool-side compression ترکیب شود</strong>. OpenAI و Anthropic وقتی prefix ثابت، system prompt، tool definitions یا history تکراری دارید بسیار قوی‌اند؛ اما اگر قبل از آن، agent شما هر بار 2MB تست لاگ و 20 فایل نامرتبط را هم بفرستد، cache فقط بخشی از مسئله را حل می‌کند. برعکس، اگر با <code>RTK/snip/Headroom</code> یا یک graph/index، نویز را اول کم کنید و بعد prompt caching provider را هم فعال نگه دارید، اثر تجمعی بسیار بالاتر می‌شود. </p>
+<h2>جمع‌بندی تحلیلی و محدودیت‌ها</h2>
+<p>برای <strong>بیشترین بازده عملی</strong>، پیشنهاد معماری به این صورت است:</p>
+<p>اگر workflow شما <strong>CLI-heavy coding</strong> است، stack ساده و بسیار پربازده این است: <strong>RTK یا snip</strong> برای shell output، به‌علاوه <strong>CodeGraph</strong> یا <strong>codebase-memory-mcp</strong> برای semantic/code-graph context. این ترکیب هم discovery cost را کم می‌کند و هم output noise را. برای repoهای بزرگ یا monorepoها، این دسته از ابزارها معمولاً از هر prompt compressor عمومی مؤثرترند، چون مشکل را در منبع حل می‌کنند. </p>
+<p>اگر workload شما <strong>generic RAG / application prompts / long documents</strong> است، stack بهتر غالباً <strong>Headroom</strong> یا <strong>LLMLingua/LLMLingua-2</strong> به‌همراه <strong>OpenAI/Anthropic prompt caching</strong> است. <code>Headroom</code> برای integration breadth و reversible compression جذاب است، و <code>LLMLingua</code> هنوز قوی‌ترین reference research برای prompt compression cloud-agnostic باقی مانده است. </p>
+<p>اگر مشکل شما <strong>فراموشی بین سشن‌ها</strong> است، صرف compact کردن prompt کافی نیست؛ باید به لایه memory بروید. اینجا <strong>Mem0</strong> از نظر عددهای رسمی و maturity جلوتر است، <strong>agentmemory</strong> برای coding-agent stacks بسیار عمل‌گراست، و <strong>projectmem</strong> گزینه local-first تمیز و کم‌هزینه‌تری است. <strong>Graphiti</strong> و <strong>Cognee</strong> زمانی مناسب‌تر می‌شوند که graph memory واقعی و temporal provenance برای شما مهم باشد، نه فقط token efficiency خام. </p>
+<p>در مورد <strong>Ollama/llama.cpp</strong>، مهم‌ترین یافته این مرور این است که هنوز «اکوسیستم عظیمِ بالغِ compressor plugin» به اندازه Claude Code/OpenAI stacks شکل نگرفته، اما سه مسیر عملی وجود دارد: <strong>imptokens</strong> که مستقیماً روی <code>llama.cpp</code> و سخت‌افزار محلی اجرا می‌شود؛ <strong>Ollama tokenization endpoints</strong> برای budget guardها و cut-off دقیق؛ و <strong>llama.cpp count_tokens</strong> برای preflight checking. بنابراین اگر stack شما local-first است اما inference اصلی را روی cloud provider می‌زنید، بهترین معماری فعلاً معمولاً <strong>local preprocessor + cloud API</strong> است، نه صرفاً یک plugin اختصاصی Ollama. </p>
+<p>از نظر <strong>محدودیت‌های این مرور</strong>، سه نکته را باید صریح گفت. اول، همه پروژه‌ها benchmark قابل‌بازتولید و هم‌مقیاس ندارند؛ برای چند پروژه، مخصوصاً <strong>Context7، Repomix، Gitingest، Engram، Cognee، CodeGraphContext</strong>، داده benchmark کاهش توکن در snippetهای رسمی بازیابی‌شده یا وجود نداشت یا برای قیاس عادلانه کافی نبود، و به همین دلیل <code>unspecified</code> ثبت شد. دوم، برای بعضی پروژه‌های پرشتاب، <strong>release metadata</strong> یکنواخت نبود؛ نمونه روشن آن feed اصلی <strong>Mem0</strong> است که latest entry در صفحه release بیشتر plugin-centric دیده می‌شود. سوم، در این پاس منبع‌محور، برای <strong>Google Gemini</strong> و <strong>AWS Bedrock</strong> به‌اندازه OpenAI/Anthropic، مواد رسمی با همان کیفیت و جزئیات در dataset فعلی بازیابی نشد؛ بنابراین آن‌ها را در تحلیل نهایی به‌صورت کمی و رتبه‌بندی‌شده نیاوردم، نه به این دلیل که قابلیت‌های مرتبط ندارند، بلکه به این دلیل که نمی‌خواستم بدون منبع هم‌سطح، قیاس عددی ارائه کنم. </p>
+<p>اگر بخواهم یک نسخه خیلی فشرده بدهم: <strong>برای coding agents بزرگ‌مقیاس، <code>codebase-memory-mcp</code> و <code>CodeGraph</code> بالاترین اثر ساختاری را دارند؛ برای output-heavy workflows، <code>RTK</code> و <code>snip</code> سریع‌ترین برد هستند؛ برای prompt-heavy appها، <code>Headroom</code> و <code>LLMLingua</code> مهم‌ترین نام‌ها هستند؛ و برای sessionهای طولانی، <code>Mem0</code> و <code>agentmemory</code> بیشترین صرفه‌جویی مرکب را می‌سازند.</strong> </p>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-container">
+            <div class="footer-brand">
+                <div class="logo">Token Saver</div>
+                <p>زیرساخت سبک‌تر برای AI Coding Agents؛ توکن کمتر، context تمیزتر، هزینه قابل‌کنترل‌تر.</p>
+            </div>
+            <div class="footer-links">
+                <a href="https://t.me/m4tinbeigipv" target="_blank" rel="noopener" class="footer-link">ارتباط در تلگرام</a>
+            </div>
+        </div>
+        <div class="footer-bottom text-center">
+            <p>&copy; 2026 Token Saver. تمامی حقوق محفوظ است.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+      // Automatically convert mermaid code blocks to actual mermaid divs
+      document.addEventListener('DOMContentLoaded', () => {
+        const blocks = document.querySelectorAll('pre code.language-mermaid');
+        blocks.forEach(block => {
+          const pre = block.parentElement;
+          const mermaidDiv = document.createElement('div');
+          mermaidDiv.className = 'mermaid';
+          mermaidDiv.textContent = block.textContent;
+          pre.replaceWith(mermaidDiv);
+        });
+      });
+    </script>
+</body>
+</html>
