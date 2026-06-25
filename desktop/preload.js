@@ -43,8 +43,8 @@ contextBridge.exposeInMainWorld('tokensaver', {
   onBudgetWarning: (cb) => ipcRenderer.on('budget-warning', (_e, data) => cb(data)),
   updateBudgetConfig: (config) => ipcRenderer.invoke('update-budget-config', config),
 
-  // Zarinpal payment & server-side license verification
   requestPayment: (token) => ipcRenderer.invoke('request-payment', { token }),
+  requestPaymentTool: (token, toolId) => ipcRenderer.invoke('request-payment-tool', { token, toolId }),
   verifyLicense: (licenseKey) => ipcRenderer.invoke('verify-license', licenseKey),
   fetchServerConfig: () => ipcRenderer.invoke('fetch-server-config'),
 

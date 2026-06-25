@@ -566,6 +566,10 @@ ipcMain.handle('request-payment', async (_e, { token }) => {
   return serverRequest('/api/payment/request', 'POST', {}, token);
 });
 
+ipcMain.handle('request-payment-tool', async (_e, { token, toolId }) => {
+  return serverRequest('/api/payment/request-tool', 'POST', { toolId }, token);
+});
+
 ipcMain.handle('verify-license', async (_e, licenseKey) => {
   return serverRequest('/api/license/verify', 'POST', { licenseKey });
 });

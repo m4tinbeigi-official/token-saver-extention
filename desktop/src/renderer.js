@@ -236,7 +236,8 @@ async function loadTools() {
       note(card, 'دستور کپی شد.');
     });
 
-    const isLocked = tool.locked && !(state.license && state.license.active);
+    const hasPurchasedTool = state.user && state.user.purchasedTools && state.user.purchasedTools.includes(tool.id);
+    const isLocked = tool.locked && !(state.license && state.license.active) && !hasPurchasedTool;
 
     // Handle locked pro tools
     if (isLocked) {
@@ -248,14 +249,32 @@ async function loadTools() {
       badge.style.background = 'rgba(245, 158, 11, 0.1)';
       badge.classList.remove('hidden');
 
-      installBtn.textContent = 'خرید و فعال‌سازی';
+      const priceText = (tool.price || 50000).toLocaleString('fa-IR');
+      installBtn.textContent = `خرید ابزار (${priceText} تومان)`;
       installBtn.classList.remove('btn-primary');
       installBtn.classList.add('btn-pro');
       
-      installBtn.addEventListener('click', () => {
-        $('#license-card').scrollIntoView({ behavior: 'smooth' });
-        $('#license-status-msg').style.color = '#f59e0b';
-        $('#license-status-msg').textContent = 'لطفاً لایسنس پرو تهیه کنید یا کد لایسنس خود را وارد نمایید.';
+      installBtn.addEventListener('click', async () => {
+        const token = localStorage.getItem('tokensaver_user_token');
+        if (!token) {
+          alert('ابتدا باید وارد حساب خود شوید.');
+          return;
+        }
+        
+        installBtn.disabled = true;
+        installBtn.textContent = 'اتصال به درگاه…';
+        const res = await api.requestPaymentTool(token, tool.id);
+        installBtn.disabled = false;
+        installBtn.textContent = `خرید ابزار (${priceText} تومان)`;
+        
+        if (res && res.ok && res.paymentUrl) {
+          api.openExternal(res.paymentUrl);
+          const msg = $('#license-status-msg');
+          msg.style.color = '#c084fc';
+          msg.textContent = `درگاه پرداخت برای ابزار ${tool.name} باز شد. پس از پرداخت موفق، قفل ابزار باز خواهد شد.`;
+        } else {
+          alert('خطا در اتصال به درگاه پرداخت ابزار: ' + ((res && res.error) || 'نامشخص'));
+        }
       });
 
       copyBtn.disabled = true;
