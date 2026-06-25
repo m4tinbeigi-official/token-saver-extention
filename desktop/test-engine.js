@@ -84,4 +84,31 @@ ok('platformKey maps win32->win', platformKey('win32') === 'win');
 ok('every tool has required fields', TOOLS.every((t) =>
   t.id && t.name && t.description && t.howItWorks && Array.isArray(t.claims) && t.afterInstall && t.install));
 
+console.log('detectAgents:');
+const { detectAgents, estimateImpact } = require('./config-engine');
+const fakeHome = fs.mkdtempSync(path.join(os.tmpdir(), 'home-'));
+fs.mkdirSync(path.join(fakeHome, '.claude'));
+fs.mkdirSync(path.join(fakeHome, '.cursor'));
+const detected = detectAgents(fakeHome, fs, path);
+ok('detects claude-code from ~/.claude', detected.includes('claude-code'));
+ok('detects cursor from ~/.cursor', detected.includes('cursor'));
+ok('does not detect codex when absent', !detected.includes('codex'));
+fs.rmSync(fakeHome, { recursive: true, force: true });
+
+console.log('estimateImpact:');
+const proj = fs.mkdtempSync(path.join(os.tmpdir(), 'proj-'));
+fs.mkdirSync(path.join(proj, 'node_modules'));
+fs.writeFileSync(path.join(proj, 'node_modules', 'big.js'), 'x'.repeat(40000)); // noise
+fs.mkdirSync(path.join(proj, 'src'));
+fs.writeFileSync(path.join(proj, 'src', 'app.js'), 'y'.repeat(4000)); // signal
+const est = estimateImpact(proj, ['tests'], ['node'], fs, path);
+ok('counts files', est.files >= 2);
+ok('noise tokens > 0 (node_modules)', est.noiseTokens > 0);
+ok('noise is the majority here', est.pct >= 80);
+fs.rmSync(proj, { recursive: true, force: true });
+
+console.log('merge tags:');
+ok('CLAUDE.md tagged markdown', plan.files.find((f) => f.path === 'CLAUDE.md').merge === 'markdown');
+ok('.aiignore tagged lines', plan.files.find((f) => f.path === '.aiignore').merge === 'lines');
+
 console.log('\nAll ' + passed + ' checks passed ✓');

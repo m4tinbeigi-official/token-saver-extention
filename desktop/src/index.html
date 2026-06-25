@@ -99,6 +99,7 @@
             <input type="text" id="user-name" class="field" placeholder="نام">
             <input type="email" id="user-email" class="field" placeholder="ایمیل">
           </div>
+          <label class="consent"><input type="checkbox" id="consent"> اجازه می‌دهم اطلاعات تماسم برای پشتیبانی و اطلاع‌رسانی ذخیره شود (اختیاری).</label>
           <div class="submit-note" id="submit-note"></div>
         </div>
       </section>
@@ -113,7 +114,8 @@
       <!-- STEP 3: config preview + apply -->
       <section class="screen" data-screen="3">
         <h1>کانفیگ پروژه</h1>
-        <p class="muted">این فایل‌های کانفیگ ساخته می‌شوند. محتوا را ببین و سپس اعمال کن (از فایل‌های موجود بکاپ <code>.tokensaver.bak</code> گرفته می‌شود).</p>
+        <p class="muted">این فایل‌های کانفیگ ساخته می‌شوند. محتوا را ببین و سپس اعمال کن. فایل‌های موجود <b>ادغام</b> می‌شوند (نه جایگزین) و بکاپ <code>.tokensaver.bak</code> گرفته می‌شود.</p>
+        <div class="impact-panel hidden" id="impact-panel"></div>
         <div class="preview-wrap">
           <div class="file-list" id="file-list"></div>
           <pre class="file-view" id="file-view">یک فایل را از لیست انتخاب کن…</pre>
@@ -148,9 +150,11 @@
       <div class="tool-after"></div>
       <div class="tool-actions">
         <button class="btn btn-primary tool-install">نصب خودکار</button>
+        <button class="btn btn-ghost tool-cancel hidden">لغو نصب</button>
         <button class="btn btn-ghost tool-repo">صفحه پروژه</button>
         <button class="btn btn-ghost tool-copy">کپی دستور</button>
       </div>
+      <p class="tool-secnote">این دستور یک اسکریپت نصب از اینترنت اجرا می‌کند. می‌توانی قبلش با «کپی دستور» آن را بررسی کنی.</p>
       <pre class="tool-log hidden"></pre>
     </div>
   </template>

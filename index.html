@@ -145,9 +145,12 @@
                 </div>
 
                 <details class="mac-help fade-in-up">
-                    <summary>روی مک باز نمی‌شود؟ («is damaged» یا «unidentified developer»)</summary>
-                    <p>چون نرم‌افزار رایگان و بدون امضای پولی اپل منتشر می‌شود، مک بار اول جلوی اجرا را می‌گیرد. کافی است روی اپ <b>راست‌کلیک → Open</b> بزنی، یا این دستور را در Terminal اجرا کنی:</p>
-                    <code class="copy-cmd" id="mac-fix-cmd">xattr -cr "/Applications/Token Saver.app"</code>
+                    <summary>روی مک باز نمی‌شود؟ («is damaged»، «unidentified developer» یا «could not verify… malware»)</summary>
+                    <p>چون نرم‌افزار رایگان و بدون امضای پولی اپل منتشر می‌شود، Gatekeeper بار اول جلوی اجرا را می‌گیرد. این یک هشدار استاندارد برای همه‌ی اپ‌های امضانشده است، نه نشانه‌ی بدافزار. سه راه:</p>
+                    <p><b>۱)</b> در macOS جدید: <b>System Settings → Privacy &amp; Security</b> را باز کن، پایین برو و کنار نام Token Saver روی <b>Open Anyway</b> بزن.</p>
+                    <p><b>۲)</b> یا روی اپ در Finder <b>راست‌کلیک → Open</b>.</p>
+                    <p><b>۳)</b> یا این دستور را در Terminal اجرا کن (نشان quarantine را پاک می‌کند):</p>
+                    <code class="copy-cmd" id="mac-fix-cmd">xattr -dr com.apple.quarantine "/Applications/Token Saver.app"</code>
                     <span class="copy-hint" id="copy-hint">برای کپی کلیک کن</span>
                 </details>
 

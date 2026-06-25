@@ -12,10 +12,16 @@ contextBridge.exposeInMainWorld('tokensaver', {
     ipcRenderer.invoke('apply-config', { projectPath, files }),
   openExternal: (target) => ipcRenderer.invoke('open-external', target),
 
+  // Detection + impact
+  detectAgents: () => ipcRenderer.invoke('detect-agents'),
+  estimateImpact: (projectPath, noisy) =>
+    ipcRenderer.invoke('estimate-impact', { projectPath, noisy }),
+
   // Tools registry + installer
   listTools: () => ipcRenderer.invoke('list-tools'),
   installTool: (toolId, projectPath) =>
     ipcRenderer.invoke('install-tool', { toolId, projectPath }),
+  cancelInstall: () => ipcRenderer.invoke('cancel-install'),
   onInstallOutput: (cb) =>
     ipcRenderer.on('install-output', (_e, data) => cb(data.toolId, data.chunk)),
 

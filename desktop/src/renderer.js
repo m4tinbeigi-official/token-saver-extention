@@ -100,21 +100,40 @@ function collectAnswers() {
 
 async function submitUserInfo() {
   const note = $('#submit-note');
+  const consent = $('#consent') && $('#consent').checked;
+  if (!consent) {
+    // Privacy: never send anything without explicit opt-in.
+    note.textContent = 'اطلاعات ارسال نشد (رضایت داده نشده) — ادامه می‌دهیم.';
+    return;
+  }
   const data = {
     name: $('#user-name').value.trim(),
     email: $('#user-email').value.trim(),
     project: state.scan ? state.scan.name : null,
     stacks: state.scan ? state.scan.stacks : [],
     answers: collectAnswers(),
+    consent: true,
     at: new Date().toISOString()
   };
   note.textContent = 'در حال ذخیره…';
   let res;
   try { res = await api.submitInfo(data); } catch (_e) { res = { ok: false, offline: true }; }
-  // Server is best-effort; we never block the flow on it.
   note.textContent = res && res.ok
     ? 'اطلاعات ذخیره شد ✓'
     : 'ذخیره روی سرور انجام نشد (مهم نیست؛ ادامه می‌دهیم).';
+}
+
+// Detect installed agents and pre-select them with a badge
+async function applyAgentDetection() {
+  let res;
+  try { res = await api.detectAgents(); } catch (_e) { return; }
+  if (!res || !res.ok || !res.agents.length) return;
+  const group = document.querySelector('.opts[data-name="agents"]');
+  if (!group) return;
+  res.agents.forEach((id) => {
+    const btn = group.querySelector('.opt[data-val="' + cssEscape(id) + '"]');
+    if (btn) { btn.classList.add('selected', 'detected'); btn.title = 'روی سیستم تشخیص داده شد'; }
+  });
 }
 
 /* ---------- Step 2: tools ---------- */
@@ -149,14 +168,21 @@ async function loadTools() {
     });
 
     const installBtn = node.querySelector('.tool-install');
+    const cancelBtn = node.querySelector('.tool-cancel');
+    cancelBtn.addEventListener('click', async () => {
+      await api.cancelInstall();
+      log.textContent += '\n[لغو شد توسط کاربر]\n';
+    });
     installBtn.addEventListener('click', async () => {
       if (!state.projectPath) { note(card, 'اول پروژه را انتخاب کن.'); return; }
       log.classList.remove('hidden');
       log.textContent = '';
       installBtn.disabled = true;
       installBtn.textContent = 'در حال نصب…';
+      cancelBtn.classList.remove('hidden');
       const res = await api.installTool(tool.id, state.projectPath);
       installBtn.disabled = false;
+      cancelBtn.classList.add('hidden');
       if (res && res.manual) {
         log.textContent += '\nاین ابزار روی سیستم تو نیاز به اجرای دستی دارد:\n' + res.cmd + '\n' + (res.note || '');
         installBtn.textContent = 'نصب دستی لازم است';
@@ -200,6 +226,22 @@ async function buildPreview() {
   if (!res.ok) { alert(res.error); return; }
   state.plan = res.plan;
   renderPreview(res.plan);
+  renderImpact(answers.noisy || []);
+}
+
+async function renderImpact(noisy) {
+  const panel = $('#impact-panel');
+  panel.classList.remove('hidden');
+  panel.innerHTML = 'در حال برآورد نویز context…';
+  let res;
+  try { res = await api.estimateImpact(state.projectPath, noisy); } catch (_e) { res = null; }
+  if (!res || !res.ok) { panel.classList.add('hidden'); return; }
+  const e = res.est;
+  const fmt = (n) => n.toLocaleString('en-US');
+  panel.innerHTML =
+    '<div class="impact-big">~' + fmt(e.noiseTokens) + (e.truncated ? '+' : '') + ' توکن نویز</div>' +
+    '<div class="impact-sub">از حدود ' + fmt(e.totalTokens) + ' توکن کل پروژه (' + e.pct + '٪) که با این کانفیگ از context کنار گذاشته می‌شود. ' +
+    'برآورد تقریبی روی ' + fmt(e.files) + ' فایل' + (e.truncated ? ' (نمونه‌برداری‌شده)' : '') + '.</div>';
 }
 
 function renderPreview(plan) {
@@ -231,8 +273,10 @@ $('#apply-btn').addEventListener('click', async () => {
   box.classList.remove('hidden');
   if (res.ok) {
     box.classList.add('ok');
-    box.innerHTML = '<h3>' + res.written.length + ' فایل نوشته شد ✓</h3>' +
-      res.written.map((f) => '<div class="f">+ ' + escapeHtml(f) + '</div>').join('');
+    const merged = res.merged || [];
+    box.innerHTML = '<h3>انجام شد ✓ (' + res.written.length + ' فایل جدید، ' + merged.length + ' ادغام)</h3>' +
+      res.written.map((f) => '<div class="f">+ ' + escapeHtml(f) + '</div>').join('') +
+      merged.map((f) => '<div class="f" style="color:#c084fc">~ ' + escapeHtml(f) + ' (ادغام شد)</div>').join('');
   } else {
     box.innerHTML = '<h3>خطا</h3><p class="muted">' + escapeHtml(res.error || 'نامشخص') + '</p>';
   }
@@ -249,5 +293,7 @@ api.appVersion().then((v) => {
   const el = $('#app-version');
   if (el && v) el.textContent = 'نسخه ' + v + ' • برای ویندوز و مک';
 }).catch(() => {});
+
+applyAgentDetection();
 
 setStep(0);

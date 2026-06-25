@@ -1,8 +1,10 @@
 #!/bin/bash
 #
-# اگر روی مک هنگام باز کردن Token Saver خطای
-# «is damaged» یا «cannot be opened / unidentified developer» گرفتی،
-# این فایل را دابل‌کلیک کن. (مخصوص اپ‌های unsigned است.)
+# اگر روی مک هنگام باز کردن Token Saver یکی از این خطاها را گرفتی:
+#   • «is damaged and can't be opened»
+#   • «cannot be opened because the developer cannot be verified»
+#   • «Apple could not verify … is free of malware»
+# این فایل را دابل‌کلیک کن. (هشدار استاندارد اپ‌های بدون امضای پولی است، نه بدافزار.)
 #
 APP="/Applications/Token Saver.app"
 

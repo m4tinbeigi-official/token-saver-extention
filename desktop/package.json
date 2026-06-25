@@ -1,7 +1,7 @@
 {
   "name": "tokensaver-desktop",
   "productName": "Token Saver",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "بهینه‌سازی مصرف توکن AI Coding Agents با یک کلیک — برای ویندوز و مک",
   "main": "main.js",
   "author": "Token Saver",
@@ -25,7 +25,11 @@
       "main.js",
       "preload.js",
       "config-engine.js",
-      "src/**/*"
+      "tools-registry.js",
+      "src/**/*",
+      "build/icon.png",
+      "build/icon.ico",
+      "node_modules/**/*"
     ],
     "directories": {
       "output": "release",

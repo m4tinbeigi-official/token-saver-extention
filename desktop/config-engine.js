@@ -74,6 +74,72 @@ function scanProject(projectPath, fs, path) {
 }
 
 /* ------------------------------------------------------------------ */
+/* Detect installed AI coding agents (by their config dirs in $HOME)   */
+/* ------------------------------------------------------------------ */
+
+function detectAgents(homedir, fs, path) {
+  const exists = (...parts) => {
+    try { return fs.existsSync(path.join(homedir, ...parts)); } catch (_e) { return false; }
+  };
+  const found = [];
+  if (exists('.claude') || exists('.config', 'claude')) found.push('claude-code');
+  if (exists('.cursor')) found.push('cursor');
+  if (exists('.codex')) found.push('codex');
+  if (exists('.gemini') || exists('.config', 'gemini')) found.push('gemini');
+  return found;
+}
+
+/* ------------------------------------------------------------------ */
+/* Estimate "context noise" tokens in a project (bounded walk)         */
+/* ------------------------------------------------------------------ */
+
+function patternToTest(pat) {
+  if (pat.endsWith('/')) {
+    const name = pat.slice(0, -1);
+    return (base) => base === name;
+  }
+  if (pat.includes('*')) {
+    const re = new RegExp('^' + pat.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$');
+    return (base) => re.test(base);
+  }
+  return (base) => base === pat;
+}
+
+function estimateImpact(root, noisy, stacks, fs, path, opts) {
+  opts = opts || {};
+  const cap = opts.maxEntries || 20000;
+  const tests = ignorePatterns(noisy, stacks || []).map(patternToTest);
+  const matches = (base) => tests.some((t) => t(base));
+
+  let totalBytes = 0, noiseBytes = 0, files = 0, count = 0, truncated = false;
+  const stack = [{ p: root, inNoise: false }];
+  while (stack.length) {
+    if (count++ > cap) { truncated = true; break; }
+    const { p, inNoise } = stack.pop();
+    let st;
+    try { st = fs.lstatSync(p); } catch (_e) { continue; }
+    if (st.isSymbolicLink()) continue;
+    const base = p.split(/[\\/]/).pop();
+    const isNoise = inNoise || matches(base);
+    if (st.isDirectory()) {
+      let entries;
+      try { entries = fs.readdirSync(p); } catch (_e) { continue; }
+      for (const e of entries) stack.push({ p: path.join(p, e), inNoise: isNoise });
+    } else if (st.isFile()) {
+      files++; totalBytes += st.size; if (isNoise) noiseBytes += st.size;
+    }
+  }
+  const toTokens = (b) => Math.round(b / 4); // rough: ~4 bytes/token
+  return {
+    files,
+    totalTokens: toTokens(totalBytes),
+    noiseTokens: toTokens(noiseBytes),
+    pct: totalBytes ? Math.round((noiseBytes / totalBytes) * 100) : 0,
+    truncated
+  };
+}
+
+/* ------------------------------------------------------------------ */
 /* Helpers                                                             */
 /* ------------------------------------------------------------------ */
 
@@ -267,9 +333,10 @@ function generatePlan(answers, info) {
   const files = [];
 
   // Universal ignore + plan record
-  files.push({ path: '.aiignore', content: ignoreFile(info, noisy) });
+  files.push({ path: '.aiignore', content: ignoreFile(info, noisy), merge: 'lines' });
   files.push({
     path: '.tokensaver/tokensaver.config.json',
+    merge: 'overwrite',
     content: JSON.stringify({
       generatedBy: 'Token Saver Desktop v1.0.0',
       generatedAt: new Date().toISOString(),
@@ -285,18 +352,18 @@ function generatePlan(answers, info) {
 
   // Per-agent files
   if (agents.includes('claude-code')) {
-    files.push({ path: 'CLAUDE.md', content: claudeMd(info, noisy) });
-    files.push({ path: '.claude/settings.json', content: claudeSettings(noisy) });
+    files.push({ path: 'CLAUDE.md', content: claudeMd(info, noisy), merge: 'markdown' });
+    files.push({ path: '.claude/settings.json', content: claudeSettings(noisy), merge: 'overwrite' });
   }
   if (agents.includes('cursor')) {
-    files.push({ path: '.cursorrules', content: cursorRules(info, noisy) });
-    files.push({ path: '.cursorignore', content: ignoreFile(info, noisy) });
+    files.push({ path: '.cursorrules', content: cursorRules(info, noisy), merge: 'markdown' });
+    files.push({ path: '.cursorignore', content: ignoreFile(info, noisy), merge: 'lines' });
   }
   if (agents.includes('codex')) {
-    files.push({ path: 'AGENTS.md', content: agentsMd(info, noisy) });
+    files.push({ path: 'AGENTS.md', content: agentsMd(info, noisy), merge: 'markdown' });
   }
   if (agents.includes('gemini')) {
-    files.push({ path: 'GEMINI.md', content: geminiMd(info, noisy) });
+    files.push({ path: 'GEMINI.md', content: geminiMd(info, noisy), merge: 'markdown' });
   }
 
   const installCommands = installCommandsFor(features, answers.provider);
@@ -322,4 +389,7 @@ function generatePlan(answers, info) {
   return { files, installCommands, recommendations, summary };
 }
 
-module.exports = { scanProject, generatePlan, ignorePatterns, decideFeatures };
+module.exports = {
+  scanProject, generatePlan, ignorePatterns, decideFeatures,
+  detectAgents, estimateImpact
+};
