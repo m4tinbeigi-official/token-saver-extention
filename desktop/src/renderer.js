@@ -208,6 +208,11 @@ async function loadTools() {
       tools = srv.tools;
       const local = await api.listTools();
       platform = local.platform;
+      // Reflect the live monthly subscription price on the buy button
+      if (srv.pricing && srv.pricing.amount) {
+        const buyBtn = $('#license-buy-btn');
+        if (buyBtn) buyBtn.textContent = 'خرید اشتراک ماهانه (' + Number(srv.pricing.amount).toLocaleString('fa-IR') + ' تومان)';
+      }
     } else {
       const local = await api.listTools();
       tools = local.tools;
@@ -235,7 +240,8 @@ async function loadTools() {
         state.licenseVerified = true;
         
         $('#license-status-msg').style.color = '#10b981';
-        $('#license-status-msg').textContent = `نسخه پرو فعال است (مالک: ${res.owner})`;
+        $('#license-status-msg').textContent = `اشتراک پرو فعال است (مالک: ${res.owner})`;
+        renderSubscriptionStatus(res.proExpiresAt);
         $('#license-key-input').value = savedKey;
         $('#license-key-input').disabled = true;
         $('#license-verify-btn').disabled = true;
@@ -887,6 +893,24 @@ function checkLargeAssets(info) {
 }
 
 /* ---------- License Manager Controller ---------- */
+// Show monthly-subscription status (active until <date>) in the settings panel
+function renderSubscriptionStatus(proExpiresAt) {
+  const el = $('#sub-status');
+  if (!el) return;
+  if (!proExpiresAt) { el.textContent = ''; return; }
+  const exp = new Date(proExpiresAt);
+  const active = exp.getTime() > Date.now();
+  const dateStr = exp.toLocaleDateString('fa-IR');
+  if (active) {
+    const days = Math.ceil((exp.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+    el.style.color = '#10b981';
+    el.textContent = `اشتراک فعال است تا ${dateStr} (${days} روز مانده). برای تمدید، دوباره خرید کن.`;
+  } else {
+    el.style.color = '#ef4444';
+    el.textContent = `اشتراک در ${dateStr} منقضی شده است. برای فعال‌سازی دوباره خرید کن.`;
+  }
+}
+
 $('#license-verify-btn').addEventListener('click', async () => {
   const input = $('#license-key-input');
   const msg = $('#license-status-msg');
@@ -908,11 +932,12 @@ $('#license-verify-btn').addEventListener('click', async () => {
     localStorage.setItem('tokensaver_license', key);
     
     msg.style.color = '#10b981';
-    msg.textContent = `لایسنس نسخه پرو با موفقیت فعال شد ✓ (مالک: ${res.owner})`;
+    msg.textContent = `اشتراک پرو با موفقیت فعال شد ✓ (مالک: ${res.owner})`;
+    renderSubscriptionStatus(res.proExpiresAt);
     input.disabled = true;
     $('#license-verify-btn').disabled = true;
     $('#license-buy-btn').style.display = 'none';
-    
+
     // Reload tools to unlock
     await loadTools();
   } else {
