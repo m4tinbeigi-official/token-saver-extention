@@ -1,45 +1,130 @@
-# Token Saver
+<div align="center">
+  <img src="https://img.shields.io/badge/Status-Beta-blue?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Platform-Mac%20%7C%20Windows%20%7C%20Linux-green?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Built%20With-Electron%20%7C%20Node.js-yellow?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge" />
 
-زیرساخت سبک‌تر برای AI Coding Agents — توکن کمتر، context تمیزتر، هزینه قابل‌کنترل‌تر.
+  <br /><br />
 
-این مخزن شامل سه بخش است: **وب‌سایت معرفی**، **صفحه آموزش رایگان**، و **نرم‌افزار دسکتاپ رایگان** (ویندوز/مک) که ابزارهای کاهش مصرف توکن را روی پروژه‌ی کاربر به‌صورت خودکار نصب و کانفیگ می‌کند.
+  <h1>🛡️ Token Saver</h1>
+  <h3>Lighter Infrastructure for AI Coding Agents</h3>
+  <p><b>Fewer tokens · Cleaner context · Controllable costs</b></p>
 
-## دانلود نرم‌افزار
+  <p>
+    <a href="https://tokensaver.ir">🌐 Website</a> &nbsp;·&nbsp;
+    <a href="https://tokensaver.ir/blog.html">📖 Blog</a> &nbsp;·&nbsp;
+    <a href="https://t.me/m4tinbeigipv">💬 Telegram</a>
+  </p>
+</div>
 
-نسخه‌های آماده‌ی ویندوز (`.exe`) و مک (`.dmg`) در بخش
-[Releases](https://github.com/m4tinbeigi-official/tokensaver/releases/latest) قرار دارند.
+---
 
-> **مک:** چون اپ رایگان و بدون امضای پولی اپل است، بار اول روی اپ **راست‌کلیک → Open** بزن، یا در ترمینال:
-> `xattr -cr "/Applications/Token Saver.app"`
+## 💡 The Problem
 
-## ساختار مخزن
+AI coding agents (Claude Code, Cursor, Windsurf, Codex CLI, Gemini CLI) are getting smarter — but simultaneously falling into the trap of **Context Illusion** and **Exponential Token Usage**.
 
-| مسیر | توضیح |
-| --- | --- |
-| `index.html` · `styles.css` · `script.js` | وب‌سایت تک‌صفحه‌ای معرفی و دانلود |
-| `tutorial.html` | صفحه آموزش رایگان (تولیدشده از `deep-research-report.md`) |
-| `build-tutorial.js` | تبدیل گزارش markdown به صفحه آموزش |
-| `desktop/` | اپلیکیشن دسکتاپ Electron (ویزارد نصب خودکار ابزار) |
-| `.github/workflows/release.yml` | ساخت و انتشار خودکار نصبی‌ها |
+When you ask an agent to _"test and debug the project"_, instead of reading useful logs, it consumes **thousands of tokens on raw npm warnings, lockfiles, and minified outputs** — driving up your API bill and breaking model focus.
 
-## نرم‌افزار دسکتاپ
+## 🚀 Solution: Token Saver
 
-ویزاردی که پروژه را اسکن می‌کند، چند سؤال فنی می‌پرسد، سپس ابزارهای متن‌باز کاهش توکن (مثل `codebase-memory-mcp` و `snip`) را با یک کلیک نصب و فایل‌های کانفیگ agent را تولید می‌کند. جزئیات اجرا و ساخت در [`desktop/README.md`](desktop/README.md).
+Token Saver is a **Local-First Context Engineering Tool** that sits between your editor/agent and the LLM provider. It:
+
+- 🔧 **Installs compression rules** directly into your project (`.tokensaver/`, `.gitignore` patterns, AGENTS.md configs)
+- 🔐 **Runs a local proxy** to strip noisy tokens *before* they hit the cloud
+- 📊 **Monitors live** token consumption and savings per request
+- 👻 **Works offline** — your code *never* leaves your machine
+
+---
+
+## ✨ Features
+
+| Feature | Free | Pro |
+|---|---|---|
+| Automated tool installer | ✅ | ✅ |
+| Context config generator (AGENTS.md, GEMINI.md) | ✅ | ✅ |
+| Guest Mode (no login required) | ✅ | ✅ |
+| Bilingual UI (English / Persian) | ✅ | ✅ |
+| Live Token Monitor (Proxy) | ✅ | ✅ |
+| Codebase Graph (code-graph-mcp) | ✅ (limited) | ✅ |
+| Token Budget Guard | ❌ | ✅ |
+| Long-term Agent Memory | ❌ | ✅ |
+| Output Compression & Deduplication | ❌ | ✅ |
+| Team Config Export | ❌ | ✅ |
+
+---
+
+## 🛠️ Architecture
+
+```
+┌─────────────────────────────────────────────────────┐
+│                  Desktop App (Electron)              │
+│  ┌──────────┐  ┌──────────┐  ┌──────────────────┐  │
+│  │  Project │  │ Questions│  │   Tool Installer │  │
+│  │  Scanner │→ │ Wizard   │→ │  (curl, npm, git)│  │
+│  └──────────┘  └──────────┘  └──────────────────┘  │
+│                                    ↓                 │
+│                         ┌──────────────────┐        │
+│                         │  Live Proxy 8080 │        │
+│                         │  Token Monitor   │        │
+│                         └──────────────────┘        │
+└─────────────────────────────────────────────────────┘
+          ↓ (Auth / Licenses / Notifications)
+┌─────────────────────────────────────────────────────┐
+│              Backend API (Node.js / JSON DB)         │
+│  /api/auth   /api/tools   /admin   /api/notify       │
+└─────────────────────────────────────────────────────┘
+```
+
+### Supported AI Agents
+Claude Code · Cursor · Windsurf · Codex CLI · Gemini CLI · Aider · Roo Cline · VS Code Copilot
+
+---
+
+## 📦 Getting Started
+
+### Prerequisites
+- Node.js v18+
+- Git
+
+### 1. Clone & Install
+
+```bash
+git clone https://github.com/m4tinbeigi-official/tokensaver.git
+cd tokensaver
+```
+
+### 2. Start the Backend
+
+```bash
+cd server
+npm install
+npm start
+# Server: http://localhost:8080
+# Admin:  http://localhost:8080/admin
+```
+
+### 3. Launch the Desktop App
 
 ```bash
 cd desktop
 npm install
-npm start          # اجرای اپ در حالت توسعه
+npm start
 ```
 
-## انتشار خودکار
+---
 
-با هر push به `main` که چیزی در `desktop/` تغییر کند (یا با push یک tag مثل `v1.1.0`)، GitHub Actions نسخه‌ی ویندوز و مک را می‌سازد و در یک Release با شماره‌ی نسخه‌ی `desktop/package.json` منتشر می‌کند. برای انتشار نسخه‌ی جدید کافی است `version` را در `desktop/package.json` بالا ببری و push کنی.
+## 🔒 Security & Privacy
 
-## وب‌سایت
+> **Your code stays on your machine.** Token Saver's proxy processes everything locally. Only authentication tokens and license keys communicate with our servers. The codebase graph (code-graph-mcp) runs entirely via local MCP servers.
 
-سایت ایستا است؛ کافی است `index.html` را باز کنی یا روی هر static host (مثل GitHub Pages) منتشر کنی.
+---
 
-## لایسنس
+## 📄 License
 
-MIT
+The core installer and config generator are open-source. Pro token-saving algorithms (Budget Guard, Output Compression, Agent Memory) are unlocked via a license key available at [tokensaver.ir](https://tokensaver.ir).
+
+---
+
+<div align="center">
+  <sub>Built with ❤️ for developers tired of high AI API bills · <a href="https://tokensaver.ir">tokensaver.ir</a></sub>
+</div>

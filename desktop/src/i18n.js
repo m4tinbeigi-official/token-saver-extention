@@ -107,7 +107,8 @@ const translations = {
     "tool_btn_install": "Auto Install",
     "tool_btn_cancel": "Cancel",
     "tool_btn_repo": "Project Page",
-    "tool_btn_copy": "Copy Command"
+    "tool_btn_copy": "Copy Command",
+    "auth_guest_btn": "Continue as Guest (No Login)"
   },
   fa: {
     "app_title": "Token Saver",
@@ -217,7 +218,8 @@ const translations = {
     "tool_btn_install": "نصب خودکار",
     "tool_btn_cancel": "لغو نصب",
     "tool_btn_repo": "صفحه پروژه",
-    "tool_btn_copy": "کپی دستور"
+    "tool_btn_copy": "کپی دستور",
+    "auth_guest_btn": "ادامه بدون ورود (حالت مهمان)"
   }
 };
 

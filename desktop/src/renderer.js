@@ -1009,6 +1009,18 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnEn) btnEn.addEventListener('click', () => { currentLang = 'en'; applyLanguage(); });
   if (btnFa) btnFa.addEventListener('click', () => { currentLang = 'fa'; applyLanguage(); });
   
+  const guestBtn = $('#auth-guest-btn');
+  if (guestBtn) {
+    guestBtn.addEventListener('click', () => {
+      loginOverlay.classList.add('hidden');
+      userProfileName.textContent = currentLang === 'fa' ? 'کاربر مهمان' : 'Guest User';
+      userProfilePhone.textContent = 'Offline Mode';
+      userProfileCard.classList.remove('hidden');
+      state.user = { isGuest: true, name: 'Guest' };
+      loadTools();
+    });
+  }
+
   const googleBtn = $('#auth-google-btn');
   if (googleBtn) {
     googleBtn.addEventListener('click', async () => {
