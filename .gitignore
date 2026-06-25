@@ -1,6 +1,8 @@
-server/
 node_modules/
 .DS_Store
 dist/
 release/
 *.log
+server/.env
+server/node_modules/
+server/db.json
