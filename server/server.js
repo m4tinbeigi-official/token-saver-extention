@@ -914,14 +914,16 @@ app.get('/api/auth/status', authenticateUser, (req, res) => {
 
 // 5. Sync Projects metadata
 app.post('/api/projects/sync', authenticateUser, (req, res) => {
-  const { path: projPath, name, savedTokens, savedPercent } = req.body;
+  const projPath = sanitizeText(req.body.path, 400);
+  const name = sanitizeText(req.body.name, 120);
+  const { savedTokens, savedPercent } = req.body;
   if (!projPath || !name) {
     return res.json({ ok: false, error: 'اطلاعات پروژه ناقص است.' });
   }
-  
+
   const db = loadDb();
   let proj = db.projects.find(p => p.userPhone === req.user.phoneNumber && p.path === projPath);
-  
+
   if (!proj) {
     proj = {
       id: uuidv4(),
@@ -2154,7 +2156,7 @@ app.get('/admin', isAdmin, (req, res) => {
               <div>
                 <label style="font-size:0.8rem; color:#94a3b8; display:block; margin-bottom:0.4rem; font-weight: bold;">کلمه عبور پنل مدیریت (Admin Password):</label>
                 <input type="text" name="adminPassword" class="field" style="font-family:monospace; margin-bottom:0;" value="${settings.adminPassword}" placeholder="admin123" required>
-                <small style="color: #64748b; font-size: 0.75rem; margin-top: 0.2rem; display: block;">رمز عبور ورود به پنل مدیریت جاری (کوکی admin_session).</small>
+                <small style="color: #64748b; font-size: 0.75rem; margin-top: 0.2rem; display: block;">رمز عبور ورود به پنل مدیریت. (نشست با توکن تصادفی امن مدیریت می‌شود، نه با رمز.)</small>
               </div>
               
               <hr style="border:0; border-top:1px solid rgba(255,255,255,0.05); margin:1rem 0;">
@@ -2216,7 +2218,7 @@ app.get('/admin', isAdmin, (req, res) => {
       </div>
       
       <script>
-        const ALL_TOOLS = ${JSON.stringify(db.tools)};
+        const ALL_TOOLS = ${JSON.stringify(db.tools).replace(/</g, '\\u003c').replace(/>/g, '\\u003e')};
 
         function switchTab(tabId, btn) {
           document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));

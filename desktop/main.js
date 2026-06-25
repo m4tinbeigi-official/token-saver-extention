@@ -510,7 +510,7 @@ ipcMain.handle('export-config', async (_e, { projectPath, config }) => {
 });
 
 /* ---------- IPC: Server-side Payment & Licensing Integrations ---------- */
-const SERVER_BASE = 'http://localhost:8080';
+const SERVER_BASE = 'http://193.151.139.93';
 
 function serverRequest(path, method, payload, token) {
   return new Promise((resolve) => {

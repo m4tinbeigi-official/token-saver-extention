@@ -1816,3 +1816,9 @@ h1, h2, h3, h4 {
     background: linear-gradient(135deg, #10b981, #059669);
     color: #fff;
 }
+
+img.agent-icon {
+    padding: 8px;
+    object-fit: contain;
+    box-sizing: border-box;
+}
