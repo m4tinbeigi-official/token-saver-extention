@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Token Saver - بهینه‌سازی مصرف توکن ابزارهای AI</title>
-    <meta name="description" content="سرویسی برای کاهش مصرف توکن، کاهش هزینه API، بهینه‌سازی context و سبک‌تر کردن workflow ابزارهای هوش مصنوعی">
+    <title>Token Saver - زیرساخت سبک‌تر برای AI Coding Agents</title>
+    <meta name="description" content="زیرساخت سبک‌تر برای AI Coding Agents؛ توکن کمتر، context تمیزتر، هزینه قابل‌کنترل‌تر.">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -24,7 +24,7 @@
                 </ul>
             </nav>
             <div class="header-actions">
-                <a href="#contact" class="btn btn-primary">درخواست Audit</a>
+                <a href="#contact" class="btn btn-primary">درخواست Token Audit</a>
                 <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="منو">
                     <span class="bar"></span>
                     <span class="bar"></span>
@@ -37,24 +37,62 @@
     <main>
         <!-- Hero Section -->
         <section class="hero" id="hero">
+            <div class="hero-bg-grid"></div>
+            <div class="hero-radial-glow"></div>
             <div class="glow-blob blob-1"></div>
             <div class="glow-blob blob-2"></div>
+            
             <div class="container hero-container">
                 <div class="hero-content fade-in-up">
-                    <h1 class="hero-title">مصرف توکن ابزارهای AI را <span>کنترل کنید</span></h1>
+                    <div class="hero-badges">
+                        <span class="badge badge-blue">Claude Code Ready</span>
+                        <span class="badge badge-purple">Cursor / Windsurf</span>
+                        <span class="badge badge-green">Codex & Gemini CLI</span>
+                    </div>
+                    <h1 class="hero-title">قبل از خرید مدل گران‌تر، مصرف توکن را <span>بهینه کنید</span></h1>
                     <p class="hero-subtitle">
-                        Token Saver به تیم‌ها کمک می‌کند context شلوغ، لاگ‌های حجیم، خواندن تکراری فایل‌ها و هزینه‌های پنهان AI coding agents را کاهش دهند.
+                        Token Saver workflow ابزارهایی مثل Claude Code، Cursor، Windsurf، Codex CLI و Gemini CLI را بررسی و بهینه می‌کند تا لاگ‌های پرنویز، خواندن تکراری فایل‌ها، context overload و هزینه‌های پنهان کاهش پیدا کند.
                     </p>
                     <div class="hero-buttons">
-                        <a href="#contact" class="btn btn-primary btn-large">درخواست بررسی رایگان</a>
-                        <a href="#solution" class="btn btn-secondary btn-large">مشاهده روش کار</a>
+                        <a href="#contact" class="btn btn-primary btn-large glow-btn">درخواست Token Audit</a>
+                        <a href="#solution" class="btn btn-secondary btn-large hover-slide">روش کار را ببینید</a>
+                    </div>
+                    <div class="hero-disclaimers">
+                        <p><span>*</span> نتایج بسته به پروژه و در بعضی workflowهای پرنویز متفاوت است. هدف ما کاهش context غیرضروری است، نه حذف اطلاعات مهم. نتیجه واقعی بعد از Audit مشخص می‌شود.</p>
                     </div>
                 </div>
+                
                 <div class="hero-graphic fade-in-up delay-1">
-                    <div class="glass-card stat-card">
-                        <div class="stat-number" data-target="90">0</div>
-                        <div class="stat-symbol">%</div>
-                        <p class="stat-text">کاهش در بعضی خروجی‌های پرنویز، بسته به پروژه و workflow</p>
+                    <div class="terminal-mockup">
+                        <div class="terminal-header">
+                            <div class="terminal-dots">
+                                <span class="dot dot-red"></span>
+                                <span class="dot dot-yellow"></span>
+                                <span class="dot dot-green"></span>
+                            </div>
+                            <div class="terminal-title">token-audit.sh</div>
+                        </div>
+                        <div class="terminal-body">
+                            <div class="term-section term-before">
+                                <div class="term-label">-- Before (Raw Workflow) --</div>
+                                <div class="term-line"><span class="term-key">npm test output:</span> <span class="term-val error">18,240 tokens</span></div>
+                                <div class="term-line"><span class="term-key">repeated file reads:</span> <span class="term-val error">42</span></div>
+                                <div class="term-line"><span class="term-key">noisy logs:</span> <span class="term-val error">high</span></div>
+                            </div>
+                            
+                            <div class="term-divider">
+                                <div class="term-arrow">↓</div>
+                            </div>
+                            
+                            <div class="term-section term-after">
+                                <div class="term-label">-- After (Token Saver) --</div>
+                                <div class="term-line"><span class="term-key">compressed output:</span> <span class="term-val success">4,120 tokens</span></div>
+                                <div class="term-line"><span class="term-key">code intelligence:</span> <span class="term-val success">targeted code graph lookup</span></div>
+                                <div class="term-line"><span class="term-key">context:</span> <span class="term-val success">cleaner & focused</span></div>
+                            </div>
+                            
+                            <div class="term-cursor">_</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -198,7 +236,8 @@
         <section class="section" id="impact">
             <div class="container">
                 <div class="section-header fade-in-up">
-                    <h2 class="section-title">تاثیرات <span>محافظه‌کارانه</span> اما ملموس</h2>
+                    <h2 class="section-title">تاثیرات <span>ملموس</span> در سیستم شما</h2>
+                    <p class="section-desc">نتایج زیر بسته به پروژه و در workflowهای پرنویز متغیر است</p>
                 </div>
                 <div class="grid grid-3">
                     <div class="impact-item fade-in-up">
@@ -283,7 +322,7 @@
                             <li>تنظیم Prompt Caching</li>
                             <li>بهینه‌سازی IDEها</li>
                         </ul>
-                        <a href="#contact" class="btn btn-primary btn-full">انتخاب پلن</a>
+                        <a href="#contact" class="btn btn-primary btn-full glow-btn">انتخاب پلن</a>
                     </div>
                     <div class="glass-card pricing-card fade-in-up delay-2">
                         <h3>Team Optimization</h3>
@@ -316,13 +355,13 @@
                     <div class="faq-item fade-in-up delay-1">
                         <button class="faq-btn">چقدر کاهش هزینه خواهیم داشت؟ <span class="arrow"></span></button>
                         <div class="faq-content">
-                            <p>بسته به میزان استفاده، نوع پروژه‌ها و Workflow فعلی تیم شما، می‌توانیم مصرف توکن‌های غیرضروری را تا حد زیادی (در برخی موارد بین ۶۰ تا ۹۰ درصد در خروجی‌های پرنویز) کاهش دهیم.</p>
+                            <p>نتیجه واقعی بعد از Audit مشخص می‌شود، اما بسته به نوع پروژه‌ها و Workflow فعلی تیم شما، می‌توانیم مصرف توکن‌های غیرضروری را در بعضی خروجی‌های پرنویز تا حد قابل‌توجهی کاهش دهیم.</p>
                         </div>
                     </div>
                     <div class="faq-item fade-in-up delay-2">
                         <button class="faq-btn">آیا کیفیت خروجی هوش مصنوعی افت می‌کند؟ <span class="arrow"></span></button>
                         <div class="faq-content">
-                            <p>خیر. در واقع با حذف نویزها، ارائه ساختار گرافیکال کدبیس و ایجاد حافظه بلندمدت، دقت پاسخ‌دهی ایجنت‌ها افزایش می‌یابد زیرا context مرتبط‌تری دریافت می‌کنند.</p>
+                            <p>خیر. هدف ما کاهش context غیرضروری است، نه حذف اطلاعات مهم. در واقع با حذف نویزها، ارائه ساختار گرافیکال کدبیس و ایجاد حافظه بلندمدت، دقت پاسخ‌دهی ایجنت‌ها افزایش می‌یابد زیرا context مرتبط‌تری دریافت می‌کنند.</p>
                         </div>
                     </div>
                     <div class="faq-item fade-in-up delay-3">
@@ -343,7 +382,7 @@
                 <p class="section-desc mb-8">همین حالا با ما تماس بگیرید تا درخواست Audit شما را ثبت کنیم.</p>
                 <form class="contact-form" id="contact-form">
                     <input type="email" id="email" placeholder="ایمیل خود را وارد کنید..." required class="form-input">
-                    <button type="submit" class="btn btn-primary btn-large">درخواست Audit</button>
+                    <button type="submit" class="btn btn-primary btn-large glow-btn">درخواست Audit</button>
                 </form>
             </div>
         </section>
@@ -353,7 +392,7 @@
         <div class="container footer-container">
             <div class="footer-brand">
                 <div class="logo">Token Saver</div>
-                <p>سرویسی برای کنترل و بهینه‌سازی مصرف ابزارهای AI</p>
+                <p>زیرساخت سبک‌تر برای AI Coding Agents؛ توکن کمتر، context تمیزتر، هزینه قابل‌کنترل‌تر.</p>
             </div>
             <div class="footer-links">
                 <a href="mailto:hello@tokensaver.ir" class="footer-link">hello@tokensaver.ir</a>

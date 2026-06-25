@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('visible');
-                // observer.unobserve(entry.target); // Uncomment to animate only once
+                // observer.unobserve(entry.target); // Optional: uncomment to animate only once
             }
         });
     }, observerOptions);
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fadeObserver.observe(el);
     });
 
-    // 5. Number Counter Animation
+    // 5. Number Counter Animation (for Impact section if numbers are added)
     const statsElements = document.querySelectorAll('.stat-number');
     let counted = false;
 
@@ -117,22 +117,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 7. Contact Form (Mailto)
     const contactForm = document.getElementById('contact-form');
-    contactForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const emailInput = document.getElementById('email').value;
-        const subject = encodeURIComponent('درخواست Audit برای Token Saver');
-        const body = encodeURIComponent(`سلام،\n\nما علاقه‌مند به دریافت Audit برای سیستم هوش مصنوعی خود هستیم.\nایمیل ارتباطی ما: ${emailInput}\n\nلطفاً در اسرع وقت با ما تماس بگیرید.\n\nبا تشکر`);
-        window.location.href = `mailto:hello@tokensaver.ir?subject=${subject}&body=${body}`;
-        
-        // Reset form
-        contactForm.reset();
-        
-        // Simple feedback
-        const btn = contactForm.querySelector('button');
-        const originalText = btn.textContent;
-        btn.textContent = 'در حال انتقال...';
-        setTimeout(() => {
-            btn.textContent = originalText;
-        }, 3000);
-    });
+    if (contactForm) {
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const emailInput = document.getElementById('email').value;
+            const subject = encodeURIComponent('درخواست Audit برای Token Saver');
+            const body = encodeURIComponent(`سلام،\n\nما علاقه‌مند به دریافت Token Audit برای زیرساخت هوش مصنوعی خود هستیم.\nایمیل ارتباطی ما: ${emailInput}\n\nلطفاً در اسرع وقت با ما تماس بگیرید.\n\nبا تشکر`);
+            window.location.href = `mailto:hello@tokensaver.ir?subject=${subject}&body=${body}`;
+            
+            // Reset form
+            contactForm.reset();
+            
+            // Simple feedback
+            const btn = contactForm.querySelector('button');
+            const originalText = btn.textContent;
+            btn.textContent = 'در حال انتقال...';
+            setTimeout(() => {
+                btn.textContent = originalText;
+            }, 3000);
+        });
+    }
 });
