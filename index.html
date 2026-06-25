@@ -586,7 +586,7 @@
                     <div class="glass-card pricing-card popular fade-in-up delay-1">
                         <div class="popular-badge">Special Offer</div>
                         <h3>Professional Implementation</h3>
-                        <div class="price">15 <span class="price-unit">Million Tomans</span></div>
+                        <div class="price">$299 <span class="price-unit">one-time</span></div>
                         <div class="price-sub">Full deployment by us</div>
                         <ul class="pricing-features">
                             <li>Full Workflow Audit and token leak report</li>
@@ -598,7 +598,7 @@
                     </div>
                     <div class="glass-card pricing-card fade-in-up delay-2">
                         <h3>Team Implementation</h3>
-                        <div class="price">30 <span class="price-unit">Million Tomans</span></div>
+                        <div class="price">$999 <span class="price-unit">Enterprise</span></div>
                         <div class="price-sub">Enterprise deployment + dedicated support</div>
                         <ul class="pricing-features">
                             <li>All professional plan features</li>
@@ -681,34 +681,14 @@
     <script src="script.js"></script>
 
     <script>
-        // Dynamic Pricing based on Geo-IP
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const res = await fetch('http://ip-api.com/json');
-                const data = await res.json();
-                if (data && data.countryCode !== 'IR') {
-                    // Change currencies to USD for non-Iran users
-                    const priceNodes = document.querySelectorAll('.price');
-                    if (priceNodes.length >= 3) {
-                        // Node 0 is Free
-                        // Node 1 is Pro (15 M) -> $299
-                        priceNodes[1].innerHTML = '$299 <span class="price-unit">Lifetime</span>';
-                        // Node 2 is Team (30 M) -> $999
-                        priceNodes[2].innerHTML = '$999 <span class="price-unit">Enterprise</span>';
-                    }
-                    
-                    // Update the buttons to point to international payment
-                    const paymentBtns = document.querySelectorAll('a[href="#contact"]');
-                    paymentBtns.forEach(btn => {
-                        if (btn.textContent.includes('Request Implementation') || btn.textContent.includes('Request Setup')) {
-                            btn.textContent = 'Buy with Crypto/Stripe';
-                            btn.href = 'mailto:sales@tokensaver.ir?subject=International%20Purchase';
-                        }
-                    });
+        // International checkout: route paid plans to Stripe/Crypto (USD pricing is shown for all visitors).
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('a[href="#contact"]').forEach(btn => {
+                if (btn.textContent.includes('Request Implementation') || btn.textContent.includes('Request Setup')) {
+                    btn.textContent = 'Buy with Crypto/Stripe';
+                    btn.href = 'mailto:sales@tokensaver.ir?subject=International%20Purchase';
                 }
-            } catch (err) {
-                console.warn('Geolocation failed for dynamic pricing.', err);
-            }
+            });
         });
     </script>
 </body>
