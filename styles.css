@@ -1024,8 +1024,21 @@ h1, h2, h3, h4 {
 .price {
     font-size: 2.5rem;
     font-weight: 800;
-    margin-bottom: 2rem;
+    margin-bottom: 0.5rem;
     color: #fff;
+}
+
+.price-unit {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.price-sub {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    opacity: 0.8;
 }
 
 .pricing-features {
