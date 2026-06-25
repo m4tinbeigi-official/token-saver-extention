@@ -1726,3 +1726,93 @@ h1, h2, h3, h4 {
     .prose h2 { font-size: 1.45rem; }
 }
 
+
+/* Supported AI Agents Grid */
+.agents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.agent-card {
+    background: rgba(10, 10, 16, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    cursor: default;
+}
+
+.agent-card:hover {
+    background: rgba(20, 20, 30, 0.6);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+}
+
+.agent-info h3 {
+    font-size: 1.05rem;
+    color: #f8fafc;
+    margin: 0 0 0.3rem 0;
+    font-weight: 700;
+}
+
+.agent-info p {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.agent-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-size: 1.5rem;
+    font-weight: 900;
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+    box-shadow: inset 0 2px 4px rgba(255,255,255,0.1);
+}
+
+/* Agent Specific Gradients */
+.agent-icon.claude {
+    background: linear-gradient(135deg, #d97757, #bd5432);
+    color: #fff;
+}
+.agent-icon.cursor {
+    background: linear-gradient(135deg, #2b2b2b, #000);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #fff;
+}
+.agent-icon.antigravity {
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    color: #fff;
+}
+.agent-icon.aider {
+    background: linear-gradient(135deg, #eab308, #ca8a04);
+    color: #fff;
+}
+.agent-icon.copilot {
+    background: linear-gradient(135deg, #ffffff, #d1d5db);
+    color: #111827;
+}
+.agent-icon.windsurf {
+    background: linear-gradient(135deg, #06b6d4, #0284c7);
+    color: #fff;
+}
+.agent-icon.cline {
+    background: linear-gradient(135deg, #ec4899, #be185d);
+    color: #fff;
+}
+.agent-icon.gemini {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+}

@@ -207,125 +207,195 @@ async function loadTools() {
     } catch(e) {}
   }
 
-  tools.forEach((tool) => {
-    const node = tpl.content.cloneNode(true);
-    const card = node.querySelector('.tool-card');
-    card.dataset.id = tool.id;
-    node.querySelector('.tool-name').textContent = tool.name;
-    node.querySelector('.tool-tagline').textContent = tool.tagline;
-    if (tool.recommended) node.querySelector('.tool-badge').classList.remove('hidden');
-    node.querySelector('.tool-desc').textContent = tool.description;
-    node.querySelector('.tool-how').innerHTML = '<b>چطور کار می‌کند:</b> ' + escapeHtml(tool.howItWorks);
-    node.querySelector('.tool-claims').innerHTML = tool.claims.map((c) => '<li>' + escapeHtml(c) + '</li>').join('');
-    node.querySelector('.tool-notes').innerHTML = tool.notes.map((c) => '<li>' + escapeHtml(c) + '</li>').join('');
-    node.querySelector('.tool-after').innerHTML = '<b>بعد از نصب:</b> ' + escapeHtml(tool.afterInstall);
+  // Set up category filters click handlers
+  const filterBtns = document.querySelectorAll('.category-filters .filter-btn');
+  filterBtns.forEach(btn => {
+    if (!btn.dataset.listenerSet) {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => {
+          b.classList.remove('active');
+          b.style.background = 'none';
+          b.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+          b.style.color = '#94a3b8';
+        });
+        btn.classList.add('active');
+        btn.style.background = 'rgba(59,130,246,0.1)';
+        btn.style.borderColor = '#3b82f6';
+        btn.style.color = '#3b82f6';
+        
+        renderTools(btn.dataset.category);
+      });
+      btn.dataset.listenerSet = 'true';
+    }
+  });
 
-    const spec = tool.install[platform];
-    const cmd = spec ? spec.cmd : '';
-    const log = node.querySelector('.tool-log');
-
-    node.querySelector('.tool-repo').addEventListener('click', () => api.openExternal(tool.repo));
+  // Render function helper
+  function renderTools(categoryFilter = 'all') {
+    list.innerHTML = '';
     
-    const installBtn = node.querySelector('.tool-install');
-    const copyBtn = node.querySelector('.tool-copy');
-    const cancelBtn = node.querySelector('.tool-cancel');
-    const secnote = node.querySelector('.tool-secnote');
-
-    copyBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(cmd);
-      note(card, 'دستور کپی شد.');
-    });
-
-    const hasPurchasedTool = state.user && state.user.purchasedTools && state.user.purchasedTools.includes(tool.id);
-    const isLocked = tool.locked && !(state.license && state.license.active) && !hasPurchasedTool;
-
-    // Handle locked pro tools
-    if (isLocked) {
-      card.classList.add('locked');
-      const badge = node.querySelector('.tool-badge');
-      badge.textContent = 'پرو (قفل شده)';
-      badge.style.borderColor = '#f59e0b';
-      badge.style.color = '#f59e0b';
-      badge.style.background = 'rgba(245, 158, 11, 0.1)';
-      badge.classList.remove('hidden');
-
-      const priceText = (tool.price || 50000).toLocaleString('fa-IR');
-      installBtn.textContent = `خرید ابزار (${priceText} تومان)`;
-      installBtn.classList.remove('btn-primary');
-      installBtn.classList.add('btn-pro');
+    // Filter tools based on selected category
+    const filteredTools = categoryFilter === 'all'
+      ? tools
+      : tools.filter(t => t.category === categoryFilter);
       
-      installBtn.addEventListener('click', async () => {
-        const token = localStorage.getItem('tokensaver_user_token');
-        if (!token) {
-          alert('ابتدا باید وارد حساب خود شوید.');
-          return;
-        }
-        
-        installBtn.disabled = true;
-        installBtn.textContent = 'اتصال به درگاه…';
-        const res = await api.requestPaymentTool(token, tool.id);
-        installBtn.disabled = false;
-        installBtn.textContent = `خرید ابزار (${priceText} تومان)`;
-        
-        if (res && res.ok && res.paymentUrl) {
-          api.openExternal(res.paymentUrl);
-          const msg = $('#license-status-msg');
-          msg.style.color = '#c084fc';
-          msg.textContent = `درگاه پرداخت برای ابزار ${tool.name} باز شد. پس از پرداخت موفق، قفل ابزار باز خواهد شد.`;
-        } else {
-          alert('خطا در اتصال به درگاه پرداخت ابزار: ' + ((res && res.error) || 'نامشخص'));
-        }
-      });
-
-      copyBtn.disabled = true;
-      if (secnote) secnote.classList.add('hidden');
-    } else {
-      // Check if already installed
-      const proj = getProjectFromHistory(state.projectPath);
-      const isInstalled = proj && proj.tools && proj.tools.includes(tool.id);
-      if (isInstalled) {
-        installBtn.textContent = 'نصب شد ✓';
-      }
-
-      cancelBtn.addEventListener('click', async () => {
-        await api.cancelInstall();
-        log.textContent += '\n[لغو شد توسط کاربر]\n';
-      });
-
-      installBtn.addEventListener('click', async () => {
-        if (!state.projectPath) { note(card, 'اول پروژه را انتخاب کن.'); return; }
-        log.classList.remove('hidden');
-        log.textContent = '';
-        installBtn.disabled = true;
-        installBtn.textContent = 'در حال نصب…';
-        cancelBtn.classList.remove('hidden');
-        const res = await api.installTool(tool.id, state.projectPath);
-        installBtn.disabled = false;
-        cancelBtn.classList.add('hidden');
-        if (res && res.manual) {
-          log.textContent += '\nاین ابزار روی سیستم تو نیاز به اجرای دستی دارد:\n' + res.cmd + '\n' + (res.note || '');
-          installBtn.textContent = 'نصب دستی لازم است';
-        } else if (res && res.ok) {
-          installBtn.textContent = 'نصب شد ✓';
-          
-          // Update project history
-          const projCurrent = getProjectFromHistory(state.projectPath);
-          const toolsList = projCurrent ? (projCurrent.tools || []) : [];
-          if (!toolsList.includes(tool.id)) {
-            toolsList.push(tool.id);
-          }
-          addOrUpdateProjectInHistory(state.projectPath, { tools: toolsList });
-        } else {
-          installBtn.textContent = 'نصب ناموفق — تلاش دوباره';
-          if (res && res.needsShell) {
-            log.textContent += '\nراهنما: روی ویندوز WSL یا Git Bash نصب کن، یا دستور را آنجا اجرا کن.';
-          }
-        }
-      });
+    if (filteredTools.length === 0) {
+      list.innerHTML = '<div style="text-align:center; padding: 2rem; color: var(--muted); grid-column: 1 / -1; font-size: 0.9rem;">هیچ ابزاری در این دسته‌بندی یافت نشد.</div>';
+      return;
     }
 
-    list.appendChild(node);
-  });
+    filteredTools.forEach((tool) => {
+      const node = tpl.content.cloneNode(true);
+      const card = node.querySelector('.tool-card');
+      card.dataset.id = tool.id;
+      node.querySelector('.tool-name').textContent = tool.name;
+      node.querySelector('.tool-tagline').textContent = tool.tagline;
+      if (tool.recommended) node.querySelector('.tool-badge').classList.remove('hidden');
+      node.querySelector('.tool-desc').textContent = tool.description;
+      node.querySelector('.tool-how').innerHTML = '<b>چطور کار می‌کند:</b> ' + escapeHtml(tool.howItWorks);
+      node.querySelector('.tool-claims').innerHTML = tool.claims.map((c) => '<li>' + escapeHtml(c) + '</li>').join('');
+      node.querySelector('.tool-notes').innerHTML = tool.notes.map((c) => '<li>' + escapeHtml(c) + '</li>').join('');
+      node.querySelector('.tool-after').innerHTML = '<b>بعد از نصب:</b> ' + escapeHtml(tool.afterInstall);
+
+      const uiUrlDiv = node.querySelector('.tool-ui-url');
+      if (uiUrlDiv) {
+        if (tool.uiUrl) {
+          uiUrlDiv.innerHTML = `رابط کاربری ابزار: <a href="#" class="tool-ui-link" style="color: #60a5fa; text-decoration: underline; font-weight: bold;">${escapeHtml(tool.uiUrl)}</a>`;
+          uiUrlDiv.querySelector('.tool-ui-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            api.openExternal(tool.uiUrl);
+          });
+          uiUrlDiv.classList.remove('hidden');
+        } else {
+          uiUrlDiv.classList.add('hidden');
+        }
+      }
+
+      const spec = tool.install[platform];
+      const cmd = spec ? spec.cmd : '';
+      const log = node.querySelector('.tool-log');
+
+      node.querySelector('.tool-repo').addEventListener('click', () => api.openExternal(tool.repo));
+      
+      const installBtn = node.querySelector('.tool-install');
+      const copyBtn = node.querySelector('.tool-copy');
+      const cancelBtn = node.querySelector('.tool-cancel');
+      const secnote = node.querySelector('.tool-secnote');
+
+      copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(cmd);
+        note(card, 'دستور کپی شد.');
+      });
+
+      const hasPurchasedTool = state.user && state.user.purchasedTools && state.user.purchasedTools.includes(tool.id);
+      const isLocked = tool.locked && !(state.license && state.license.active) && !hasPurchasedTool;
+
+      if (isLocked) {
+        card.classList.add('locked');
+        const badge = node.querySelector('.tool-badge');
+        badge.textContent = 'پرو (قفل شده)';
+        badge.style.borderColor = '#f59e0b';
+        badge.style.color = '#f59e0b';
+        badge.style.background = 'rgba(245, 158, 11, 0.1)';
+        badge.classList.remove('hidden');
+
+        const priceText = (tool.price || 50000).toLocaleString('fa-IR');
+        installBtn.textContent = `خرید ابزار (${priceText} تومان)`;
+        installBtn.classList.remove('btn-primary');
+        installBtn.classList.add('btn-pro');
+        
+        installBtn.addEventListener('click', async () => {
+          const token = localStorage.getItem('tokensaver_user_token');
+          if (!token) {
+            alert('ابتدا باید وارد حساب خود شوید.');
+            return;
+          }
+          
+          installBtn.disabled = true;
+          installBtn.textContent = 'اتصال به درگاه…';
+          const res = await api.requestPaymentTool(token, tool.id);
+          installBtn.disabled = false;
+          installBtn.textContent = `خرید ابزار (${priceText} تومان)`;
+          
+          if (res && res.ok && res.paymentUrl) {
+            api.openExternal(res.paymentUrl);
+            const msg = $('#license-status-msg');
+            msg.style.color = '#c084fc';
+            msg.textContent = `درگاه پرداخت برای ابزار ${tool.name} باز شد. پس از پرداخت موفق، قفل ابزار باز خواهد شد.`;
+          } else {
+            alert('خطا در اتصال به درگاه پرداخت ابزار: ' + ((res && res.error) || 'نامشخص'));
+          }
+        });
+
+        copyBtn.disabled = true;
+        if (secnote) secnote.classList.add('hidden');
+      } else {
+        const proj = getProjectFromHistory(state.projectPath);
+        const isInstalled = proj && proj.tools && proj.tools.includes(tool.id);
+        if (isInstalled) {
+          installBtn.textContent = 'نصب شد ✓';
+        }
+
+        cancelBtn.addEventListener('click', async () => {
+          await api.cancelInstall();
+          log.textContent += '\n[لغو شد توسط کاربر]\n';
+        });
+
+        installBtn.addEventListener('click', async () => {
+          if (!state.projectPath) { note(card, 'اول پروژه را انتخاب کن.'); return; }
+          log.classList.remove('hidden');
+          log.textContent = '';
+          installBtn.disabled = true;
+          installBtn.textContent = 'در حال نصب…';
+          cancelBtn.classList.remove('hidden');
+
+          const token = localStorage.getItem('tokensaver_user_token');
+          if (!token) {
+            alert('برای نصب ابزارها ابتدا باید وارد حساب کاربری خود شوید.');
+            installBtn.disabled = false;
+            installBtn.textContent = 'نصب خودکار';
+            cancelBtn.classList.add('hidden');
+            return;
+          }
+
+          const useRes = await api.useTool(token, tool.id, state.projectPath);
+          if (!useRes || !useRes.ok) {
+            alert('خطا در تخصیص ابزار: ' + ((useRes && useRes.error) || 'عدم دسترسی یا رسیدن به سقف مجاز استفاده روی پروژه‌ها.'));
+            installBtn.disabled = false;
+            installBtn.textContent = 'نصب خودکار';
+            cancelBtn.classList.add('hidden');
+            return;
+          }
+
+          const res = await api.installTool(tool.id, state.projectPath);
+          installBtn.disabled = false;
+          cancelBtn.classList.add('hidden');
+          if (res && res.manual) {
+            log.textContent += '\nاین ابزار روی سیستم تو نیاز به اجرای دستی دارد:\n' + res.cmd + '\n' + (res.note || '');
+            installBtn.textContent = 'نصب دستی لازم است';
+          } else if (res && res.ok) {
+            installBtn.textContent = 'نصب شد ✓';
+            
+            const projCurrent = getProjectFromHistory(state.projectPath);
+            const toolsList = projCurrent ? (projCurrent.tools || []) : [];
+            if (!toolsList.includes(tool.id)) {
+              toolsList.push(tool.id);
+            }
+            addOrUpdateProjectInHistory(state.projectPath, { tools: toolsList });
+          } else {
+            installBtn.textContent = 'نصب ناموفق — تلاش دوباره';
+            if (res && res.needsShell) {
+              log.textContent += '\nراهنما: روی ویندوز WSL یا Git Bash نصب کن، یا دستور را آنجا اجرا کن.';
+            }
+          }
+        });
+      }
+
+      list.appendChild(node);
+    });
+  }
+
+  // Render initial all category
+  renderTools('all');
 
   // Stream installer output into the matching tool's log box
   api.onInstallOutput((toolId, chunk) => {
@@ -917,11 +987,51 @@ async function checkStartupAuth() {
     
     // Reload tools to unlock Pro tools
     await loadTools();
+    await fetchAndShowNotifications();
   } else {
     localStorage.removeItem('tokensaver_user_token');
     loginOverlay.classList.remove('hidden');
     authStatusMsg.style.color = '#ef4444';
     authStatusMsg.textContent = 'نشست شما منقضی شده است. لطفا دوباره وارد شوید.';
+  }
+}
+
+// Fetch and render latest notifications from server
+async function fetchAndShowNotifications() {
+  const token = localStorage.getItem('tokensaver_user_token');
+  if (!token) return;
+
+  try {
+    const res = await api.fetchNotifications(token);
+    if (res && res.ok && res.notifications && res.notifications.length > 0) {
+      const dismissed = JSON.parse(localStorage.getItem('tokensaver_dismissed_notifs') || '[]');
+      const activeNotifs = res.notifications.filter(n => !dismissed.includes(n.id));
+      
+      if (activeNotifs.length > 0) {
+        const latest = activeNotifs[activeNotifs.length - 1];
+        const banner = $('#notifications-banner');
+        const content = $('#notification-content');
+        const closeBtn = $('#notif-close-btn');
+
+        content.textContent = latest.message;
+        banner.classList.remove('hidden');
+
+        const newCloseBtn = closeBtn.cloneNode(true);
+        closeBtn.replaceWith(newCloseBtn);
+
+        newCloseBtn.addEventListener('click', () => {
+          banner.classList.add('hidden');
+          dismissed.push(latest.id);
+          localStorage.setItem('tokensaver_dismissed_notifs', JSON.stringify(dismissed));
+        });
+      } else {
+        $('#notifications-banner').classList.add('hidden');
+      }
+    } else {
+      $('#notifications-banner').classList.add('hidden');
+    }
+  } catch (e) {
+    console.error('Error fetching notifications:', e);
   }
 }
 
@@ -994,6 +1104,7 @@ authVerifyBtn.addEventListener('click', async () => {
       state.licenseVerified = true;
     }
     await loadTools();
+    await fetchAndShowNotifications();
   } else {
     authStatusMsg.style.color = '#ef4444';
     authStatusMsg.textContent = 'خطا در تایید کد: ' + (res.error || 'کد وارد شده نامعتبر است.');

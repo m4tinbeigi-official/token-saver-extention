@@ -566,6 +566,10 @@ ipcMain.handle('sync-project', async (_e, { token, projectPath, name, savedToken
   return serverRequest('/api/projects/sync', 'POST', { path: projectPath, name, savedTokens, savedPercent }, token);
 });
 
+ipcMain.handle('use-tool', async (_e, { token, toolId, projectPath }) => {
+  return serverRequest('/api/tools/use', 'POST', { toolId, projectPath }, token);
+});
+
 ipcMain.handle('request-payment', async (_e, { token }) => {
   return serverRequest('/api/payment/request', 'POST', {}, token);
 });
@@ -584,6 +588,10 @@ ipcMain.handle('fetch-server-config', async () => {
     cachedServerTools = res.tools;
   }
   return res;
+});
+
+ipcMain.handle('fetch-notifications', async (_e, token) => {
+  return serverRequest('/api/notifications', 'GET', null, token);
 });
 
 ipcMain.handle('update-budget-config', async (_e, { budgetGuard, limitTokens, limitCost }) => {

@@ -52,6 +52,9 @@ contextBridge.exposeInMainWorld('tokensaver', {
   sendOtp: (phoneNumber) => ipcRenderer.invoke('send-otp', { phoneNumber }),
   verifyOtp: (phoneNumber, code, name, email) => ipcRenderer.invoke('verify-otp', { phoneNumber, code, name, email }),
   checkAuthStatus: (token) => ipcRenderer.invoke('check-auth-status', token),
+  fetchNotifications: (token) => ipcRenderer.invoke('fetch-notifications', token),
   syncProject: (token, projectPath, name, savedTokens, savedPercent) =>
-    ipcRenderer.invoke('sync-project', { token, projectPath, name, savedTokens, savedPercent })
+    ipcRenderer.invoke('sync-project', { token, projectPath, name, savedTokens, savedPercent }),
+  useTool: (token, toolId, projectPath) =>
+    ipcRenderer.invoke('use-tool', { token, toolId, projectPath })
 });

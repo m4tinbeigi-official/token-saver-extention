@@ -142,6 +142,16 @@
           </div>
         </div>
 
+        <!-- نوتیفیکیشن‌ها و پیام‌های مدیریت -->
+        <div id="notifications-banner" class="hidden" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.6rem; position: relative; backdrop-filter: blur(12px);">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span style="font-size: 1.1rem;">🔔</span>
+            <h4 style="margin: 0; font-size: 0.9rem; color: #60a5fa; font-weight: bold;">پیام جدید از مدیریت سیستم</h4>
+            <button id="notif-close-btn" style="position: absolute; top: 0.8rem; left: 0.8rem; background: none; border: none; color: #94a3b8; font-size: 1.1rem; cursor: pointer; line-height: 1;">×</button>
+          </div>
+          <div id="notification-content" style="font-size: 0.82rem; color: #e2e8f0; line-height: 1.5; white-space: pre-line;"></div>
+        </div>
+
         <!-- فعال‌سازی نسخه پرو -->
         <div class="license-card" id="license-card" style="margin-bottom: 1.5rem;">
           <div class="license-row" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
@@ -156,6 +166,14 @@
             </div>
           </div>
           <div class="license-status-msg" id="license-status-msg" style="margin-top: 0.5rem; font-size: 0.82rem; min-height: 1.1em; color: var(--muted);"></div>
+        </div>
+
+        <!-- دسته‌بندی ابزارها -->
+        <div class="category-filters" style="display: flex; gap: 0.6rem; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 0.8rem;">
+          <button class="filter-btn active" data-category="all" style="padding: 0.4rem 1rem; background: rgba(59,130,246,0.1); border: 1px solid #3b82f6; color: #3b82f6; border-radius: 20px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: all 0.3s;">همه ابزارها</button>
+          <button class="filter-btn" data-category="compression" style="padding: 0.4rem 1rem; background: none; border: 1px solid rgba(255, 255, 255, 0.08); color: #94a3b8; border-radius: 20px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: all 0.3s;">فشرده‌سازی و پروکسی</button>
+          <button class="filter-btn" data-category="index" style="padding: 0.4rem 1rem; background: none; border: 1px solid rgba(255, 255, 255, 0.08); color: #94a3b8; border-radius: 20px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: all 0.3s;">ایندکس کدبیس</button>
+          <button class="filter-btn" data-category="memory" style="padding: 0.4rem 1rem; background: none; border: 1px solid rgba(255, 255, 255, 0.08); color: #94a3b8; border-radius: 20px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: all 0.3s;">لایه‌های حافظه</button>
         </div>
 
         <div class="tools-list" id="tools-list"></div>
@@ -282,6 +300,7 @@
       <ul class="tool-claims"></ul>
       <ul class="tool-notes"></ul>
       <div class="tool-after"></div>
+      <div class="tool-ui-url hidden" style="margin-top: 0.5rem; font-size: 0.8rem; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.15); padding: 0.5rem; border-radius: 6px; color: #60a5fa;"></div>
       <div class="tool-actions">
         <button class="btn btn-primary tool-install">نصب خودکار</button>
         <button class="btn btn-ghost tool-cancel hidden">لغو نصب</button>
