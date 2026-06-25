@@ -389,7 +389,26 @@ function generatePlan(answers, info) {
   return { files, installCommands, recommendations, summary };
 }
 
+/* ------------------------------------------------------------------ */
+/* Project history (pure upsert — main process persists to disk)       */
+/* ------------------------------------------------------------------ */
+
+function upsertProject(projects, record) {
+  const list = Array.isArray(projects) ? projects.slice() : [];
+  const i = list.findIndex((p) => p.path === record.path);
+  if (i >= 0) {
+    const prev = list[i];
+    const merged = Object.assign({}, prev, record);
+    merged.tools = Array.from(new Set([...(prev.tools || []), ...(record.tools || [])]));
+    merged.firstAt = prev.firstAt || prev.at || record.at;
+    list[i] = merged;
+  } else {
+    list.push(Object.assign({ tools: [], firstAt: record.at }, record));
+  }
+  return list;
+}
+
 module.exports = {
   scanProject, generatePlan, ignorePatterns, decideFeatures,
-  detectAgents, estimateImpact
+  detectAgents, estimateImpact, upsertProject
 };

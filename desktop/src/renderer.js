@@ -60,6 +60,10 @@ $('#pick-btn').addEventListener('click', async () => {
   if (!res.ok) { alert(res.error); return; }
   state.scan = res.info;
   renderScan(res.info);
+  
+  // Add project to history list
+  addOrUpdateProjectInHistory(dir);
+  
   updateNextButton();
 });
 
@@ -162,39 +166,81 @@ async function loadTools() {
     const log = node.querySelector('.tool-log');
 
     node.querySelector('.tool-repo').addEventListener('click', () => api.openExternal(tool.repo));
-    node.querySelector('.tool-copy').addEventListener('click', () => {
+    
+    const installBtn = node.querySelector('.tool-install');
+    const copyBtn = node.querySelector('.tool-copy');
+    const cancelBtn = node.querySelector('.tool-cancel');
+    const secnote = node.querySelector('.tool-secnote');
+
+    copyBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(cmd);
       note(card, 'دستور کپی شد.');
     });
 
-    const installBtn = node.querySelector('.tool-install');
-    const cancelBtn = node.querySelector('.tool-cancel');
-    cancelBtn.addEventListener('click', async () => {
-      await api.cancelInstall();
-      log.textContent += '\n[لغو شد توسط کاربر]\n';
-    });
-    installBtn.addEventListener('click', async () => {
-      if (!state.projectPath) { note(card, 'اول پروژه را انتخاب کن.'); return; }
-      log.classList.remove('hidden');
-      log.textContent = '';
-      installBtn.disabled = true;
-      installBtn.textContent = 'در حال نصب…';
-      cancelBtn.classList.remove('hidden');
-      const res = await api.installTool(tool.id, state.projectPath);
-      installBtn.disabled = false;
-      cancelBtn.classList.add('hidden');
-      if (res && res.manual) {
-        log.textContent += '\nاین ابزار روی سیستم تو نیاز به اجرای دستی دارد:\n' + res.cmd + '\n' + (res.note || '');
-        installBtn.textContent = 'نصب دستی لازم است';
-      } else if (res && res.ok) {
+    // Handle locked pro tools
+    if (tool.locked) {
+      card.classList.add('locked');
+      const badge = node.querySelector('.tool-badge');
+      badge.textContent = 'پرو (قفل شده)';
+      badge.style.borderColor = '#f59e0b';
+      badge.style.color = '#f59e0b';
+      badge.style.background = 'rgba(245, 158, 11, 0.1)';
+      badge.classList.remove('hidden');
+
+      installBtn.textContent = 'خرید و فعال‌سازی';
+      installBtn.classList.remove('btn-primary');
+      installBtn.classList.add('btn-pro');
+      
+      installBtn.addEventListener('click', () => {
+        alert('این ویژگی در نسخه‌های بعدی با پرداخت هزینه فعال می‌شود.');
+      });
+
+      copyBtn.disabled = true;
+      if (secnote) secnote.classList.add('hidden');
+    } else {
+      // Check if already installed
+      const proj = getProjectFromHistory(state.projectPath);
+      const isInstalled = proj && proj.tools && proj.tools.includes(tool.id);
+      if (isInstalled) {
         installBtn.textContent = 'نصب شد ✓';
-      } else {
-        installBtn.textContent = 'نصب ناموفق — تلاش دوباره';
-        if (res && res.needsShell) {
-          log.textContent += '\nراهنما: روی ویندوز WSL یا Git Bash نصب کن، یا دستور را آنجا اجرا کن.';
-        }
       }
-    });
+
+      cancelBtn.addEventListener('click', async () => {
+        await api.cancelInstall();
+        log.textContent += '\n[لغو شد توسط کاربر]\n';
+      });
+
+      installBtn.addEventListener('click', async () => {
+        if (!state.projectPath) { note(card, 'اول پروژه را انتخاب کن.'); return; }
+        log.classList.remove('hidden');
+        log.textContent = '';
+        installBtn.disabled = true;
+        installBtn.textContent = 'در حال نصب…';
+        cancelBtn.classList.remove('hidden');
+        const res = await api.installTool(tool.id, state.projectPath);
+        installBtn.disabled = false;
+        cancelBtn.classList.add('hidden');
+        if (res && res.manual) {
+          log.textContent += '\nاین ابزار روی سیستم تو نیاز به اجرای دستی دارد:\n' + res.cmd + '\n' + (res.note || '');
+          installBtn.textContent = 'نصب دستی لازم است';
+        } else if (res && res.ok) {
+          installBtn.textContent = 'نصب شد ✓';
+          
+          // Update project history
+          const projCurrent = getProjectFromHistory(state.projectPath);
+          const toolsList = projCurrent ? (projCurrent.tools || []) : [];
+          if (!toolsList.includes(tool.id)) {
+            toolsList.push(tool.id);
+          }
+          addOrUpdateProjectInHistory(state.projectPath, { tools: toolsList });
+        } else {
+          installBtn.textContent = 'نصب ناموفق — تلاش دوباره';
+          if (res && res.needsShell) {
+            log.textContent += '\nراهنما: روی ویندوز WSL یا Git Bash نصب کن، یا دستور را آنجا اجرا کن.';
+          }
+        }
+      });
+    }
 
     list.appendChild(node);
   });
@@ -237,6 +283,7 @@ async function renderImpact(noisy) {
   try { res = await api.estimateImpact(state.projectPath, noisy); } catch (_e) { res = null; }
   if (!res || !res.ok) { panel.classList.add('hidden'); return; }
   const e = res.est;
+  state.lastEstimate = e; // Save estimate to state
   const fmt = (n) => n.toLocaleString('en-US');
   panel.innerHTML =
     '<div class="impact-big">~' + fmt(e.noiseTokens) + (e.truncated ? '+' : '') + ' توکن نویز</div>' +
@@ -277,6 +324,19 @@ $('#apply-btn').addEventListener('click', async () => {
     box.innerHTML = '<h3>انجام شد ✓ (' + res.written.length + ' فایل جدید، ' + merged.length + ' ادغام)</h3>' +
       res.written.map((f) => '<div class="f">+ ' + escapeHtml(f) + '</div>').join('') +
       merged.map((f) => '<div class="f" style="color:#c084fc">~ ' + escapeHtml(f) + ' (ادغام شد)</div>').join('');
+
+    // Update project history with config savings
+    let savedTokens = 0;
+    let savedPercent = 0;
+    if (state.lastEstimate) {
+      savedTokens = state.lastEstimate.noiseTokens;
+      savedPercent = state.lastEstimate.pct;
+    }
+    addOrUpdateProjectInHistory(state.projectPath, {
+      configApplied: true,
+      savedTokens,
+      savedPercent
+    });
   } else {
     box.innerHTML = '<h3>خطا</h3><p class="muted">' + escapeHtml(res.error || 'نامشخص') + '</p>';
   }
@@ -293,6 +353,135 @@ api.appVersion().then((v) => {
   const el = $('#app-version');
   if (el && v) el.textContent = 'نسخه ' + v + ' • برای ویندوز و مک';
 }).catch(() => {});
+
+/* ---------- Project History Logic ---------- */
+function addOrUpdateProjectInHistory(projectPath, updateData = {}) {
+  let projects = [];
+  try {
+    projects = JSON.parse(localStorage.getItem('tokensaver_projects') || '[]');
+  } catch (e) {
+    projects = [];
+  }
+  
+  let p = projects.find(item => item.path === projectPath);
+  if (!p) {
+    const folderName = projectPath.split(/[/\\]/).pop() || projectPath;
+    p = {
+      path: projectPath,
+      name: folderName,
+      tools: [],
+      configApplied: false,
+      savedTokens: 0,
+      savedPercent: 0,
+      addedAt: new Date().toISOString()
+    };
+    projects.push(p);
+  }
+  
+  Object.assign(p, updateData);
+  localStorage.setItem('tokensaver_projects', JSON.stringify(projects));
+  renderProjectHistory();
+}
+
+function getProjectFromHistory(projectPath) {
+  if (!projectPath) return null;
+  try {
+    const projects = JSON.parse(localStorage.getItem('tokensaver_projects') || '[]');
+    return projects.find(p => p.path === projectPath) || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function renderProjectHistory() {
+  const list = $('#history-list');
+  const section = $('#history-section');
+  if (!list || !section) return;
+
+  let projects = [];
+  try {
+    projects = JSON.parse(localStorage.getItem('tokensaver_projects') || '[]');
+  } catch (e) {
+    projects = [];
+  }
+
+  if (projects.length === 0) {
+    section.classList.add('hidden');
+    return;
+  }
+
+  section.classList.remove('hidden');
+  list.innerHTML = '';
+
+  projects.forEach((p) => {
+    const item = document.createElement('div');
+    item.className = 'history-item';
+
+    let methodsHtml = '';
+    if (p.configApplied) {
+      methodsHtml += `<span class="badge badge-config">کانفیگ پروژه</span>`;
+    }
+    if (p.tools && p.tools.length > 0) {
+      p.tools.forEach((tId) => {
+        const t = (state.availableTools || []).find(x => x.id === tId);
+        const name = t ? t.name.split(' — ')[0] : tId;
+        methodsHtml += `<span class="badge badge-tool">${escapeHtml(name)}</span>`;
+      });
+    }
+    if (!methodsHtml) {
+      methodsHtml = `<span class="badge badge-none">بدون تغییر</span>`;
+    }
+
+    let savingsHtml = '—';
+    if (p.savedTokens > 0) {
+      const fmt = (n) => n.toLocaleString('en-US');
+      savingsHtml = `<div class="saving-value">${p.savedPercent}٪ کاهش نویز</div><div class="saving-detail">~${fmt(p.savedTokens)} توکن</div>`;
+    } else if (p.tools && p.tools.length > 0) {
+      savingsHtml = `<div class="saving-value active-tools">ابزار فعال</div><div class="saving-detail">${p.tools.length} ابزار کاهش مصرف</div>`;
+    }
+
+    item.innerHTML = `
+      <div class="history-info">
+        <div class="history-name-row">
+          <span class="history-name" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</span>
+          <button class="btn btn-ghost btn-sm history-select-btn" data-path="${escapeHtml(p.path)}">انتخاب پروژه</button>
+        </div>
+        <div class="history-path" title="${escapeHtml(p.path)}">${escapeHtml(p.path)}</div>
+      </div>
+      <div class="history-methods">
+        <div class="label-small">روش‌های اعمال‌شده:</div>
+        <div class="badges-wrap">${methodsHtml}</div>
+      </div>
+      <div class="history-savings">
+        <div class="label-small">میزان صرفه‌جویی:</div>
+        <div class="savings-wrap">${savingsHtml}</div>
+      </div>
+    `;
+
+    item.querySelector('.history-select-btn').addEventListener('click', async (e) => {
+      const path = e.target.dataset.path;
+      state.projectPath = path;
+      const res = await api.scanProject(path);
+      if (!res.ok) {
+        alert(res.error);
+        return;
+      }
+      state.scan = res.info;
+      renderScan(res.info);
+      updateNextButton();
+    });
+
+    list.appendChild(item);
+  });
+}
+
+// Fetch available tools and render project history on startup
+api.listTools().then(({ tools }) => {
+  state.availableTools = tools;
+  renderProjectHistory();
+}).catch(() => {
+  renderProjectHistory();
+});
 
 applyAgentDetection();
 
