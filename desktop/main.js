@@ -3,8 +3,14 @@
 const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { spawn } = require('child_process');
+const https = require('https');
 
 const { scanProject, generatePlan } = require('./config-engine');
+const { TOOLS, getTool, platformKey } = require('./tools-registry');
+
+// Where user info is (best-effort) submitted. Failure is non-fatal by design.
+const SERVER_ENDPOINT = 'https://tokensaver.ir/api/leads';
 
 let mainWindow = null;
 
@@ -109,4 +115,86 @@ ipcMain.handle('open-external', async (_e, target) => {
     shell.showItemInFolder(target);
   }
   return true;
+});
+
+/* ---------- IPC: list available tools ---------- */
+ipcMain.handle('list-tools', async () => {
+  return { tools: TOOLS, platform: platformKey(process.platform) };
+});
+
+/* ---------- IPC: install a tool (runs its installer, streams output) ---------- */
+ipcMain.handle('install-tool', async (event, { toolId, projectPath }) => {
+  const tool = getTool(toolId);
+  if (!tool) return { ok: false, error: 'ابزار یافت نشد.' };
+
+  const spec = tool.install[platformKey(process.platform)];
+  if (!spec) return { ok: false, error: 'این ابزار برای سیستم‌عامل شما تعریف نشده.' };
+  if (spec.type === 'manual') {
+    return { ok: false, manual: true, cmd: spec.cmd, note: spec.note || '' };
+  }
+
+  const wc = event.sender;
+  const send = (chunk) => { try { wc.send('install-output', { toolId, chunk }); } catch (_e) {} };
+
+  send('$ ' + spec.cmd + '\n\n');
+
+  return await new Promise((resolve) => {
+    let child;
+    try {
+      // bash -lc runs the curl|bash pipeline. On Windows this needs WSL/Git Bash on PATH.
+      child = spawn('bash', ['-lc', spec.cmd], {
+        cwd: projectPath && fs.existsSync(projectPath) ? projectPath : process.cwd()
+      });
+    } catch (err) {
+      send('\n[خطا در اجرای shell] ' + String(err.message || err));
+      resolve({ ok: false, error: String(err.message || err), needsShell: true });
+      return;
+    }
+
+    child.on('error', (err) => {
+      const msg = err && err.code === 'ENOENT'
+        ? 'bash پیدا نشد. روی ویندوز WSL یا Git Bash نصب کن و دوباره امتحان کن.'
+        : String(err.message || err);
+      send('\n[خطا] ' + msg + '\n');
+      resolve({ ok: false, error: msg, needsShell: err && err.code === 'ENOENT', cmd: spec.cmd });
+    });
+
+    child.stdout.on('data', (d) => send(d.toString()));
+    child.stderr.on('data', (d) => send(d.toString()));
+    child.on('close', (code) => {
+      send('\n\n' + (code === 0 ? '✓ نصب با موفقیت تمام شد.' : '✗ نصب با کد ' + code + ' پایان یافت.') + '\n');
+      resolve({ ok: code === 0, code, afterInstall: tool.afterInstall });
+    });
+  });
+});
+
+/* ---------- IPC: submit user info to server (best-effort, never throws) ---------- */
+ipcMain.handle('submit-info', async (_e, data) => {
+  return await new Promise((resolve) => {
+    let finished = false;
+    const done = (result) => { if (!finished) { finished = true; resolve(result); } };
+    try {
+      const payload = JSON.stringify(data || {});
+      const url = new URL(SERVER_ENDPOINT);
+      const req = https.request(
+        {
+          hostname: url.hostname,
+          path: url.pathname,
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) },
+          timeout: 5000
+        },
+        (res) => {
+          res.on('data', () => {});
+          res.on('end', () => done({ ok: res.statusCode >= 200 && res.statusCode < 300, status: res.statusCode }));
+        }
+      );
+      req.on('error', () => done({ ok: false, offline: true }));
+      req.on('timeout', () => { req.destroy(); done({ ok: false, offline: true }); });
+      req.write(payload);
+      req.end();
+    } catch (_err) {
+      done({ ok: false, offline: true });
+    }
+  });
 });

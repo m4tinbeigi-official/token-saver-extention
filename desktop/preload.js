@@ -10,5 +10,15 @@ contextBridge.exposeInMainWorld('tokensaver', {
     ipcRenderer.invoke('preview-config', { projectPath, answers }),
   applyConfig: (projectPath, files) =>
     ipcRenderer.invoke('apply-config', { projectPath, files }),
-  openExternal: (target) => ipcRenderer.invoke('open-external', target)
+  openExternal: (target) => ipcRenderer.invoke('open-external', target),
+
+  // Tools registry + installer
+  listTools: () => ipcRenderer.invoke('list-tools'),
+  installTool: (toolId, projectPath) =>
+    ipcRenderer.invoke('install-tool', { toolId, projectPath }),
+  onInstallOutput: (cb) =>
+    ipcRenderer.on('install-output', (_e, data) => cb(data.toolId, data.chunk)),
+
+  // Best-effort lead submission
+  submitInfo: (data) => ipcRenderer.invoke('submit-info', data)
 });

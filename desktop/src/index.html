@@ -17,10 +17,10 @@
       <ol class="steps" id="steps">
         <li data-step="0" class="active"><span>۱</span> پروژه</li>
         <li data-step="1"><span>۲</span> سؤال‌ها</li>
-        <li data-step="2"><span>۳</span> پیش‌نمایش</li>
-        <li data-step="3"><span>۴</span> اعمال</li>
+        <li data-step="2"><span>۳</span> ابزارها</li>
+        <li data-step="3"><span>۴</span> کانفیگ</li>
       </ol>
-      <div class="sidebar-foot">نسخه ۱.۰ • برای ویندوز و مک</div>
+      <div class="sidebar-foot">نسخه ۱.۱ • برای ویندوز و مک</div>
     </aside>
 
     <!-- Main -->
@@ -39,10 +39,10 @@
         </div>
       </section>
 
-      <!-- STEP 1: questions -->
+      <!-- STEP 1: questions + user info -->
       <section class="screen" data-screen="1">
-        <h1>چند سؤال کوتاه</h1>
-        <p class="muted">بر اساس پاسخ‌ها تصمیم می‌گیریم چه کانفیگی بسازیم.</p>
+        <h1>چند سؤال فنی</h1>
+        <p class="muted">بر اساس پاسخ‌ها، ابزار و کانفیگ مناسب را پیشنهاد می‌دهیم.</p>
 
         <div class="q">
           <h3>کدام agentها را استفاده می‌کنی؟</h3>
@@ -92,24 +92,33 @@
             <button class="opt" data-val="mixed">ترکیبی</button>
           </div>
         </div>
+
+        <div class="q">
+          <h3>اطلاعات تماس <span class="muted-inline">(اختیاری — برای پشتیبانی و اطلاع‌رسانی ابزارهای جدید)</span></h3>
+          <div class="fields">
+            <input type="text" id="user-name" class="field" placeholder="نام">
+            <input type="email" id="user-email" class="field" placeholder="ایمیل">
+          </div>
+          <div class="submit-note" id="submit-note"></div>
+        </div>
       </section>
 
-      <!-- STEP 2: preview -->
+      <!-- STEP 2: tools -->
       <section class="screen" data-screen="2">
-        <h1>پیش‌نمایش کانفیگ</h1>
-        <p class="muted">این فایل‌ها ساخته می‌شوند. قبل از نوشتن می‌توانی محتوا را ببینی.</p>
+        <h1>ابزارهای صرفه‌جویی توکن</h1>
+        <p class="muted">این ابزارهای متن‌باز را می‌توانی مستقیم از همین‌جا روی پروژه‌ات نصب کنی. نصب فقط با کلیک خودت و با نمایش خروجی زنده انجام می‌شود.</p>
+        <div class="tools-list" id="tools-list"></div>
+      </section>
+
+      <!-- STEP 3: config preview + apply -->
+      <section class="screen" data-screen="3">
+        <h1>کانفیگ پروژه</h1>
+        <p class="muted">این فایل‌های کانفیگ ساخته می‌شوند. محتوا را ببین و سپس اعمال کن (از فایل‌های موجود بکاپ <code>.tokensaver.bak</code> گرفته می‌شود).</p>
         <div class="preview-wrap">
           <div class="file-list" id="file-list"></div>
           <pre class="file-view" id="file-view">یک فایل را از لیست انتخاب کن…</pre>
         </div>
         <div class="reco" id="reco"></div>
-        <div class="install" id="install"></div>
-      </section>
-
-      <!-- STEP 3: apply / done -->
-      <section class="screen" data-screen="3">
-        <h1 id="done-title">آماده‌ی اعمال</h1>
-        <p class="muted" id="done-sub">با زدن دکمه، فایل‌های کانفیگ داخل پروژه نوشته می‌شوند. از فایل‌های موجود نسخه‌ی پشتیبان <code>.tokensaver.bak</code> ساخته می‌شود.</p>
         <button class="btn btn-primary btn-lg" id="apply-btn">اعمال کانفیگ روی پروژه</button>
         <div class="result hidden" id="result"></div>
       </section>
@@ -121,6 +130,30 @@
       </div>
     </main>
   </div>
+
+  <!-- Tool card template -->
+  <template id="tool-card-tpl">
+    <div class="tool-card">
+      <div class="tool-head">
+        <div>
+          <div class="tool-name"></div>
+          <div class="tool-tagline"></div>
+        </div>
+        <span class="tool-badge hidden">پیشنهادی</span>
+      </div>
+      <p class="tool-desc"></p>
+      <div class="tool-how"></div>
+      <ul class="tool-claims"></ul>
+      <ul class="tool-notes"></ul>
+      <div class="tool-after"></div>
+      <div class="tool-actions">
+        <button class="btn btn-primary tool-install">نصب خودکار</button>
+        <button class="btn btn-ghost tool-repo">صفحه پروژه</button>
+        <button class="btn btn-ghost tool-copy">کپی دستور</button>
+      </div>
+      <pre class="tool-log hidden"></pre>
+    </div>
+  </template>
 
   <script src="renderer.js"></script>
 </body>

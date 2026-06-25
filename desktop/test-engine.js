@@ -71,4 +71,17 @@ ok('empty answers still produces files', plan3.files.length > 0);
 // cleanup
 fs.rmSync(tmp, { recursive: true, force: true });
 
+console.log('tools-registry:');
+const { TOOLS, getTool, platformKey } = require('./tools-registry');
+ok('registry has at least one tool', TOOLS.length >= 1);
+ok('codebase-memory-mcp exists', !!getTool('codebase-memory-mcp'));
+const cmm = getTool('codebase-memory-mcp');
+ok('has mac/win/linux install specs', cmm.install.mac && cmm.install.win && cmm.install.linux);
+ok('install cmd uses the official installer', /DeusData\/codebase-memory-mcp\/main\/install\.sh/.test(cmm.install.mac.cmd));
+ok('install cmd passes --ui', /--ui/.test(cmm.install.mac.cmd));
+ok('platformKey maps darwin->mac', platformKey('darwin') === 'mac');
+ok('platformKey maps win32->win', platformKey('win32') === 'win');
+ok('every tool has required fields', TOOLS.every((t) =>
+  t.id && t.name && t.description && t.howItWorks && Array.isArray(t.claims) && t.afterInstall && t.install));
+
 console.log('\nAll ' + passed + ' checks passed ✓');

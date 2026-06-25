@@ -132,4 +132,42 @@ code { font-family: 'JetBrains Mono', monospace; background: rgba(139,92,246,0.1
 /* Nav */
 .nav { display: flex; justify-content: space-between; gap: 1rem; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
 
+/* User info fields */
+.muted-inline { color: var(--muted); font-weight: 400; font-size: 0.8rem; }
+.fields { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.field {
+  flex: 1; min-width: 180px;
+  font-family: inherit; font-size: 0.95rem;
+  background: rgba(255,255,255,0.05); color: var(--text);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 0.7rem 1rem; outline: none; transition: 0.2s;
+}
+.field:focus { border-color: var(--purple); background: rgba(255,255,255,0.08); }
+.submit-note { color: var(--muted); font-size: 0.82rem; margin-top: 0.6rem; min-height: 1.1em; }
+
+/* Tool cards */
+.tools-list { display: flex; flex-direction: column; gap: 1.25rem; }
+.tool-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem 1.6rem; }
+.tool-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.tool-name { font-size: 1.2rem; font-weight: 800; }
+.tool-tagline { color: var(--green); font-size: 0.9rem; font-weight: 600; margin-top: 0.2rem; }
+.tool-badge { background: var(--grad-soft); border: 1px solid var(--purple); color: var(--text); font-size: 0.72rem; font-weight: 700; padding: 0.25rem 0.7rem; border-radius: 999px; white-space: nowrap; }
+.tool-desc { color: var(--muted); line-height: 1.8; margin: 0.9rem 0; }
+.tool-how { color: var(--muted); line-height: 1.8; margin-bottom: 0.9rem; font-size: 0.93rem; }
+.tool-how b, .tool-after b { color: var(--text); }
+.tool-claims, .tool-notes { margin: 0 1.1rem 0.9rem; }
+.tool-claims li { color: #34d399; font-size: 0.88rem; margin: 0.25rem 0; }
+.tool-notes li { color: var(--muted); font-size: 0.85rem; margin: 0.25rem 0; line-height: 1.6; }
+.tool-after { background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.25); border-radius: 10px; padding: 0.7rem 1rem; font-size: 0.9rem; color: var(--muted); margin-bottom: 1rem; }
+.tool-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.tool-actions .btn { padding: 0.55rem 1.1rem; font-size: 0.88rem; }
+.card-note { color: var(--green); font-size: 0.82rem; margin-top: 0.6rem; }
+.tool-log {
+  margin-top: 1rem; max-height: 240px; overflow: auto;
+  background: #0b0d12; border: 1px solid var(--border); border-radius: 10px;
+  padding: 1rem; direction: ltr; text-align: left;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; line-height: 1.55;
+  color: #c9d1d9; white-space: pre-wrap;
+}
+
 .hidden { display: none !important; }

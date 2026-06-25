@@ -1,0 +1,11 @@
+# Token Saver ignore — الگوهایی که نباید وارد context ابزار AI شوند
+node_modules/
+dist/
+build/
+out/
+.next/
+coverage/
+.cache/
+vendor/
+*.log
+logs/

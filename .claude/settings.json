@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_tokensaver": "تنظیمات تولیدشده توسط Token Saver برای کاهش مصرف توکن",
+  "permissions": {
+    "allow": [
+      "Bash(npm test:*)",
+      "Bash(npm run build:*)",
+      "Read",
+      "Grep",
+      "Glob"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "command -v snip >/dev/null 2>&1 && snip filter || cat"
+          }
+        ]
+      }
+    ]
+  }
+}
