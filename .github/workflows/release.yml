@@ -1,17 +1,22 @@
 name: Build & Release Desktop App
 
-# با push کردن یک tag مثل v1.1.0 اجرا می‌شود و نصبی‌های ویندوز و مک را
-# می‌سازد و به‌صورت خودکار در GitHub Releases آپلود می‌کند.
+# خودکار اجرا می‌شود وقتی:
+#   • به main پوش شود و چیزی در پوشه‌ی desktop تغییر کرده باشد (آپدیت نرم‌افزار)
+#   • یک tag مثل v1.2.0 پوش شود
+#   • به‌صورت دستی از تب Actions (Run workflow)
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [main]
+    paths:
+      - 'desktop/**'
+      - '.github/workflows/release.yml'
   workflow_dispatch: {}
 
 permissions:
   contents: write
 
 jobs:
+  # ── مرحله ۱: ساخت نصبی‌ها روی مک و ویندوز ──
   build:
     strategy:
       fail-fast: false
@@ -40,15 +45,45 @@ jobs:
       - name: Build installer
         run: ${{ matrix.build }}
         env:
-          # ساخت بدون code signing (نصبی‌های unsigned)
-          CSC_IDENTITY_AUTO_DISCOVERY: false
+          CSC_IDENTITY_AUTO_DISCOVERY: false # نصبی unsigned
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload installers to the Release
-        uses: softprops/action-gh-release@v2
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
         with:
-          files: |
+          name: installers-${{ matrix.os }}
+          path: |
             desktop/release/*.dmg
             desktop/release/*.exe
+          if-no-files-found: ignore
+
+  # ── مرحله ۲: انتشار یک Release با هر دو نصبی ──
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read app version
+        id: ver
+        shell: bash
+        working-directory: desktop
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Download all installers
+        uses: actions/download-artifact@v4
+        with:
+          path: dist-artifacts
+
+      - name: Publish / update the Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.ver.outputs.version }}
+          name: Token Saver v${{ steps.ver.outputs.version }}
+          make_latest: true
+          body: |
+            نصبی‌های خودکار Token Saver برای ویندوز و مک.
+            این Release با هر آپدیت نرم‌افزار به‌صورت خودکار به‌روز می‌شود.
+          files: dist-artifacts/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
