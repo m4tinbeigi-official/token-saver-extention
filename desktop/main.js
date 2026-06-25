@@ -13,6 +13,7 @@ const { scanProject, generatePlan, detectAgents, estimateImpact } = require('./c
 const { TOOLS, getTool, platformKey } = require('./tools-registry');
 
 let currentInstall = null; // tracks a running installer child process
+let cachedServerTools = []; // cache server-defined tools
 
 // Where user info is (best-effort) submitted. Failure is non-fatal by design.
 const SERVER_ENDPOINT = 'https://tokensaver.ir/api/leads';
@@ -193,7 +194,10 @@ ipcMain.handle('list-tools', async () => {
 
 /* ---------- IPC: install a tool (runs its installer, streams output) ---------- */
 ipcMain.handle('install-tool', async (event, { toolId, projectPath }) => {
-  const tool = getTool(toolId);
+  let tool = cachedServerTools.find((t) => t.id === toolId);
+  if (!tool) {
+    tool = getTool(toolId);
+  }
   if (!tool) return { ok: false, error: 'ابزار یافت نشد.' };
 
   const spec = tool.install[platformKey(process.platform)];
@@ -575,7 +579,11 @@ ipcMain.handle('verify-license', async (_e, licenseKey) => {
 });
 
 ipcMain.handle('fetch-server-config', async () => {
-  return serverRequest('/api/app-config', 'GET');
+  const res = await serverRequest('/api/app-config', 'GET');
+  if (res && res.ok && res.tools) {
+    cachedServerTools = res.tools;
+  }
+  return res;
 });
 
 ipcMain.handle('update-budget-config', async (_e, { budgetGuard, limitTokens, limitCost }) => {
