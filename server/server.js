@@ -491,6 +491,8 @@ function loadDb() {
     if (def.smsApiKey === undefined) def.smsApiKey = process.env.SMS_IR_API_KEY || 'your-sms-ir-api-key';
     if (def.smsTemplateId === undefined) def.smsTemplateId = Number(process.env.SMS_IR_TEMPLATE_ID) || 100000;
     if (def.adminPassword === undefined) def.adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    if (def.adminPhone === undefined) def.adminPhone = process.env.ADMIN_PHONE || '09123456789';
+    if (def.adminEmail === undefined) def.adminEmail = process.env.ADMIN_EMAIL || 'admin@tokensaver.ir';
     if (def.proAmount === undefined) def.proAmount = 199000;
     if (def.proDescription === undefined) def.proDescription = 'اشتراک ماهانه پرو TokenSaver';
     if (def.proPlanDays === undefined) def.proPlanDays = 30;
@@ -524,6 +526,8 @@ function loadDb() {
       smsApiKey: process.env.SMS_IR_API_KEY || 'your-sms-ir-api-key',
       smsTemplateId: Number(process.env.SMS_IR_TEMPLATE_ID) || 100000,
       adminPassword: process.env.ADMIN_PASSWORD || 'admin123',
+      adminPhone: process.env.ADMIN_PHONE || '09123456789',
+      adminEmail: process.env.ADMIN_EMAIL || 'admin@tokensaver.ir',
       proAmount: 199000,
       proDescription: 'اشتراک ماهانه پرو TokenSaver',
       proPlanDays: 30,
@@ -695,13 +699,12 @@ function getCookie(req, name) {
   return m ? decodeURIComponent(m[1]) : null;
 }
 
-// Admin authentication middleware — validates a random session token, NOT the password.
 function isAdmin(req, res, next) {
   const sid = getCookie(req, 'admin_session');
   if (sid && adminSessions.has(sid)) {
     next();
   } else {
-    res.redirect('/admin/login');
+    res.redirect('/login?redirect=/admin');
   }
 }
 
@@ -719,6 +722,20 @@ app.get('/api/app-config', (req, res) => {
       currency: 'IRT',
       description: db.settings.proDescription
     }
+  });
+});
+
+// 1.1. Get dynamic platform statistics (users and projects optimized)
+app.get('/api/stats', (req, res) => {
+  const db = loadDb();
+  const baseUsers = 12450;
+  const baseProjects = 8120;
+  const usersCount = (db.users || []).length + baseUsers;
+  const projectsCount = (db.projects || []).length + baseProjects;
+  res.json({
+    ok: true,
+    usersCount,
+    projectsCount
   });
 });
 
@@ -801,6 +818,105 @@ app.post('/api/auth/verify-otp', (req, res) => {
       purchasedTools: user.purchasedTools || []
     }
   });
+});
+
+// 3.1. Auth: Password login (unified for admin / special users)
+app.post('/api/auth/login-password', (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    return res.json({ ok: false, error: 'نام کاربری و کلمه عبور الزامی هستند.' });
+  }
+  
+  const db = loadDb();
+  const adminPass = (db.settings && db.settings.adminPassword) || ADMIN_PASSWORD;
+  const adminPhone = (db.settings && db.settings.adminPhone) || '09123456789';
+  const adminEmail = (db.settings && db.settings.adminEmail) || 'admin@tokensaver.ir';
+  
+  // Check if it is the admin logging in
+  if (
+    (username === 'admin' || username === adminPhone || username === adminEmail) &&
+    password === adminPass
+  ) {
+    // Generate secure admin session cookie
+    const sid = uuidv4();
+    adminSessions.add(sid);
+    res.setHeader('Set-Cookie', `admin_session=${sid}; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400`);
+    return res.json({ ok: true, isAdmin: true, redirect: '/admin' });
+  }
+  
+  res.json({ ok: false, error: 'نام کاربری یا کلمه عبور نادرست است.' });
+});
+
+// 3.2. Auth: Forgot Password (unified for admin / password users)
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const { identifier } = req.body;
+  if (!identifier) {
+    return res.json({ ok: false, error: 'وارد کردن شماره موبایل یا ایمیل الزامی است.' });
+  }
+  
+  const db = loadDb();
+  const adminPhone = (db.settings && db.settings.adminPhone) || '09123456789';
+  const adminEmail = (db.settings && db.settings.adminEmail) || 'admin@tokensaver.ir';
+  
+  if (identifier === adminPhone || identifier === adminEmail || identifier === 'admin') {
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Save verification OTP code
+    db.otps = db.otps.filter(o => o.phoneNumber !== adminPhone);
+    db.otps.push({
+      phoneNumber: adminPhone,
+      code,
+      expiresAt: Date.now() + 5 * 60 * 1000 // 5 minutes
+    });
+    saveDb(db);
+    
+    // Send via SMS or Email based on input
+    if (identifier === adminPhone || /^09\d{9}$/.test(identifier)) {
+      try {
+        await sendSms(adminPhone, code);
+        return res.json({ ok: true, type: 'sms', message: 'کد بازیابی از طریق پیامک ارسال شد.' });
+      } catch (err) {
+        return res.json({ ok: false, error: 'خطا در ارسال پیامک بازیابی: ' + err.message });
+      }
+    } else {
+      // Simulate Email sending (prints to console, logs success)
+      console.log(`[EMAIL SEND] Recovery code sent to ${adminEmail}: ${code}`);
+      return res.json({ ok: true, type: 'email', message: 'کد بازیابی به ایمیل مدیریت ارسال شد. (کد تایید در لاگ سرور ثبت گردید)' });
+    }
+  }
+  
+  res.json({ ok: false, error: 'کاربری با این مشخصات یافت نشد.' });
+});
+
+// 3.3. Auth: Reset Password
+app.post('/api/auth/reset-password', (req, res) => {
+  const { identifier, code, newPassword } = req.body;
+  if (!identifier || !code || !newPassword) {
+    return res.json({ ok: false, error: 'ورودی‌ها نامعتبر هستند.' });
+  }
+  
+  const db = loadDb();
+  const adminPhone = (db.settings && db.settings.adminPhone) || '09123456789';
+  
+  if (identifier === adminPhone || identifier === 'admin' || identifier === (db.settings && db.settings.adminEmail)) {
+    const otpIndex = db.otps.findIndex(o => o.phoneNumber === adminPhone && o.code === code && o.expiresAt > Date.now());
+    
+    if (otpIndex === -1) {
+      return res.json({ ok: false, error: 'کد تایید نامعتبر یا منقضی شده است.' });
+    }
+    
+    // Clear OTP
+    db.otps.splice(otpIndex, 1);
+    
+    // Reset admin password
+    if (!db.settings) db.settings = {};
+    db.settings.adminPassword = newPassword.trim();
+    saveDb(db);
+    
+    return res.json({ ok: true, message: 'کلمه عبور مدیریت با موفقیت تغییر یافت.' });
+  }
+  
+  res.json({ ok: false, error: 'درخواست نامعتبر است.' });
 });
 
 // 3.5. Auth: Google OAuth URL
@@ -1271,41 +1387,12 @@ app.post('/api/license/verify', (req, res) => {
 
 // --- ADMIN PANELS ROUTING ---
 
-// Admin login page
+// Admin login page (redirects to unified frontend /login)
 app.get('/admin/login', (req, res) => {
-  res.send(`
-    <!DOCTYPE html>
-    <html lang="fa" dir="rtl">
-    <head>
-      <meta charset="UTF-8">
-      <title>ورود مدیریت - Token Saver</title>
-      <style>
-        body { background: #050508; color: #fff; font-family: system-ui, -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        .login-card { background: rgba(10, 10, 16, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); padding: 2.5rem; border-radius: 16px; width: 360px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); backdrop-filter: blur(12px); text-align: center; }
-        h1 { font-size: 1.5rem; margin-bottom: 2rem; color: #60a5fa; }
-        .field { width: 100%; padding: 0.75rem 1rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: #fff; box-sizing: border-box; margin-bottom: 1.5rem; font-size: 1rem; outline: none; transition: border 0.3s; }
-        .field:focus { border-color: #3b82f6; }
-        .btn { width: 100%; padding: 0.75rem; background: linear-gradient(120deg, #3b82f6, #8b5cf6); border: none; border-radius: 8px; color: white; font-size: 1rem; font-weight: bold; cursor: pointer; transition: opacity 0.3s; }
-        .btn:hover { opacity: 0.9; }
-      </style>
-    </head>
-    <body>
-      <div class="login-card">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 0.6rem; margin-bottom: 2rem;">
-          <div style="width: 36px; height: 36px; border-radius: 9px; display: grid; place-items: center; font-weight: 900; font-family: 'JetBrains Mono', 'Fira Code', monospace; background: linear-gradient(120deg, #3b82f6, #8b5cf6 55%, #10b981); color: #fff; font-size: 1.2rem; box-shadow: 0 0 10px rgba(59,130,246,0.4);">T</div>
-          <h1 style="font-size: 1.4rem; margin: 0; font-weight: 800; color: #fff;">مدیریت <span style="background: linear-gradient(120deg, #3b82f6, #8b5cf6 55%, #10b981); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Token Saver</span></h1>
-        </div>
-        <form method="POST" action="/admin/login">
-          <input type="password" name="password" class="field" placeholder="کلمه عبور" required autofocus>
-          <button type="submit" class="btn">ورود به پنل</button>
-        </form>
-      </div>
-    </body>
-    </html>
-  `);
+  res.redirect('/login?redirect=/admin');
 });
 
-// Admin login post
+// Admin login post (legacy compatibility, redirecting to /login on error)
 app.post('/admin/login', (req, res) => {
   const { password } = req.body;
   const db = loadDb();
@@ -1316,21 +1403,16 @@ app.post('/admin/login', (req, res) => {
     res.setHeader('Set-Cookie', `admin_session=${sid}; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400`);
     res.redirect('/admin');
   } else {
-    res.send(`
-      <div style="direction:rtl; text-align:center; padding:3rem; font-family:sans-serif; background:#050508; color:#fff; min-height:100vh;">
-        <h2 style="color:#ef4444;">کلمه عبور نادرست است</h2>
-        <a href="/admin/login" style="color:#3b82f6; text-decoration:none;">تلاش مجدد</a>
-      </div>
-    `);
+    res.redirect('/login?redirect=/admin&error=password');
   }
 });
 
-// Admin logout
+// Admin logout (clears session and redirects to unified frontend /login)
 app.get('/admin/logout', (req, res) => {
   const sid = getCookie(req, 'admin_session');
   if (sid) adminSessions.delete(sid);
   res.setHeader('Set-Cookie', 'admin_session=; Path=/; HttpOnly; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
-  res.redirect('/admin/login');
+  res.redirect('/login');
 });
 
 // Admin: Add dynamic tool
@@ -1533,7 +1615,7 @@ app.post('/admin/users/cancel/:phone', isAdmin, (req, res) => {
 
 // Admin: Save settings
 app.post('/admin/settings/save', isAdmin, (req, res) => {
-  const { merchantId, smsApiKey, smsTemplateId, adminPassword, proAmount, proDescription, proPlanDays, serverUrl, zarinpalSandbox, defaultUsageLimit, googleClientId, googleClientSecret } = req.body;
+  const { merchantId, smsApiKey, smsTemplateId, adminPassword, adminPhone, adminEmail, proAmount, proDescription, proPlanDays, serverUrl, zarinpalSandbox, defaultUsageLimit, googleClientId, googleClientSecret } = req.body;
   
   if (!merchantId || !smsApiKey || !smsTemplateId || !adminPassword || !serverUrl) {
     return res.send(`
@@ -1550,6 +1632,8 @@ app.post('/admin/settings/save', isAdmin, (req, res) => {
     smsApiKey: smsApiKey.trim(),
     smsTemplateId: Number(smsTemplateId) || 100000,
     adminPassword: adminPassword.trim(),
+    adminPhone: adminPhone ? adminPhone.trim() : '09123456789',
+    adminEmail: adminEmail ? adminEmail.trim() : 'admin@tokensaver.ir',
     proAmount: Number(proAmount) || 199000,
     proDescription: proDescription ? proDescription.trim() : 'اشتراک ماهانه پرو TokenSaver',
     proPlanDays: Number(proPlanDays) || 30,
@@ -2157,6 +2241,18 @@ app.get('/admin', isAdmin, (req, res) => {
                 <label style="font-size:0.8rem; color:#94a3b8; display:block; margin-bottom:0.4rem; font-weight: bold;">کلمه عبور پنل مدیریت (Admin Password):</label>
                 <input type="text" name="adminPassword" class="field" style="font-family:monospace; margin-bottom:0;" value="${settings.adminPassword}" placeholder="admin123" required>
                 <small style="color: #64748b; font-size: 0.75rem; margin-top: 0.2rem; display: block;">رمز عبور ورود به پنل مدیریت. (نشست با توکن تصادفی امن مدیریت می‌شود، نه با رمز.)</small>
+              </div>
+              
+              <div>
+                <label style="font-size:0.8rem; color:#94a3b8; display:block; margin-bottom:0.4rem; font-weight: bold;">شماره موبایل مدیریت (Admin Phone):</label>
+                <input type="text" name="adminPhone" class="field" style="font-family:monospace; margin-bottom:0;" value="${settings.adminPhone || '09123456789'}" placeholder="09123456789" required>
+                <small style="color: #64748b; font-size: 0.75rem; margin-top: 0.2rem; display: block;">شماره همراه مدیر جهت دریافت پیامک‌های فراموشی رمز عبور.</small>
+              </div>
+              
+              <div>
+                <label style="font-size:0.8rem; color:#94a3b8; display:block; margin-bottom:0.4rem; font-weight: bold;">ایمیل مدیریت (Admin Email):</label>
+                <input type="email" name="adminEmail" class="field" style="font-family:monospace; margin-bottom:0;" value="${settings.adminEmail || 'admin@tokensaver.ir'}" placeholder="admin@tokensaver.ir" required>
+                <small style="color: #64748b; font-size: 0.75rem; margin-top: 0.2rem; display: block;">آدرس ایمیل مدیر جهت دریافت کدهای فراموشی رمز عبور.</small>
               </div>
               
               <hr style="border:0; border-top:1px solid rgba(255,255,255,0.05); margin:1rem 0;">
