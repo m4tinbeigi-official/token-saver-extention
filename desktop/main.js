@@ -16,7 +16,7 @@ let currentInstall = null; // tracks a running installer child process
 let cachedServerTools = []; // cache server-defined tools
 
 // Where user info is (best-effort) submitted. Failure is non-fatal by design.
-const SERVER_ENDPOINT = 'https://tokensaver.ir/api/leads';
+const SERVER_ENDPOINT = 'http://193.151.139.93/api/leads';
 
 let mainWindow = null;
 

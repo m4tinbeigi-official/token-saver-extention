@@ -12,13 +12,22 @@ const state = {
   stats: { requests: 0, tokens: 0, saved: 0 }
 };
 
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
 let currentLang = localStorage.getItem('lang') || 'en';
+let isIranIp = false;
 
 function applyTranslations() {
-  const elems = document.querySelectorAll('[data-i18n]');
-  elems.forEach(el => {
-    const key = el.dataset.i18n;
-    const txt = window.i18n[currentLang][key];
+  const dict = window.i18n ? window.i18n[currentLang] : null;
+  if (!dict) return;
+  
+  // Set text direction for RTL languages
+  document.documentElement.dir = currentLang === 'fa' ? 'rtl' : 'ltr';
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const txt = dict[key];
     if (!txt) return;
     if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
       el.value = txt;
@@ -27,30 +36,30 @@ function applyTranslations() {
     }
   });
 
-  const phElems = document.querySelectorAll('[data-i18n-ph]');
-  phElems.forEach(el => {
-    const key = el.dataset.i18nPh;
-    const txt = window.i18n[currentLang][key];
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const key = el.getAttribute('data-i18n-ph');
+    const txt = dict[key];
     if (txt) el.placeholder = txt;
   });
-
-  // Set text direction for RTL languages
-  document.documentElement.dir = currentLang === 'fa' ? 'rtl' : 'ltr';
+  
+  const googleStep = $('#auth-step-google');
+  const phoneStep = $('#auth-step-phone');
+  const descText = $('#auth-desc-text');
+  
+  if (googleStep && phoneStep && descText) {
+    if (currentLang === 'fa' || isIranIp) {
+      googleStep.classList.add('hidden');
+      phoneStep.classList.remove('hidden');
+      descText.textContent = dict.auth_desc_otp;
+    } else {
+      googleStep.classList.remove('hidden');
+      phoneStep.classList.add('hidden');
+      descText.textContent = dict.auth_desc_google;
+    }
+  }
 }
 
 applyTranslations();
-
-$('#lang-en').addEventListener('click', () => {
-  localStorage.setItem('lang', 'en');
-  applyTranslations();
-});
-$('#lang-fa').addEventListener('click', () => {
-  localStorage.setItem('lang', 'fa');
-  applyTranslations();
-});
-
-const $ = (sel) => document.querySelector(sel);
-const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
 /* ---------- Step navigation ---------- */
 function setStep(step) {
@@ -1015,35 +1024,10 @@ const userProfilePhone = $('#user-profile-phone');
 const sidebarLogoutBtn = $('#sidebar-logout-btn');
 
 let currentAuthPhone = '';
-// currentLang is declared once near the top of this file
-let isIranIp = false;
 
 // Translate UI elements
 function applyLanguage() {
-  const dict = window.i18n ? window.i18n[currentLang] : null;
-  if (!dict) return;
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    el.textContent = dict[el.getAttribute('data-i18n')];
-  });
-  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
-    el.placeholder = dict[el.getAttribute('data-i18n-ph')];
-  });
-  
-  const googleStep = $('#auth-step-google');
-  const phoneStep = $('#auth-step-phone');
-  const descText = $('#auth-desc-text');
-  
-  if (googleStep && phoneStep && descText) {
-    if (currentLang === 'fa' || isIranIp) {
-      googleStep.classList.add('hidden');
-      phoneStep.classList.remove('hidden');
-      descText.textContent = dict.auth_desc_otp;
-    } else {
-      googleStep.classList.remove('hidden');
-      phoneStep.classList.add('hidden');
-      descText.textContent = dict.auth_desc_google;
-    }
-  }
+  applyTranslations();
 }
 
 // IP Geolocation Check
