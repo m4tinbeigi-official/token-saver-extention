@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import DarkModeToggle from './DarkModeToggle';
 
 export default function Header({ lang }) {
   const isFa = lang === 'fa';
@@ -80,6 +81,7 @@ export default function Header({ lang }) {
             </li>
           </ul>
         </nav>
+        <DarkModeToggle />
       </div>
     </header>
   );

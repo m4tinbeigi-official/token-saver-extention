@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies (frontend)
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Install dependencies (backend)
+        working-directory: ./server
+        run: npm ci
+
+      - name: Run frontend tests
+        working-directory: ./frontend
+        run: npm test -- --detectOpenHandles
+
+      - name: Run backend tests
+        working-directory: ./server
+        run: npm test -- --detectOpenHandles
+
+      - name: Security audit
+        working-directory: ./
+        run: |
+          npm audit --audit-level=high || true
+          npm audit fix --force || true
+
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: Lint (optional)
+        working-directory: ./frontend
+        run: npm run lint || true
