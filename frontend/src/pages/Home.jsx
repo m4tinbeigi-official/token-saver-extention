@@ -128,7 +128,8 @@ export default function Home({ lang }) {
 
   useEffect(() => {
     document.documentElement.dir = isFa ? 'rtl' : 'ltr';
-    document.title = isFa ? "Token Saver - کاهش هزینه ابزارهای هوش مصنوعی" : "Token Saver - AI Token Optimization";
+document.documentElement.lang = isFa ? 'fa' : 'en';
+document.title = isFa ? "Token Saver - کاهش هزینه ابزارهای هوش مصنوعی" : "Token Saver - AI Token Optimization";
     
     // Fetch live platform stats
     fetch('/api/stats')

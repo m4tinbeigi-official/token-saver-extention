@@ -1,0 +1,15 @@
+/* src/styles/fonts.css */
+/* Vazirmatn Font */
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('https://fonts.gstatic.com/s/vazirmatn/v33/2sDfZM1Qp9ZfN9i6cXv4VxgG4Yc.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+/* JetBrains Mono Font */
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('https://fonts.gstatic.com/s/jetbrainsmono/v16/6UedgF-1Jw8nXJXKpT1f6A.woff2') format('woff2');
+  font-weight: 400 700;
+  font-display: swap;
+}
