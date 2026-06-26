@@ -1,0 +1,36 @@
+{
+  "name": "token-saver-vscode-extension",
+  "publisher": "m4tinbeigi-official",
+  "displayName": "Token Saver Optimizer",
+  "description": "Login to Token Saver and optimize your project to reduce token consumption.",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onCommand:tokensaver.optimize"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "tokensaver.optimize",
+        "title": "Token Saver: Optimize Project"
+      }
+    ]
+  },
+  "scripts": {"publish": "vsce publish",
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "typescript": "^5.2.2",
+    "vsce": "^2.15.0",
+    "@types/node": "^20.0.0"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.0"
+  }
+}
